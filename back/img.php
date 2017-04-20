@@ -1,0 +1,1 @@
+http://stackoverflow.com/questions/9880503/crop-image-in-circle-php
