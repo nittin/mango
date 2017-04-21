@@ -1,4 +1,4 @@
-<ui-gmap-google-map center="map.center" zoom="map.zoom">
+<ui-gmap-google-map center="map.center" zoom="map.zoom" bounds="map.bounds">
     <ui-gmap-marker ng-repeat="m in marker.list" idkey="m.id" coords="m.coords" options="m.options" click="marker.open(m.popup)">
         <ui-gmap-window options="m.popup.options" closeClick="marker.close(m.popup)">
             <div>{{m.name}}</div>

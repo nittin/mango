@@ -7,4 +7,7 @@ angular.module('myApp.back', [
     'myApp.back.user-service'
 ])
 
-.value('environment', 'http://coloroi.com/back/users');
+    .value('environment', {
+        user: 'http://coloroi.com/back/users',
+        userDetail: 'http://coloroi.com/back/users/'
+    });
