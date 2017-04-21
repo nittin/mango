@@ -13,7 +13,8 @@ angular.module('myApp', [
     $locationProvider.hashPrefix('!');
 
     $routeProvider.otherwise({redirectTo: '/view1'});
-
+    //main 192365741272526
+    //test 192972897878477
     $facebookProvider.setAppId('192972897878477');
     $facebookProvider.setPermissions('public_profile,email,user_friends');
     $facebookProvider.setVersion('v2.9');

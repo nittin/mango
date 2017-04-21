@@ -38,3 +38,6 @@ jspm_packages
 /.idea/
 /bower_components/
 /app/lib/
+/mango.iml
+/back/vendor/
+/back/composer.phar
