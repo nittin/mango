@@ -9,5 +9,6 @@ angular.module('myApp.back', [
 
     .value('environment', {
         user: 'http://coloroi.com/back/users',
-        userDetail: 'http://coloroi.com/back/users/'
+        userDetail: 'http://coloroi.com/back/users/',
+        cropPhoto: 'http://coloroi.com/back/photo?url='
     });

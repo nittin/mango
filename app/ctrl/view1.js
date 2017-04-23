@@ -5,11 +5,25 @@ angular.module('myApp.view1', ['ngRoute'])
     .config(function ($routeProvider) {
         $routeProvider.when('/view1', {
             templateUrl: 'view/view1.html',
-            controller: 'View1Ctrl'
+            controller: 'View1Ctrl',
+            resolve: {
+                factory: function ($q, $rootScope, $location, $facebook) {
+                    var d = $q.defer();
+                    var goHome = function () {
+                        d.reject();
+                        $location.path('/');
+                    };
+                    $facebook.getLoginStatus().then(function (e) {
+                        if (e.status === 'connected') { d.resolve(true); }
+                        else { goHome(); }
+                    }, goHome);
+                    return d.promise;
+                }
+            }
         });
     })
 
-    .controller('View1Ctrl', function ($rootScope, $scope, $q, $facebook, uiGmapIsReady, user) {
+    .controller('View1Ctrl', function ($rootScope, $scope,$mdSidenav,$mdMedia, $q, $facebook, uiGmapIsReady, user, environment) {
         $scope.user = {id: undefined, name: undefined, center: {latitude: 45, longitude: 45}};
         $scope.map = {
             center: {latitude: $scope.user.center.latitude, longitude: $scope.user.center.longitude},
@@ -19,15 +33,21 @@ angular.module('myApp.view1', ['ngRoute'])
         $scope.marker = {
             list: [],
             options: {scrollwheel: false},
-            open: function (popup) {
+            open: function (marker) {
                 $scope.marker.list.forEach(function (i) {
                     i.popup.options.visible = false;
                 });
-                popup.options.visible = true;
+                marker.popup.options.visible = true;
+                // $scope.map.center.latitude = marker.coords.latitude;
+                $scope.map.center.longitude = marker.coords.longitude;
             },
             close: function (popup) {
                 popup.options.visible = false;
             }
+        };
+
+        $scope.submenu = {
+            active: 0
         };
         var map = function () {
             var d = $q.defer();
@@ -53,10 +73,10 @@ angular.module('myApp.view1', ['ngRoute'])
         var me = function () {
             var d = $q.defer();
 
-            $facebook.api('/me', {fields: 'name,id,picture{url}'}).then(
+            $facebook.api('/me', {fields: 'name,id,picture{url},cover'}).then(
                 function (userRes) {
 
-                    $facebook.api(userRes.id + '/friends', {fields: 'name,id,picture{url}'}).then(
+                    $facebook.api(userRes.id + '/friends', {fields: 'name,id,picture{url},cover'}).then(
                         function (response) {
                             d.resolve({me: userRes, friends: response.data});
                         });
@@ -81,7 +101,7 @@ angular.module('myApp.view1', ['ngRoute'])
                         me().then(function (r) {
                             d.resolve(r)
                         });
-                    })
+                    });
                 }
             });
 
@@ -96,7 +116,7 @@ angular.module('myApp.view1', ['ngRoute'])
             $scope.map.center.longitude = position.longitude;
             $rootScope.friends = fbInfo.friends;
             var bounds = new google.maps.LatLngBounds();
-            var checkAll = $rootScope.friends.map(function (i) {
+            var checkAll = fbInfo.friends.map(function (i) {
                 var d = $q.defer();
                 user.check(i.id).then(function (userChecked) {
                     d.resolve({fbInfo: i, data: userChecked.data})
@@ -104,21 +124,27 @@ angular.module('myApp.view1', ['ngRoute'])
                 return d.promise;
             });
             $q.all(checkAll).then(function (all) {
-                all.forEach(function (i) {
+                all.forEach(function (i, index) {
                     if (i.data) {
-                        var lat = parseFloat(i.data.lat);
-                        var lng = parseFloat(i.data.lng);
+                        i.data.lat = parseFloat(i.data.lat);
+                        i.data.lng = parseFloat(i.data.lng);
                         $scope.marker.list.push({
-                            coords: {latitude: lat, longitude: lng},
+                            coords: {latitude: i.data.lat, longitude: i.data.lng},
                             show: true,
                             name: i.fbInfo.name,
                             id: i.fbInfo.id,
+                            fb: i.fbInfo,
                             options: {
-                                icon: i.fbInfo.picture.data.url
+                                icon: {
+                                    url: environment.cropPhoto + encodeURIComponent(i.fbInfo.picture.data.url),
+                                    scaledSize: {
+                                        width:30,height:40
+                                    }
+                                }
                             },
                             popup: {options: {visible: false}}
                         });
-                        bounds.extend(new google.maps.LatLng(lat, lng));
+                        bounds.extend(new google.maps.LatLng(i.data.lat, i.data.lng));
                     }
                 });
                 bounds.extend(new google.maps.LatLng(position.latitude, position.longitude));
@@ -140,12 +166,52 @@ angular.module('myApp.view1', ['ngRoute'])
                     show: true,
                     name: fbInfo.me.name,
                     id: fbInfo.me.id,
+                    fb: fbInfo.me,
                     options: {
-                        icon: fbInfo.me.picture.data.url
+                        icon: {
+                            url: environment.cropPhoto + encodeURIComponent(fbInfo.me.picture.data.url),
+                            scaledSize: {
+                                width: 30, height: 40
+                            }
+                        }
                     },
                     popup: {options: {visible: false}}
-                })
+                });
+                $rootScope.me = fbInfo.me;
             });
         });
 
+        var debounce = function (func, wait, context) {
+            var timer;
+            return function debounced() {
+                var context = $scope,
+                    args = Array.prototype.slice.call(arguments);
+                $timeout.cancel(timer);
+                timer = $timeout(function () {
+                    timer = undefined;
+                    func.apply(context, args);
+                }, wait || 10);
+            };
+        };
+        var buildDelayedToggler = function (navID) {
+            return debounce(function() {
+                // Component lookup should always be available since we are not using `ng-if`
+                $mdSidenav(navID)
+                    .toggle()
+                    .then(function () {
+                        $log.debug("toggle " + navID + " is done");
+                    });
+            }, 200);
+        };
+        $scope.toggleLeft = buildDelayedToggler('left');
+        $scope.openId = function (id) {
+            var marker = $scope.marker.list.filter(function (i) {
+                return i.id === id;
+            })[0];
+            if (marker) {
+                $scope.map.center.latitude = marker.coords.latitude;
+                $scope.map.center.longitude = marker.coords.longitude;
+                $scope.marker.open(marker);
+            }
+        };
     });

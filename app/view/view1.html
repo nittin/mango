@@ -1,7 +1,63 @@
-<ui-gmap-google-map center="map.center" zoom="map.zoom" bounds="map.bounds">
-    <ui-gmap-marker ng-repeat="m in marker.list" idkey="m.id" coords="m.coords" options="m.options" click="marker.open(m.popup)">
-        <ui-gmap-window options="m.popup.options" closeClick="marker.close(m.popup)">
-            <div>{{m.name}}</div>
-        </ui-gmap-window>
-    </ui-gmap-marker>
-</ui-gmap-google-map>
+<section layout="row" layout-fill flex>
+    <div class="sidebar" layout="column" layout-align="center center">
+
+        <md-button class="md-icon-button" aria-label="World" ng-class="{active:submenu.active===0}" ng-click="submenu.active=0">
+            <md-icon aria-label="World" class="material-icons md-24">public</md-icon>
+        </md-button>
+
+        <md-button class="md-icon-button" aria-label="Group" ng-class="{active:submenu.active===1}" ng-click="submenu.active=1">
+            <md-icon aria-label="Group" class="material-icons md-24">people</md-icon>
+        </md-button>
+
+        <md-button class="md-icon-button" ng-class="{active:submenu.active===2}" ng-click="submenu.active=2">
+            <md-icon aria-label="Friend" class="material-icons md-24">person_pin</md-icon>
+        </md-button>
+    </div>
+    <md-sidenav
+            class="md-sidenav-left"
+            md-component-id="left"
+            md-is-locked-open="$mdMedia('gt-sm')"
+            md-whiteframe="4">
+
+        <md-toolbar class="md-tall">
+            <div flex></div>
+            <div class="md-toolbar-tools">
+                <h2 flex md-truncate>Friends list</h2>
+                <md-button class="md-icon-button" ng-click="openId($root.me.id)" aria-label="Favorite">
+                    <md-icon aria-label="Friend" class="material-icons md-24">face</md-icon>
+                </md-button>
+
+            </div>
+        </md-toolbar>
+
+        <md-content>
+            <md-list>
+                <md-subheader class="md-no-sticky">Online friends (2)</md-subheader>
+                <md-list-item ng-repeat="i in $root.friends" ng-click="openId(i.id)">
+                    <img alt="{{i.name}}" ng-src="{{i.picture.data.url}}" class="md-avatar"/>
+                    <p>{{i.name}}</p>
+                    <md-icon ng-click="" aria-label="Online" class="material-icons md-24">brightness_1</md-icon>
+                </md-list-item>
+                <md-subheader class="md-no-sticky">Offline friends (0)</md-subheader>
+            </md-list>
+        </md-content>
+    </md-sidenav>
+    <md-content flex layout="column">
+        <ui-gmap-google-map flex center="map.center" zoom="map.zoom" bounds="map.bounds">
+            <ui-gmap-marker ng-repeat="m in marker.list" idkey="m.id" coords="m.coords" options="m.options"
+                            click="marker.open(m)">
+                <ui-gmap-window class="marker-popup" options="m.popup.options" closeClick="marker.close(m.popup)">
+                    <div class="marker-popup-content">
+                        <div class="marker-popup-cover"><img ng-src="{{m.fb.cover.source}}"/></div>
+                        <div class="marker-popup-avt"><img ng-src="{{m.fb.picture.data.url}}"/></div>
+                        <div class="marker-popup-info" layout="row">
+                            <b flex md-truncate class="marker-popup-info-name">{{m.name}}</b>
+                            <md-icon ng-click="dire()" aria-label="Direction" class="material-icons md-16 md-green">directions</md-icon>
+                            <span>5km</span>
+                        </div>
+                    </div>
+                </ui-gmap-window>
+            </ui-gmap-marker>
+        </ui-gmap-google-map>
+    </md-content>
+</section>

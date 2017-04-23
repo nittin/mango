@@ -1,29 +1,99 @@
 /* app css stylesheet */
 
-.menu {
-    list-style: none;
-    border-bottom: 0.1em solid black;
-    margin-bottom: 2em;
-    padding: 0 0 0.5em;
+.angular-google-map{
+    height: 100%;
+    .angular-google-map-container {
+        height: 100%;
+    }
 }
 
-.menu:before {
-    content: "[";
+.marker-popup {
+    background: red;
 }
 
-.menu:after {
-    content: "]";
+.gm-style {
+    .gm-style-iw {
+        overflow: visible;
+        > div {
+            overflow: visible!important;
+        }
+    }
 }
 
-.menu > li {
-    display: inline;
+.marker-popup-content {
+    position: relative;
+    overflow: visible;
+    width: 150px;
+    height: 120px;
+    .marker-popup-cover {
+        position: absolute;
+        height: 85px;
+        width: 201px;
+        top: -8px;
+        left: -14px;
+        > img {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+        }
+    }
+    .marker-popup-avt {
+        height: 40px;
+        width: 40px;
+        position: absolute;
+        top: 50px;
+        left: 70px;
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.8);
+        > img {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+        }
+    }
+    .marker-popup-info {
+        width: 170px;
+        height: 40px;
+        line-height: 40px;
+        position: relative;
+        top: 80px;
+        .marker-popup-info-name {
+            padding-right: 8px;
+        }
+    }
+}
+.material-icons {
+    line-height: 24px;
+    text-align: center;
+    &.md-8 { font-size: 8px; }
+    &.md-16 { font-size: 16px; }
+    &.md-24 { font-size: 24px; }
+    &.md-32 { font-size: 32px; }
+    &.md-36 { font-size: 36px; }
+    &.md-48 { font-size: 48px; }
+    &.md-green {
+        color: #8bc34a;
+    }
 }
 
-.menu > li + li:before {
-    content: "|";
-    padding-right: 0.3em;
+.sidebar {
+    width: 54px;
+    background-color: #333;
+    .md-icon-button {
+        &.active {
+            md-icon{
+                color: rgb(140,158,255);
+            }
+        }
+    }
 }
 
-.angular-google-map-container {
-    height: 300px;
+#footer {
+    height: 48px;
+    background: #FFF;
+    position: relative;
+    z-index: 60;
+    border-top: 1px solid #ddd;
+    font-size: 12px;
 }
