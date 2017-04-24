@@ -1,11 +1,11 @@
 'use strict';
 
-angular.module('myApp.view1', ['ngRoute'])
+angular.module('myApp.map', ['ngRoute'])
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/view1', {
-            templateUrl: 'view/view1.html',
-            controller: 'View1Ctrl',
+        $routeProvider.when('/map', {
+            templateUrl: 'view/map.view.html',
+            controller: 'MapCtrl',
             resolve: {
                 factory: function ($q, $rootScope, $location, $facebook) {
                     var d = $q.defer();
@@ -23,7 +23,7 @@ angular.module('myApp.view1', ['ngRoute'])
         });
     })
 
-    .controller('View1Ctrl', function ($rootScope, $scope,$mdSidenav,$mdMedia, $q, $facebook, uiGmapIsReady, user, environment) {
+    .controller('MapCtrl', function ($rootScope, $scope,$mdSidenav,$mdMedia, $q, $facebook, uiGmapIsReady, user, environment) {
         $scope.user = {id: undefined, name: undefined, center: {latitude: 45, longitude: 45}};
         $scope.map = {
             center: {latitude: $scope.user.center.latitude, longitude: $scope.user.center.longitude},

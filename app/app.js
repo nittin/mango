@@ -9,8 +9,8 @@ angular.module('myApp', [
     'uiGmapgoogle-maps',
     'ngFacebook',
     'myApp.home',
-    'myApp.view1',
-    'myApp.view2',
+    'myApp.map',
+    'myApp.info',
     'myApp.version',
     'myApp.back'
 ]).config(function ($locationProvider, $routeProvider, $facebookProvider) {

@@ -11,7 +11,7 @@ angular.module('myApp.home', ['ngRoute'])
                     var d = $q.defer();
                     var start = function () {
                         d.reject();
-                        $location.path('/view1');
+                        $location.path('/map');
                     };
                     $facebook.getLoginStatus().then(function (e) {
                         if (e.status === 'connected') { start(); }
@@ -28,7 +28,7 @@ angular.module('myApp.home', ['ngRoute'])
     .controller('HomeCtrl', function ($rootScope, $scope, $location, $facebook) {
         $scope.start = function () {
             $facebook.login().then(function (e) {
-                $location.path('/view1');
+                $location.path('/map');
             });
         };
     });
