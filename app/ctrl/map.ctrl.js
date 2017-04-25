@@ -64,6 +64,7 @@ angular.module('myApp.map', ['ngRoute'])
                 navigator.geolocation.getCurrentPosition(function (position) {
                     d.resolve(position.coords);
                 }, function () {
+                    d.reject();
                 });
             } else {
                 d.reject();

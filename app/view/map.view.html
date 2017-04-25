@@ -32,7 +32,7 @@
 
         <md-content>
             <md-list>
-                <md-subheader class="md-no-sticky">Online friends (2)</md-subheader>
+                <md-subheader class="md-no-sticky">Online friends ({{$root.friends.length}})</md-subheader>
                 <md-list-item ng-repeat="i in $root.friends" ng-click="openId(i.id)">
                     <img alt="{{i.name}}" ng-src="{{i.picture.data.url}}" class="md-avatar"/>
                     <p>{{i.name}}</p>
