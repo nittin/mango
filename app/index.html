@@ -11,9 +11,13 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Mango seed</title>
+    <title>Mango Round</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyClAPoOqXhqVipG1zfveIEuqS6G4YYbLv4"></script>
+
     <!-- inject-bower:css -->
     <link rel="stylesheet" href="lib/angular-material.css">
     <!-- endinject -->
@@ -22,20 +26,6 @@
     <link rel="stylesheet/less" href="app.less"/>
     <script src="lib/less.js"></script>
     <!-- endinject -->
-
-    <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyClAPoOqXhqVipG1zfveIEuqS6G4YYbLv4"></script>
-    <script>(function (d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) {
-            return;
-        }
-        js = d.createElement(s);
-        js.id = id;
-        js.src = "//connect.facebook.net/en_US/sdk.js";
-        fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
-    </script>
 </head>
 <body ng-cloak ng-controller="MasterCtrl">
 <md-content layout-fill layout="column">
@@ -44,12 +34,12 @@
     <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
         your browser</a> to improve your experience.</p>
     <![endif]-->
-    <div flex>
-        <div ng-view layout-fill></div>
+    <div flex layout="column">
+        <div ng-view layout-fill flex layout="column"></div>
     </div>
     <div id="footer" layout="row" layout-align="center center" aria-hidden="false">
         <div>
-            Powered by Mangohihi ©2017.
+            Powered by Mango ©2017.
             Code licensed under the <a class="md-accent">MIT License</a>.
             Mango seed app: version
             <a target="_blank" class="md-default-theme md-accent"><span app-version></span></a>.
@@ -81,5 +71,16 @@
 <script src="components/back/back.js"></script>
 <script src="components/back/user.service.js"></script>
 <!-- endinject -->
+<script>(function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) {
+        return;
+    }
+    js = d.createElement(s);
+    js.id = id;
+    js.src = "https://connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+</script>
 </body>
 </html>

@@ -24,7 +24,7 @@ var src = {
     ],
     html: 'app/view/**/*.html',
     json: 'app/i18n/**/*.json',
-    asset: 'app/img/**/*',
+    asset: 'app/asset/**/*',
     index: 'app/index.html',
     bower: ['bower.json', '.bowerrc']
 };
@@ -37,7 +37,7 @@ var getBuildConfig = function (environment) {
         root_child: 'build/' + env + '/*',
         all: 'app.js',
         html: 'build/' + env + '/view/',
-        asset: 'build/' + env + '/img/',
+        asset: 'build/' + env + '/asset/',
         json: 'build/' + env + '/i18n/',
         js: {
             app: 'app.min.js',

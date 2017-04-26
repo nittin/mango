@@ -41,3 +41,4 @@ jspm_packages
 /mango.iml
 /back/vendor/
 /back/composer.phar
+/back/key.php
