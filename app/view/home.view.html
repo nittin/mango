@@ -4,7 +4,7 @@
         </div>
         <div class="md-toolbar-tools">
             <div flex></div>
-            <md-button aria-label="Join with Facebook now!" ng-click="start()">
+            <md-button aria-label="Join with Facebook now!" ng-click="start()" ng-disabled="$root.connect!=='good'">
                 <md-icon md-svg-src="asset/img/fb-square.ic.svg" class="md-24" aria-label="Facebook"></md-icon>
                 <span>Start with Facebook! </span>
                 <md-icon class="material-icons md-24">arrow_forward</md-icon>
@@ -13,15 +13,26 @@
     </md-toolbar>
 
     <md-content flex>
-        <div class="banner">
-            <div class="sun"></div>
-            <div class="scene"></div>
-            <div class="actor" layout="row" layout-align="center start">
-                <div class="mango animate-up-down"></div>
+        <div class="welcome" ng-if="$root.connect==='good'">
+            <div class="banner">
+                <div class="sun"></div>
+                <div class="scene"></div>
+                <div class="actor" layout="row" layout-align="center start">
+                    <div class="mango animate-up-down"></div>
+                </div>
+            </div>
+            <div layout="row" layout-align="center start">
+                <div class="shadow"></div>
             </div>
         </div>
-        <div layout="row" layout-align="center start">
-            <div class="shadow"></div>
+        <div class="broken" layout="row" layout-align="center center" ng-if="$root.connect==='fail'">
+            <div class="attention"></div>
+            <div layout="column" layout-align="start start">
+                <div>
+                    <h2>Connection Fail</h2>
+                    <p>Try again!</p>
+                </div>
+            </div>
         </div>
     </md-content>
 </div>
