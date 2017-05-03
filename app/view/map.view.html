@@ -1,7 +1,7 @@
-<section layout="row" layout-fill flex>
-    <div class="sidebar" layout="column" layout-align="center center">
+<section layout-gt-xs="row" layout-xs="column" layout-fill flex>
+    <div class="sidebar" layout-gt-xs="column" layout-xs="row" layout-align="center center">
 
-        <md-button class="md-icon-button" aria-label="World" ng-class="{active:submenu.active===0}" ng-click="submenu.active=0">
+        <md-button class="md-icon-button" aria-label="World" ng-class="{active:submenu.active===0}" ng-click="submenu.active=0;submenu.toggle()">
             <md-icon aria-label="World" class="material-icons md-24">public</md-icon>
         </md-button>
 

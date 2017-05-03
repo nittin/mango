@@ -3,7 +3,7 @@
 .angular-google-map{
     height: 100%;
     .angular-google-map-container {
-        height: 100%;
+        height: calc(~"100vh - 54px");
     }
 }
 
@@ -78,9 +78,10 @@
 }
 
 .sidebar {
-    width: 54px;
     background-color: #333;
     .md-icon-button {
+        width: 54px;
+        height: 54px;
         &.active {
             md-icon{
                 color: rgb(140,158,255);

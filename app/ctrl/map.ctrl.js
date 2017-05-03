@@ -23,7 +23,7 @@ angular.module('myApp.map', ['ngRoute'])
         });
     })
 
-    .controller('MapCtrl', function ($rootScope, $scope,$mdSidenav,$mdMedia, $q, $facebook, uiGmapIsReady, user, environment) {
+    .controller('MapCtrl', function ($rootScope, $scope, $mdSidenav, $mdMedia, $q, $facebook, uiGmapIsReady, user, environment) {
         $scope.user = {id: undefined, name: undefined, center: {latitude: 45, longitude: 45}};
         $scope.map = {
             center: {latitude: $scope.user.center.latitude, longitude: $scope.user.center.longitude},
@@ -47,8 +47,13 @@ angular.module('myApp.map', ['ngRoute'])
         };
 
         $scope.submenu = {
-            active: 0
+            active: 0,
+            toggle: function () {
+                $mdSidenav('left').toggle().then(function () {
+                });
+            }
         };
+
         var map = function () {
             var d = $q.defer();
             uiGmapIsReady.promise(1).then(function (instances) {
@@ -158,9 +163,9 @@ angular.module('myApp.map', ['ngRoute'])
             user.check(fbInfo.me.id).then(function (r) {
                 var nowUTC = new Date(new Date().toISOString()).getTime();
                 if (r.data) {//Update
-                    user.update(fbInfo.me.id, fbInfo.me.name, position.latitude, position.longitude, 1, nowUTC);
+                    user.update(fbInfo.me.id, fbInfo.me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC);
                 } else {//Insert
-                    user.create(fbInfo.me.id, fbInfo.me.name, position.latitude, position.longitude, 1, nowUTC);
+                    user.create(fbInfo.me.id, fbInfo.me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC);
                 }
                 $scope.marker.list.push({
                     coords: {latitude: position.latitude, longitude: position.longitude},

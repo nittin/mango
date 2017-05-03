@@ -16,7 +16,7 @@ var src = {
     root: 'app/',
     lib: 'app/lib',
     css: 'app/**/*.css',
-    less: 'app/**/*.less',
+    less: 'app/app.less',
     js: [
         'app/app.js',
         'app/components/**/*.js',
@@ -41,13 +41,11 @@ var getBuildConfig = function (environment) {
         json: 'build/' + env + '/i18n/',
         js: {
             app: 'app.min.js',
-            vendors: 'vendors.min.js',
-            externalLibs: 'libs.min.js'
+            vendors: 'vendors.min.js'
         },
         css: {
             app: 'app.min.css',
-            vendors: 'vendors.min.css',
-            externalLibs: 'libs.min.css'
+            vendors: 'vendors.min.css'
         }
     };
 };
