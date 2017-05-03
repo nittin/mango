@@ -1,7 +1,33 @@
-<p>This is the partial for view 2.</p>
-
-<div class="list-friend">
-  <div class="friend-item" ng-repeat="i in friends">
-    <img ng-src="{{i.picture.data.url}}"/><span class="friend-name">{{i.name}}</span>
-  </div>
+<div class="message-view" layout="column" flex>
+  <md-content ng-if="!chat.joined">
+    <form name="user">
+      <div layout="column" layout-align="start center" layout-padding>
+        <md-input-container flex>
+          <label>User name</label>
+          <input name="user" ng-model="chat.user">
+        </md-input-container>
+        <md-button ng-click="chat.join(chat.user)">Join now!</md-button>
+      </div>
+    </form>
+  </md-content>
+  <md-content ng-if="chat.joined" layout="column" flex>
+    <div layout="column" layout-align="start center">
+      <md-button ng-click="chat.leave(chat.user)">Leave</md-button>
+    </div>
+    <div class="message-list" flex>
+      <div class="message" ng-repeat="i in messages">
+        <p><b>{{i.user}}:</b></p>
+        <p>{{i.text}}</p>
+      </div>
+    </div>
+    <form name="conversation">
+      <div layout="row">
+        <md-input-container flex>
+          <label>Content</label>
+          <input md-no-asterisk name="description" ng-model="chat.content">
+        </md-input-container>
+        <md-button ng-click="chat.send(chat.user,chat.content)">Send</md-button>
+      </div>
+    </form>
+  </md-content>
 </div>

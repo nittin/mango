@@ -1,5 +1,6 @@
 {
     "require": {
-        "slim/slim": "^3.0"
+        "slim/slim": "3.8.1",
+        "cboden/ratchet": "v0.3.6"
     }
 }
