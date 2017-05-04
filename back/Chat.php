@@ -9,6 +9,9 @@ class Chat implements MessageComponentInterface {
 
     public function __construct() {
         $this->clients = new \SplObjectStorage;
+        $host= gethostname();
+        $ip = gethostbyname($host);
+        echo "start listener: ".$host." ip: ".$ip."\n";
     }
 
     public function onOpen(ConnectionInterface $conn) {
