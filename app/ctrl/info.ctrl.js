@@ -54,7 +54,7 @@ angular.module('myApp.info', ['ngRoute'])
             $scope.messages.push(msg);
         }
 
-        var conn = new WebSocket('ws://localhost:8080');
+        var conn = new WebSocket('wss://www.mangoround.com:8081');
         conn.onopen = function (e) {
             console.log("Connection established!");
         };
