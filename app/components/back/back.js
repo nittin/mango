@@ -4,11 +4,12 @@
 'use strict';
 
 angular.module('myApp.back', [
-    'myApp.back.user-service'
+    'myApp.back.user-service',
+    'myApp.back.user-filter'
 ])
 
     .value('environment', {
-        user: 'https://mangoround.com/back/users',
-        userDetail: 'https://mangoround.com/back/users/',
-        cropPhoto: 'https://mangoround.com/back/photo?url='
+        user: BACK_HOST_NAME + 'back/users',
+        userDetail: BACK_HOST_NAME + 'back/users/',
+        cropPhoto: BACK_HOST_NAME + 'back/photo?url='
     });

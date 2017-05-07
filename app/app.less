@@ -1,4 +1,5 @@
 @import 'css/home';
+@import 'css/map';
 @import 'css/animate';
 .angular-google-map{
     height: 100%;
@@ -62,10 +63,16 @@
             padding-right: 8px;
         }
     }
+    .popup-icon-button {
+        margin: 0;
+        padding: 0;
+        width: 24px;
+    }
 }
 .material-icons {
     line-height: 24px;
     text-align: center;
+    &.md-6 { font-size: 6px; }
     &.md-8 { font-size: 8px; }
     &.md-16 { font-size: 16px; }
     &.md-24 { font-size: 24px; }
@@ -75,6 +82,31 @@
     &.md-green {
         color: #8bc34a;
     }
+    &.old-0 { color: #cddc39 !important; }
+    &.old-1 { color: #bcdc43 !important;}
+    &.old-2 { color: #bcdc43 !important;}
+    &.old-3 { color: #8bc34a !important;}
+    &.old-4 { color: #8bc34a !important;}
+    &.old-5 { color: #4caf50 !important;}
+    &.old-6 { color: #4caf50 !important;}
+    &.old-7 { color: #009688 !important;}
+    &.old-8 { color: #009688 !important;}
+    &.old-9 { color: #00bcd4 !important;}
+    &.old-10 { color: #00bcd4 !important;}
+    &.old-11 { color: #03a9f4 !important;}
+    &.old-12 { color: #03a9f4 !important;}
+    &.old-13 { color: #2196f3 !important;}
+    &.old-14 { color: #2196f3 !important;}
+    &.old-15 { color: #3f51b5 !important;}
+    &.old-16 { color: #3f51b5 !important;}
+    &.old-17 { color: #673ab7 !important;}
+    &.old-18 { color: #673ab7 !important;}
+    &.old-19 { color: #383085 !important;}
+    &.old-20 { color: #383085 !important;}
+    &.old-21 { color: #555555 !important;}
+    &.old-22 { color: #555555 !important;}
+    &.old-23 { color: #333333 !important;}
+    &.old-24 { color: #333333 !important;}
 }
 
 .sidebar {
@@ -91,10 +123,39 @@
 }
 
 #footer {
-    height: 48px;
+    height: 54px;
     background: #FFF;
     position: relative;
     z-index: 60;
     border-top: 1px solid #ddd;
     font-size: 12px;
+}
+
+.notifier {
+    .md-icon-button {
+        .material-icons {
+            color: inherit !important;
+        }
+    }
+    .md-toast-text {
+        padding: 0;
+        > h3 {
+            color: #fff !important;
+        }
+        > p {
+            color: #888 !important;
+        }
+    }
+}
+.md-no-padding-lr {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+.md-no-padding-tb {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+.md-no-padding {
+    .md-no-padding-lr;
+    .md-no-padding-tb;
 }

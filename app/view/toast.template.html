@@ -1,0 +1,15 @@
+<md-toast>
+    <md-list class="md-no-padding" flex>
+        <md-list-item class="md-2-line md-no-padding">
+            <img alt="{{data.name}}" ng-src="{{data.picture.data.url}}" class="md-avatar"/>
+            <div class="md-list-item-text md-toast-text">
+                <h3>{{data.first_name}}</h3>
+                <p>now is online <md-icon aria-label="" class="material-icons md-16 old-0">brightness_1</md-icon></p>
+            </div>
+            <md-button class="md-secondary md-icon-button md-highlight" md-no-ink aria-label="Status">
+                <md-icon aria-label="" class="material-icons md-24 animate-shake">pan_tool</md-icon>
+                <md-tooltip md-delay="400" md-direction="bottom" md-z-index="106">Hey {{data.first_name}}!</md-tooltip>
+            </md-button>
+        </md-list-item>
+    </md-list>
+</md-toast>

@@ -43,3 +43,4 @@ jspm_packages
 /back/composer.phar
 /back/key.php
 /back/composer.lock
+/key/

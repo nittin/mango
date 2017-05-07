@@ -1,4 +1,4 @@
-<section layout-gt-xs="row" layout-xs="column" layout-fill flex>
+<section layout-gt-xs="row" layout-xs="column" layout-fill flex class="map">
     <div class="sidebar" layout-gt-xs="column" layout-xs="row" layout-align="center center">
 
         <md-button class="md-icon-button" aria-label="World" ng-class="{active:submenu.active===0}" ng-click="submenu.active=0;submenu.toggle()">
@@ -22,38 +22,70 @@
         <md-toolbar class="md-tall">
             <div flex></div>
             <div class="md-toolbar-tools">
-                <h2 flex md-truncate>Friends list</h2>
-                <md-button class="md-icon-button" ng-click="openId($root.me.id)" aria-label="Favorite">
+                <h2 flex md-truncate>{{me.name}}</h2>
+                <md-button class="md-icon-button" ng-click="openId($root.me.id)" ng-disabled="!$root.progress.all" aria-label="Find me">
                     <md-icon aria-label="Friend" class="material-icons md-24">face</md-icon>
+                    <md-tooltip md-delay="400" md-direction="right">Find me</md-tooltip>
                 </md-button>
-
             </div>
         </md-toolbar>
 
         <md-content>
-            <md-list>
-                <md-subheader class="md-no-sticky">Online friends ({{$root.friends.length}})</md-subheader>
+            <md-list class="list">
+                <md-subheader class="md-no-sticky">
+                    <div layout="row">
+                        <span flex>Online friends </span><b ng-if="$root.progress.all">({{$root.friends.length}})</b>
+                    </div>
+                </md-subheader>
+                <md-list-item layout="row" ng-if="!$root.progress.all">
+                    <div flex layout="row" layout-align="center center">
+                        <md-progress-circular class="md-hue-2" md-diameter="20"></md-progress-circular>
+                    </div>
+                </md-list-item>
                 <md-list-item ng-repeat="i in $root.friends" ng-click="openId(i.id)">
                     <img alt="{{i.name}}" ng-src="{{i.picture.data.url}}" class="md-avatar"/>
-                    <p>{{i.name}}</p>
-                    <md-icon ng-click="" aria-label="Online" class="material-icons md-24">brightness_1</md-icon>
+                    <p md-truncate>{{i.name}}</p>
+                    <md-button class="md-icon-button status-light" md-no-ink aria-label="Status">
+                        <md-icon aria-label="" class="material-icons md-24" ng-class="i.date|old:'old-'">brightness_1</md-icon>
+                        <md-tooltip md-delay="400" md-direction="right">{{i.date|ago}}</md-tooltip>
+                    </md-button>
                 </md-list-item>
-                <md-subheader class="md-no-sticky">Offline friends (0)</md-subheader>
+                <md-subheader class="md-no-sticky">
+                    <div layout="row">
+                        <span flex>Offline friends </span><b ng-if="$root.progress.all">({{0}})</b>
+                    </div>
+                </md-subheader>
+                <md-list-item layout="row" ng-if="!$root.progress.all">
+                    <div flex layout="row" layout-align="center center">
+                        <md-progress-circular class="md-hue-2" md-diameter="20"></md-progress-circular>
+                    </div>
+                </md-list-item>
             </md-list>
         </md-content>
     </md-sidenav>
-    <md-content flex layout="column">
+    <md-content flex layout="column" class="map-area">
+        <div class="map-mask" layout="column" layout-align="center center" ng-if="$root.progress.current<100">
+            <md-progress-circular md-mode="determinate" value="{{$root.progress.current}}"></md-progress-circular>
+            <div layout-padding>{{$root.progress.message}}</div>
+        </div>
         <ui-gmap-google-map flex center="map.center" zoom="map.zoom" bounds="map.bounds">
             <ui-gmap-marker ng-repeat="m in marker.list" idkey="m.id" coords="m.coords" options="m.options"
                             click="marker.open(m)">
-                <ui-gmap-window class="marker-popup" options="m.popup.options" closeClick="marker.close(m.popup)">
+                <ui-gmap-window class="marker-popup" show="m.popup.show" options="m.popup.options" closeClick="marker.close(m.popup)">
                     <div class="marker-popup-content">
                         <div class="marker-popup-cover"><img ng-src="{{m.fb.cover.source}}"/></div>
                         <div class="marker-popup-avt"><img ng-src="{{m.fb.picture.data.url}}"/></div>
                         <div class="marker-popup-info" layout="row">
-                            <b flex md-truncate class="marker-popup-info-name">{{m.name}}</b>
-                            <md-icon ng-click="dire()" aria-label="Direction" class="material-icons md-16 md-green">directions</md-icon>
-                            <span>5km</span>
+                            <b flex md-truncate class="marker-popup-info-name">{{m.fb.first_name}}</b>
+                            <div ng-show="!$root.direct.current.me">
+                                <span>{{m.distance/1000| number:2}}km</span>
+                                <button class="md-button md-icon-button popup-icon-button"
+                                        ng-click="$root.direct.toMe()" ng-disable="!$root.direct.current.distance"
+                                        aria-label="Direction">
+                                    <md-icon aria-label="Go" class="material-icons md-16 md-green">directions</md-icon>
+                                </button>
+                            </div>
+                            <div ng-show="$root.direct.current.me">I'm here!</div>
                         </div>
                     </div>
                 </ui-gmap-window>

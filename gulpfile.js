@@ -63,11 +63,11 @@ var cleanerEnv = function () {
 
 // concat *.js to `vendor.js` and *.css to `vendor.css`
 var builder = function () {
-    var env = this.environment ? '_' + this.environment : '';
+    var prefix = this.environment ? '_' + this.environment : '';
     var build = getBuildConfig(this.environment);
 
     var now = new Date();
-    var version = env + now.toISOString().replace(/T/, ' ').replace(/\..+/, '')
+    var version = prefix + now.toISOString().replace(/T/, ' ').replace(/\..+/, '')
             .replace(/-/g, '').replace(/:/g, '').replace(/ /g, '_');
     var suffix = '?v=app' + version;
     var vendorStream = {
@@ -82,11 +82,11 @@ var builder = function () {
             .pipe(cssmin())
             .pipe(gulp.dest(build.root))
     };
-
+    var srcJs = ['app/env/env.' + this.environment + '.js'].concat(src.js);
     var appStream = {
         //find init file
-        js: gulp.src(src.js)
-            .pipe(angularFilesort())
+        js: gulp.src(srcJs)
+            // .pipe(angularFilesort())
 
             //append all *.js which ignore init file
             .pipe(concat(build.js.app))
@@ -114,7 +114,7 @@ var builder = function () {
 
 // build tasks
 gulp.task('_build_ci', builder.bind({environment: 'ci'}));
-gulp.task('_build_default', builder.bind({environment: ''}));
+gulp.task('_build_product', builder.bind({environment: 'product'}));
 
 // clean tasks
 gulp.task('clean_all', cleaner);
