@@ -9,7 +9,12 @@ require 'vendor/autoload.php';
 require 'key.php';
 require 'img.php';
 
-
+$pusher = new Pusher(
+    $_KEY_PUSHER_AUTH,
+    $_KEY_PUSHER_SECRET,
+    $_KEY_PUSHER_APP,
+    array('cluster' => $_KEY_PUSHER_CLUSTER, 'encrypted' => true)
+);
 $app = new \Slim\App([
     'settings' => [
         'displayErrorDetails' => true,
@@ -19,6 +24,9 @@ $app = new \Slim\App([
             'pass' => $_KEY_PASSWORD,
             'dbname' => $_KEY_DB
         ],
+        'channel' => [
+            'world' => 'world-channel'
+        ]
     ],
 ]);
 $app->options('/{routes:.+}', function ($request, $response, $args) {
@@ -71,13 +79,17 @@ $app->get('/users/{id}', function (Request $request, Response $response) {
     mysql_select_db($dbname, $link) or die('Cannot select the DB');
 
     /* grab the posts from the db */
-    $query = "SELECT * FROM user WHERE user.id=$d_id";
+    $query = "SELECT * FROM user WHERE user.id IN ($d_id)";
     $result = mysql_query($query,$link) or die('Errant query:  '.$query);
-
     /* create one master array of the records */
-    $posts = mysql_fetch_assoc($result);
+    $posts = array();
+    if(mysql_num_rows($result)) {
+        while($post = mysql_fetch_assoc($result)) {
+            $posts[] = $post;
+        }
+    }
 
-    return $posts ? json_encode($posts) : '';
+    return json_encode(array('users'=>$posts));
 });
 $app->post('/users', function (Request $request, Response $response) {
     header('Content-type: application/json');
@@ -96,15 +108,25 @@ $app->post('/users', function (Request $request, Response $response) {
     $d_lng = $data["lng"];
     $d_status = $data["status"];
     $d_date = $data["date"];
+    $d_friends = $data["friends"];
     /* grab the posts from the db */
-    $query = "INSERT INTO user(id, name, lat, lng, status, date) "
-        ."VALUES('$d_id', '$d_name', '$d_lat', '$d_lng', '$d_status', '$d_date')";
+    $query = "INSERT INTO user(id, name, lat, lng, friends, status, date) "
+        ."VALUES('$d_id', '$d_name', '$d_lat', '$d_lng', '$d_friends', '$d_status', '$d_date')";
     $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
-
+    /* push notification to friends*/
+    $message['content'] = 'new user';
+    $message['id'] = $d_id;
+    $message['name'] = $d_name;
+    $message['date'] = $d_date;
+    $message['type'] = 1;
+    $friend_array = explode(",", $d_friends);
+    foreach ($friend_array as $f) {
+        $pusher->trigger($f, 'user-online', $message);
+    }
     $answer = array('success' => true, 'id' => mysql_insert_id());
     return json_encode($answer);
 });
-$app->put('/users', function (Request $request, Response $response) {
+$app->put('/users', function (Request $request, Response $response) use ($pusher)  {
     header('Content-type: application/json');
 
     $domain = $this->get('settings')['db']['domain'];
@@ -122,20 +144,31 @@ $app->put('/users', function (Request $request, Response $response) {
     $d_lng = $data["lng"];
     $d_status = $data["status"];
     $d_date = $data["date"];
+    $d_friends = $data["friends"];
     /* grab the posts from the db */
-    $query = "UPDATE $dbtable SET name =  '$d_name',lat = '$d_lat',lng = '$d_lng',status = '$d_status', date = '$d_date' WHERE CONCAT(`$dbtable`.`id`) = '$d_id'";
+    $query = "UPDATE $dbtable SET name =  '$d_name',lat = '$d_lat',lng = '$d_lng',friends = '$d_friends',status = '$d_status', date = '$d_date' WHERE CONCAT(`$dbtable`.`id`) = '$d_id'";
     $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
-
+    /* push notification to friends*/
+    $message['content'] = 'online';
+    $message['id'] = $d_id;
+    $message['name'] = $d_name;
+    $message['date'] = $d_date;
+    $message['type'] = 2;
+    $friend_array = explode(",", $d_friends);
+    foreach ($friend_array as $f) {
+        $pusher->trigger($f, 'user-online', $message);
+    }
+    /* answer user*/
     $answer = array('success' => true, 'id' => $d_id);
     return json_encode($answer);
 });
 
-$app->get('/assets/{height}/{width}/{id}/{type}', function(Request $request, Response $response) {
-    $dir = dirname(__DIR__)."/back/assets/img/";
-    $height =$request->getAttribute('height');
-    $width =$request->getAttribute('width');
-    $type =$request->getAttribute('type');
-    $id =$request->getAttribute('id');
+$app->get('/assets/{height}/{width}/{id}/{type}', function (Request $request, Response $response) {
+    $dir = dirname(__DIR__) . "/back/assets/img/";
+    $height = $request->getAttribute('height');
+    $width = $request->getAttribute('width');
+    $type = $request->getAttribute('type');
+    $id = $request->getAttribute('id');
     $im = new Imagick();
     $im->setBackgroundColor(new ImagickPixel('transparent'));
     $svg = file_get_contents($dir.$id);

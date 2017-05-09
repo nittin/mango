@@ -152,7 +152,7 @@ angular.module('myApp.back.user-filter', [])
     .filter('ago', function(nowTime, timeAgo) {
         function timeAgoFilter(value, format, timezone) {
             var fromTime = timeAgo.parse(value);
-            var diff = nowTime() - fromTime;
+            var diff = Math.min(nowTime() - fromTime, 0);
             return timeAgo.inWords(diff, fromTime, format, timezone);
         }
         timeAgoFilter.$stateful = true;
@@ -161,7 +161,7 @@ angular.module('myApp.back.user-filter', [])
     .filter('old', function(nowTime, timeAgo) {
         function timeAgoFilter(value, prefix) {
             var fromTime = timeAgo.parse(value);
-            var diff = nowTime() - fromTime;
+            var diff = Math.min(nowTime() - fromTime, 0);
             var type = timeAgo.inTypes(diff);
             return prefix ? prefix + type.toString() : type;
         }

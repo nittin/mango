@@ -42,7 +42,7 @@
                         <md-progress-circular class="md-hue-2" md-diameter="20"></md-progress-circular>
                     </div>
                 </md-list-item>
-                <md-list-item ng-repeat="i in $root.friends" ng-click="openId(i.id)">
+                <md-list-item ng-repeat="i in $root.friends|orderBy:'-date'" ng-click="openId(i.id)">
                     <img alt="{{i.name}}" ng-src="{{i.picture.data.url}}" class="md-avatar"/>
                     <p md-truncate>{{i.name}}</p>
                     <md-button class="md-icon-button status-light" md-no-ink aria-label="Status">

@@ -87,18 +87,7 @@ angular.module('myApp.map', ['ngRoute'])
                 });
             }
         };
-        // var ii = 0;
-        // $interval(function () {
-        //     $mdToast.show({
-        //         hideDelay   : 5000,
-        //         position    : 'top right',
-        //         controller  : 'ToastCtrl',
-        //         templateUrl: 'view/toast.template.html',
-        //         toastClass: 'notifier',
-        //         locals: {data: $rootScope.friends[ii]}
-        //     });
-        //     ii = ii >= $rootScope.friends.length - 1 ? 0 : ii + 1;
-        // }, 5000);
+
         var direction = {
             service: null,
             render: null
@@ -181,30 +170,26 @@ angular.module('myApp.map', ['ngRoute'])
             $scope.map.center.longitude = position.longitude;
             $rootScope.friends = fbInfo.friends;
             var bounds = new google.maps.LatLngBounds();
-            var checkAll = fbInfo.friends.map(function (i) {
-                var d = $q.defer();
-                user.check(i.id).then(function (userChecked) {
-                    d.resolve({fbInfo: i, data: userChecked.data})
-                });
-                return d.promise;
-            });
-            $rootScope.progress.message = 'Get your friends list';
 
-            $q.all(checkAll).then(function (all) {
-                all.forEach(function (i, index) {
-                    if (i.data) {
-                        $rootScope.friends[index].date = parseInt(i.data.date);
-                        i.data.lat = parseFloat(i.data.lat);
-                        i.data.lng = parseFloat(i.data.lng);
+            $rootScope.progress.message = 'Start set your friends list';
+            var friendChain = fbInfo.friends.map(function (i) { return i.id }).join(',');
+            user.check(friendChain).then(function (r) {
+                var all = r.data.users;
+                $rootScope.friends.forEach(function (i, index) {
+                    var target = all.filter(function (j) { return i.id === j.id; })[0];
+                    if (target) {
+                        i.date = parseInt(target.date, 10);
+                        i.lat = parseFloat(target.lat);
+                        i.lng = parseFloat(target.lng);
                         $scope.marker.list.push({
-                            coords: {latitude: i.data.lat, longitude: i.data.lng},
+                            coords: {latitude: i.lat, longitude: i.lng},
                             show: true,
-                            name: i.fbInfo.name,
-                            id: i.fbInfo.id,
-                            fb: i.fbInfo,
+                            name: i.name,
+                            id: i.id,
+                            fb: i,
                             options: {
                                 icon: {
-                                    url: environment.cropPhoto + encodeURIComponent(i.fbInfo.picture.data.url),
+                                    url: environment.cropPhoto + encodeURIComponent(i.picture.data.url),
                                     scaledSize: {
                                         width:30,height:40
                                     }
@@ -212,7 +197,7 @@ angular.module('myApp.map', ['ngRoute'])
                             },
                             popup: {options: {visible: false}}
                         });
-                        bounds.extend(new google.maps.LatLng(i.data.lat, i.data.lng));
+                        bounds.extend(new google.maps.LatLng(i.lat, i.lng));
                     }
                 });
                 bounds.extend(new google.maps.LatLng(position.latitude, position.longitude));
@@ -221,39 +206,40 @@ angular.module('myApp.map', ['ngRoute'])
                     southwest: {latitude: bounds.getSouthWest().lat(), longitude: bounds.getSouthWest().lng()}
                 };
                 $rootScope.progress.current += 10;
-                $rootScope.progress.message = 'Get your info';
-                user.check(fbInfo.me.id).then(function (r) {
-                    var nowUTC = new Date(new Date().toISOString()).getTime();
-                    if (r.data) {//Update
-                        user.update(fbInfo.me.id, fbInfo.me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC);
-                    } else {//Insert
-                        user.create(fbInfo.me.id, fbInfo.me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC);
-                    }
-                    $scope.marker.list.push({
-                        coords: {latitude: position.latitude, longitude: position.longitude},
-                        show: true,
-                        name: fbInfo.me.name,
-                        id: fbInfo.me.id,
-                        fb: fbInfo.me,
-                        options: {
-                            icon: {
-                                url: environment.cropPhoto + encodeURIComponent(fbInfo.me.picture.data.url),
-                                scaledSize: {
-                                    width: 30, height: 40
-                                }
+                $rootScope.progress.message = 'Get your friends info done';
+            });
+            user.check(fbInfo.me.id).then(function (r) {
+                var nowUTC = new Date(new Date().toISOString()).getTime();
+                if (r.data.users[0]) {//Update
+                    user.update(fbInfo.me.id, fbInfo.me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC, friendChain);
+                } else {//Insert
+                    user.create(fbInfo.me.id, fbInfo.me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC, friendChain);
+                }
+                $scope.marker.list.push({
+                    coords: {latitude: position.latitude, longitude: position.longitude},
+                    show: true,
+                    name: fbInfo.me.name,
+                    id: fbInfo.me.id,
+                    fb: fbInfo.me,
+                    options: {
+                        icon: {
+                            url: environment.cropPhoto + encodeURIComponent(fbInfo.me.picture.data.url),
+                            scaledSize: {
+                                width: 30, height: 40
                             }
-                        },
-                        me: true,
-                        popup: {options: {visible: false}}
-                    });
-                    $rootScope.me = fbInfo.me;
-                    $rootScope.me.coords = {latitude: position.latitude, longitude: position.longitude};
-                    $rootScope.progress.current += 19;
-                    $rootScope.progress.message = 'Go to your map now...';
-                    $timeout(function () {
-                        $rootScope.progress.current += 1;
-                    }, 2000);
+                        }
+                    },
+                    me: true,
+                    popup: {options: {visible: false}}
                 });
+                $rootScope.me = fbInfo.me;
+                $rootScope.me.coords = {latitude: position.latitude, longitude: position.longitude};
+                $rootScope.progress.current += 19;
+                $rootScope.progress.message = 'Go to your map now...';
+                $timeout(function () {
+                    $rootScope.progress.current += 1;
+                    startSubscribe();
+                }, 2000);
             });
             $rootScope.progress.all = true;
         });
@@ -292,17 +278,47 @@ angular.module('myApp.map', ['ngRoute'])
             }
         };
 
-        Pusher.logToConsole = true;
-
-        var pusher = new Pusher(PUSHER.key, {
-            cluster: PUSHER.cluster,
-            encrypted: true
-        });
-
-        var channel = pusher.subscribe('my-channel');
-        channel.bind('my-event', function(data) {
-            alert(data.message);
-        });
+        Pusher.logToConsole = DEBUG;
+        var startSubscribe = function () {
+            var pusher = new Pusher(PUSHER.key, {
+                cluster: PUSHER.cluster,
+                encrypted: true
+            });
+            var channelId = $rootScope.me.id;
+            var userChannel = pusher.subscribe($rootScope.me.id);
+            var worldChannel = pusher.subscribe('world-channel');
+            userChannel.bind('user-online', function(data) {
+                var friend = $rootScope.friends.filter(function (i) {
+                    return i.id === data.id && $rootScope.me.id !== data.id;
+                })[0];
+                if (friend) {
+                    friend.date = data.date;
+                    $mdToast.show({
+                        hideDelay: 5000,
+                        position: 'top right',
+                        controller: 'ToastCtrl',
+                        templateUrl: 'view/toast.template.html',
+                        toastClass: 'notifier',
+                        locals: {data: friend}
+                    });
+                }
+            });
+            worldChannel.bind('system', function(data) {
+                switch (data.type){
+                    case 0:
+                        $mdToast.show(
+                            $mdToast.simple()
+                                .textContent(data.message)
+                                .position('bottom right')
+                                .hideDelay(3000)
+                        ).then(function () {
+                            window.location.reload();
+                        });
+                        break;
+                    default:break;
+                }
+            });
+        };
     })
     .controller('ToastCtrl', function($scope, $mdToast, data) {
            $scope.data = data;

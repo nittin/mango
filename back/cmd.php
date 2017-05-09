@@ -4,7 +4,7 @@ require 'key.php';
 
 
 $options = array(
-    'cluster' => 'ap1',
+    'cluster' => $_KEY_PUSHER_CLUSTER,
     'encrypted' => true
 );
 $pusher = new Pusher(
@@ -14,5 +14,6 @@ $pusher = new Pusher(
     $options
 );
 
-$data['message'] = 'hello world';
-$pusher->trigger('my-channel', 'my-event', $data);
+$data['message'] = 'Restart now!';
+$data['type'] = '0';
+$pusher->trigger('world-channel', 'system', $data);
