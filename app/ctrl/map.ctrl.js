@@ -291,6 +291,18 @@ angular.module('myApp.map', ['ngRoute'])
                 $scope.marker.open(marker);
             }
         };
+
+        Pusher.logToConsole = true;
+
+        var pusher = new Pusher(PUSHER.key, {
+            cluster: PUSHER.cluster,
+            encrypted: true
+        });
+
+        var channel = pusher.subscribe('my-channel');
+        channel.bind('my-event', function(data) {
+            alert(data.message);
+        });
     })
     .controller('ToastCtrl', function($scope, $mdToast, data) {
            $scope.data = data;

@@ -1,6 +1,7 @@
 {
     "require": {
         "slim/slim": "3.8.1",
-        "cboden/ratchet": "v0.3.6"
+        "cboden/ratchet": "v0.3.6",
+        "pusher/pusher-php-server": "^2.6"
     }
 }

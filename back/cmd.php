@@ -1,19 +1,18 @@
 <?php
 require 'vendor/autoload.php';
-require 'Chat.php';
+require 'key.php';
 
-use Ratchet\Server\IoServer;
-use Ratchet\Http\HttpServer;
-use Ratchet\WebSocket\WsServer;
-use ChatApp\Chat;
 
-$server = IoServer::factory(
-    new HttpServer(
-        new WsServer(
-            new Chat()
-        )
-    ),
-    8081
+$options = array(
+    'cluster' => 'ap1',
+    'encrypted' => true
+);
+$pusher = new Pusher(
+    $_KEY_PUSHER_AUTH,
+    $_KEY_PUSHER_SECRET,
+    $_KEY_PUSHER_APP,
+    $options
 );
 
-$server->run();
+$data['message'] = 'hello world';
+$pusher->trigger('my-channel', 'my-event', $data);
