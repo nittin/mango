@@ -161,7 +161,7 @@ angular.module('myApp.back.user-filter', [])
     .filter('old', function(nowTime, timeAgo) {
         function timeAgoFilter(value, prefix) {
             var fromTime = timeAgo.parse(value);
-            var diff = Math.min(nowTime() - fromTime, 0);
+            var diff = Math.max(nowTime() - fromTime, 0);
             var type = timeAgo.inTypes(diff);
             return prefix ? prefix + type.toString() : type;
         }
