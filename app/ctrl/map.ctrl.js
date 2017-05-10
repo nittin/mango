@@ -34,13 +34,17 @@ angular.module('myApp.map', ['ngRoute'])
             list: [],
             options: {scrollwheel: false},
             open: function (marker) {
-                $scope.marker.list.forEach(function (i) {
+                $scope.marker.list.forEach(function (i, index) {
                     if (i.id !== marker.id) {
                         i.popup.show = false;
+                    } else {
+                        $scope.carousel.active = index;
                     }
                 });
-                // $scope.map.center.latitude = marker.coords.latitude;
                 $scope.map.center.longitude = marker.coords.longitude;
+                if ($scope.inSmallScreen) {
+                    $scope.map.center.latitude = marker.coords.latitude;
+                }
                 if (!marker.distance && !marker.me) {
                     direction.service.route({
                         origin: new google.maps.LatLng($rootScope.me.coords.latitude, $rootScope.me.coords.longitude),
@@ -62,6 +66,12 @@ angular.module('myApp.map', ['ngRoute'])
             },
             close: function (popup) {
                 popup.show = false;
+                $scope.carousel.active = -1;
+            },
+            event: {
+                click:function (m,e,agr) {
+                    var a=e;
+                }
             }
         };
         $rootScope.direct = {
@@ -87,7 +97,17 @@ angular.module('myApp.map', ['ngRoute'])
                 });
             }
         };
-
+        $scope.carousel = {
+            active: -1
+        };
+        $scope.$watch('carousel.active', function (i) {
+            if (i > -1) {
+                $scope.marker.open($scope.marker.list[i]);
+            }
+        });
+        $scope.$watch(function() { return $mdMedia('xs') }, function(isSmall) {
+            $scope.inSmallScreen = isSmall;
+        });
         var direction = {
             service: null,
             render: null
@@ -183,7 +203,7 @@ angular.module('myApp.map', ['ngRoute'])
                         i.lng = parseFloat(target.lng);
                         $scope.marker.list.push({
                             coords: {latitude: i.lat, longitude: i.lng},
-                            show: true,
+                            show: false,
                             name: i.name,
                             id: i.id,
                             fb: i,
@@ -195,7 +215,7 @@ angular.module('myApp.map', ['ngRoute'])
                                     }
                                 }
                             },
-                            popup: {options: {visible: false}}
+                            popup: {options: {visible: true}}
                         });
                         bounds.extend(new google.maps.LatLng(i.lat, i.lng));
                     }
@@ -217,7 +237,7 @@ angular.module('myApp.map', ['ngRoute'])
                 }
                 $scope.marker.list.push({
                     coords: {latitude: position.latitude, longitude: position.longitude},
-                    show: true,
+                    show: false,
                     name: fbInfo.me.name,
                     id: fbInfo.me.id,
                     fb: fbInfo.me,
@@ -230,7 +250,7 @@ angular.module('myApp.map', ['ngRoute'])
                         }
                     },
                     me: true,
-                    popup: {options: {visible: false}}
+                    popup: {options: {visible: true}}
                 });
                 $rootScope.me = fbInfo.me;
                 $rootScope.me.coords = {latitude: position.latitude, longitude: position.longitude};

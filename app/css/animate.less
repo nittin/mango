@@ -7,6 +7,37 @@
     transform-origin: 70% 140%;
     transform: rotate(0deg);
 }
+.transit(@type, @time) {
+    -webkit-transition: @type cubic-bezier(0.22, 0.61, 0.36, 1) @time;
+    -moz-transition: @type cubic-bezier(0.22, 0.61, 0.36, 1) @time;
+    -ms-transition: @type cubic-bezier(0.22, 0.61, 0.36, 1) @time;
+    -o-transition: @type cubic-bezier(0.22, 0.61, 0.36, 1) @time;
+    transition: @type cubic-bezier(0.22, 0.61, 0.36, 1) @time;
+}
+
+.transform(@type) {
+    -webkit-transform: @type;
+    -moz-transform: @type;
+    -ms-transform: @type;
+    -o-transform: @type;
+    transform: @type;
+}
+
+.transit-up-down {
+    .transit(all, 500ms);
+    &.ng-enter {
+        .transform(translateY(100%));
+        &.ng-enter-active {
+            .transform(translateY(0));
+        }
+    }
+    &.ng-leave {
+        .transit-up-down.ng-enter.ng-enter-active;
+        &.ng-leave-active {
+            .transit-up-down.ng-enter;
+        }
+    }
+}
 @keyframes up-down {
     0% { margin-top: 0; } 50% { margin-top: -30px; } 100% { margin-top: 0; }
 }

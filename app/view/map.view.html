@@ -70,8 +70,8 @@
         </div>
         <ui-gmap-google-map flex center="map.center" zoom="map.zoom" bounds="map.bounds" pan="true">
             <ui-gmap-marker ng-repeat="m in marker.list" idkey="m.id" coords="m.coords" options="m.options"
-                            click="marker.open(m)">
-                <ui-gmap-window class="marker-popup" show="m.popup.show" options="m.popup.options" closeClick="marker.close(m.popup)">
+                            click="marker.open(m)" events="marker.event">
+                <ui-gmap-window class="marker-popup" ng-if="!inSmallScreen" show="m.popup.show" options="m.popup.options" closeClick="marker.close(m.popup)">
                     <div class="marker-popup-content">
                         <div class="marker-popup-cover"><img ng-src="{{m.fb.cover.source}}" alt="No cover photo"/></div>
                         <div class="marker-popup-avt"><img ng-src="{{m.fb.picture.data.url}}" alt="Avatar"/></div>
@@ -91,8 +91,9 @@
                 </ui-gmap-window>
             </ui-gmap-marker>
         </ui-gmap-google-map>
-        <div class="cards-swipe" hide-gt-xs>
-            <ul class="cards-wrap" rn-carousel>
+        <div class="cards-swipe transit-up-down" hide-gt-xs ng-if="carousel.active!==-1">
+            <ul class="cards-wrap" rn-carousel rn-carousel-index="carousel.active" rn-carousel-duration="400"
+                rn-carousel-easing="easeOutCubic">
                 <li ng-repeat="m in marker.list">
                     <md-card>
                         <md-card-header>
@@ -101,7 +102,10 @@
                             </md-card-avatar>
                             <md-card-header-text>
                                 <span class="md-title" md-truncate>{{m.fb.name}}</span>
-                                <span class="md-subhead">{{m.distance/1000| number:3}}km</span>
+                                <span class="md-subhead">
+                                    <span ng-if="!m.me">{{m.distance/1000| number:3}}km</span>
+                                    <span ng-if="m.me">I'm here!</span>
+                                </span>
                             </md-card-header-text>
                         </md-card-header>
                         <div class="card-item" >
@@ -109,7 +113,7 @@
                                 <md-button class="md-icon-button" aria-label="Say hello">
                                     <md-icon class="material-icons md-green">pan_tool</md-icon>
                                 </md-button>
-                                <md-button class="md-icon-button" aria-label="Go to">
+                                <md-button ng-if="!m.me" class="md-icon-button" ng-click="$root.direct.toMe()"  aria-label="Go to">
                                     <md-icon class="material-icons md-green">directions</md-icon>
                                 </md-button>
                             </md-card-actions>

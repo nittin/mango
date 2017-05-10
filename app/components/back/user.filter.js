@@ -18,6 +18,7 @@ angular.module('myApp.back.user-filter', [])
             months: '%d months',
             year: 'about a year',
             years: '%d years',
+            unknown: 'Unknown time',
             numbers: []
         };
     })
@@ -69,7 +70,9 @@ angular.module('myApp.back.user-filter', [])
                 lang = 'en_US';
                 $l = sstrings[lang];
             }
-
+            if (isNaN(distanceMillis)) {
+                return $l.unknown;
+            }
             var prefix = $l.prefixAgo;
             var suffix = $l.suffixAgo;
             if (timeAgoSettings.allowFuture) {
