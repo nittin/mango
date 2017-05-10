@@ -23,4 +23,21 @@
             }
         }
     }
+    .cards-swipe {
+        position: absolute;
+        bottom: 0;
+        z-index: 10;
+        width: 100%;
+        overflow-y: hidden;
+        overflow-x: auto;
+        .cards-wrap {
+            height: 150px;
+            .card-item{
+                width: calc(~"100vw - 16px");
+                .md-card-image {
+                    height: 70px;
+                }
+            }
+        }
+    }
 }

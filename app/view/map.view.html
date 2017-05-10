@@ -68,17 +68,17 @@
             <md-progress-circular md-mode="determinate" value="{{$root.progress.current}}"></md-progress-circular>
             <div layout-padding>{{$root.progress.message}}</div>
         </div>
-        <ui-gmap-google-map flex center="map.center" zoom="map.zoom" bounds="map.bounds">
+        <ui-gmap-google-map flex center="map.center" zoom="map.zoom" bounds="map.bounds" pan="true">
             <ui-gmap-marker ng-repeat="m in marker.list" idkey="m.id" coords="m.coords" options="m.options"
                             click="marker.open(m)">
                 <ui-gmap-window class="marker-popup" show="m.popup.show" options="m.popup.options" closeClick="marker.close(m.popup)">
                     <div class="marker-popup-content">
-                        <div class="marker-popup-cover"><img ng-src="{{m.fb.cover.source}}"/></div>
-                        <div class="marker-popup-avt"><img ng-src="{{m.fb.picture.data.url}}"/></div>
+                        <div class="marker-popup-cover"><img ng-src="{{m.fb.cover.source}}" alt="No cover photo"/></div>
+                        <div class="marker-popup-avt"><img ng-src="{{m.fb.picture.data.url}}" alt="Avatar"/></div>
                         <div class="marker-popup-info" layout="row">
                             <b flex md-truncate class="marker-popup-info-name">{{m.fb.first_name}}</b>
                             <div ng-show="!$root.direct.current.me">
-                                <span>{{m.distance/1000| number:2}}km</span>
+                                <span>{{m.distance/1000| number:3}}km</span>
                                 <button class="md-button md-icon-button popup-icon-button"
                                         ng-click="$root.direct.toMe()" ng-disable="!$root.direct.current.distance"
                                         aria-label="Direction">
@@ -91,5 +91,32 @@
                 </ui-gmap-window>
             </ui-gmap-marker>
         </ui-gmap-google-map>
+        <div class="cards-swipe" hide-gt-xs>
+            <ul class="cards-wrap" rn-carousel>
+                <li ng-repeat="m in marker.list">
+                    <md-card>
+                        <md-card-header>
+                            <md-card-avatar>
+                                <img ng-src="{{m.fb.picture.data.url}}" alt="Avatar"/>
+                            </md-card-avatar>
+                            <md-card-header-text>
+                                <span class="md-title" md-truncate>{{m.fb.name}}</span>
+                                <span class="md-subhead">{{m.distance/1000| number:3}}km</span>
+                            </md-card-header-text>
+                        </md-card-header>
+                        <div class="card-item" >
+                            <md-card-actions layout="row" layout-align="end center">
+                                <md-button class="md-icon-button" aria-label="Say hello">
+                                    <md-icon class="material-icons md-green">pan_tool</md-icon>
+                                </md-button>
+                                <md-button class="md-icon-button" aria-label="Go to">
+                                    <md-icon class="material-icons md-green">directions</md-icon>
+                                </md-button>
+                            </md-card-actions>
+                        </div>
+                    </md-card>
+                </li>
+            </ul>
+        </div>
     </md-content>
 </section>

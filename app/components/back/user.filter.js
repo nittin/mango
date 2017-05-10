@@ -152,7 +152,7 @@ angular.module('myApp.back.user-filter', [])
     .filter('ago', function(nowTime, timeAgo) {
         function timeAgoFilter(value, format, timezone) {
             var fromTime = timeAgo.parse(value);
-            var diff = Math.min(nowTime() - fromTime, 0);
+            var diff = Math.max(nowTime() - fromTime, 0);
             return timeAgo.inWords(diff, fromTime, format, timezone);
         }
         timeAgoFilter.$stateful = true;
