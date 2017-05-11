@@ -204,6 +204,7 @@ angular.module('myApp.map', ['ngRoute'])
                         $scope.marker.list.push({
                             coords: {latitude: i.lat, longitude: i.lng},
                             show: false,
+                            date: i.date,
                             name: i.name,
                             id: i.id,
                             fb: i,

@@ -78,7 +78,7 @@
                         <div class="marker-popup-info" layout="row">
                             <b flex md-truncate class="marker-popup-info-name">{{m.fb.first_name}}</b>
                             <div ng-show="!$root.direct.current.me">
-                                <span>{{m.distance/1000| number:3}}km</span>
+                                <span>{{m.distance/1000|number}}km</span>
                                 <button class="md-button md-icon-button popup-icon-button"
                                         ng-click="$root.direct.toMe()" ng-disable="!$root.direct.current.distance"
                                         aria-label="Direction">
@@ -103,7 +103,8 @@
                             <md-card-header-text>
                                 <span class="md-title" md-truncate>{{m.fb.name}}</span>
                                 <span class="md-subhead">
-                                    <span ng-if="!m.me">{{m.distance/1000| number:3}}km</span>
+                                    <span ng-if="!m.me">{{m.distance/1000|number}}km</span>
+                                    <span ng-if="!m.me">{{m.date|ago}}</span>
                                     <span ng-if="m.me">I'm here!</span>
                                 </span>
                             </md-card-header-text>
