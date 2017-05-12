@@ -14,6 +14,7 @@ angular.module('myApp', [
     'myApp.map',
     'myApp.info',
     'myApp.version',
+    'myApp.device',
     'myApp.back'
 ]).config(function ($locationProvider, $routeProvider, $facebookProvider) {
     $locationProvider.hashPrefix('');

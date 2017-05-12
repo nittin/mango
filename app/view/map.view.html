@@ -46,7 +46,7 @@
                     <img alt="{{i.name}}" ng-src="{{i.picture.data.url}}" class="md-avatar"/>
                     <p md-truncate>{{i.name}}</p>
                     <md-button class="md-icon-button status-light" md-no-ink aria-label="Status">
-                        <md-icon aria-label="" class="material-icons md-24" ng-class="i.date|old:'old-'">brightness_1</md-icon>
+                        <md-icon aria-label="" class="material-icons md-24" ng-class="i.date|old:'old-'">{{i.device===1?'desktop_windows':i.device===2?'smartphone':'brightness_1'}}</md-icon>
                         <md-tooltip md-delay="400" md-direction="right">{{i.date|ago}}</md-tooltip>
                     </md-button>
                 </md-list-item>

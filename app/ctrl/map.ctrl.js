@@ -32,6 +32,7 @@ angular.module('myApp.map', ['ngRoute'])
         };
         $scope.marker = {
             list: [],
+            size: {w: 40, h: 58},
             options: {scrollwheel: false},
             open: function (marker) {
                 $scope.marker.list.forEach(function (i, index) {
@@ -199,6 +200,7 @@ angular.module('myApp.map', ['ngRoute'])
                     var target = all.filter(function (j) { return i.id === j.id; })[0];
                     if (target) {
                         i.date = parseInt(target.date, 10);
+                        i.device = parseInt(target.device, 10);
                         i.lat = parseFloat(target.lat);
                         i.lng = parseFloat(target.lng);
                         $scope.marker.list.push({
@@ -212,7 +214,7 @@ angular.module('myApp.map', ['ngRoute'])
                                 icon: {
                                     url: environment.cropPhoto + encodeURIComponent(i.picture.data.url),
                                     scaledSize: {
-                                        width:30,height:40
+                                        width: $scope.marker.size.w, height: $scope.marker.size.h
                                     }
                                 }
                             },
@@ -246,7 +248,7 @@ angular.module('myApp.map', ['ngRoute'])
                         icon: {
                             url: environment.cropPhoto + encodeURIComponent(fbInfo.me.picture.data.url),
                             scaledSize: {
-                                width: 30, height: 40
+                                width: $scope.marker.size.w, height: $scope.marker.size.h
                             }
                         }
                     },

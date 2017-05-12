@@ -91,7 +91,7 @@ $app->get('/users/{id}', function (Request $request, Response $response) {
 
     return json_encode(array('users'=>$posts));
 });
-$app->post('/users', function (Request $request, Response $response) {
+$app->post('/users', function (Request $request, Response $response) use ($pusher) {
     header('Content-type: application/json');
 
     $domain = $this->get('settings')['db']['domain'];
@@ -108,10 +108,11 @@ $app->post('/users', function (Request $request, Response $response) {
     $d_lng = $data["lng"];
     $d_status = $data["status"];
     $d_date = $data["date"];
+    $d_device = $data["device"];
     $d_friends = $data["friends"];
     /* grab the posts from the db */
-    $query = "INSERT INTO user(id, name, lat, lng, friends, status, date) "
-        ."VALUES('$d_id', '$d_name', '$d_lat', '$d_lng', '$d_friends', '$d_status', '$d_date')";
+    $query = "INSERT INTO user(id, name, lat, lng, friends, status, device, date) "
+        ."VALUES('$d_id', '$d_name', '$d_lat', '$d_lng', '$d_friends', '$d_status', '$d_device', '$d_date')";
     $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
     /* push notification to friends*/
     $message['content'] = 'new user';
@@ -144,9 +145,10 @@ $app->put('/users', function (Request $request, Response $response) use ($pusher
     $d_lng = $data["lng"];
     $d_status = $data["status"];
     $d_date = $data["date"];
+    $d_device = $data["device"];
     $d_friends = $data["friends"];
     /* grab the posts from the db */
-    $query = "UPDATE $dbtable SET name =  '$d_name',lat = '$d_lat',lng = '$d_lng',friends = '$d_friends',status = '$d_status', date = '$d_date' WHERE CONCAT(`$dbtable`.`id`) = '$d_id'";
+    $query = "UPDATE $dbtable SET name =  '$d_name',lat = '$d_lat',lng = '$d_lng',friends = '$d_friends',status = '$d_status',device = '$d_device', date = '$d_date' WHERE CONCAT(`$dbtable`.`id`) = '$d_id'";
     $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
     /* push notification to friends*/
     $message['content'] = 'online';
@@ -186,12 +188,12 @@ $app->get('/photo', function (Request $request, Response $response) {
     header("Content-Type: image/png");
     $url = $request->getQueryParams()['url'];
     $im = imagecreatefromjpeg($url);
-    $image_marker = imagecreatefrompng('assets/img/marker.png');
+    $image_marker = imagecreatefrompng('assets/img/marker-w.png');
     $image = imageCreateCorners($im,50,50, 25);
 
     imagealphablending($image_marker, true);
     imagesavealpha($image_marker, true);
-    imagecopy($image_marker, $image, 5, 5, 0, 0, 50, 50);
+    imagecopy($image_marker, $image, 15, 18, 0, 0, 50, 50);
 
 //    imagecopymerge( $image,$image_marker, 0, 0, 5, 5, 50, 50, 0);
     imagepng($image_marker);
