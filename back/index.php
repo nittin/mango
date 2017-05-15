@@ -1,7 +1,7 @@
 <?php
 
-//error_reporting(E_ALL);
-//ini_set('display_errors', 1);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
@@ -200,5 +200,47 @@ $app->get('/photo', function (Request $request, Response $response) {
     imagedestroy($im);
     imagedestroy($image_marker);
     imagedestroy($image);
+});
+$app->get('/oauth/', function (Request $request, Response $response) use($_KEY_FB_APP, $_KEY_FB_SECRET, $_KEY_FB_REDIRECT){
+    header('Content-type: application/json');
+
+    $CODE = $request->getQueryParams()['code'];
+    function cURLget ($ch_url) {
+        $ch = curl_init();
+        curl_setopt($ch,CURLOPT_URL,$ch_url);
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+        curl_setopt($ch,CURLOPT_USERAGENT,$_SERVER['HTTP_USER_AGENT']);
+        $ch_send = curl_exec($ch);
+        curl_close($ch);
+        return $ch_send;
+    };
+
+
+// App  Token
+    $fb_app_token_get = cURLget("https://graph.facebook.com/v2.9/oauth/access_token"
+        . "?client_id=" . $_KEY_FB_APP
+        . "&client_secret=". $_KEY_FB_SECRET
+        . "&grant_type=client_credentials"
+    );
+    $fb_app_token = json_decode($fb_app_token_get, true);
+
+// Obtain User Token
+    $fb_user_token_get = cURLget("https://graph.facebook.com/v2.9/oauth/access_token"
+        . "?client_id=" . $_KEY_FB_APP
+        . "&client_secret=". $_KEY_FB_SECRET
+        . "&redirect_uri=" . urlencode($_KEY_FB_REDIRECT)
+        . "&code=" . $CODE
+    );
+    $fb_user_token = json_decode($fb_user_token_get, true);
+// Check Token
+    $fb_check_user_token_get = cURLget("https://graph.facebook.com/debug_token"
+        . "?input_token=" . $fb_user_token['access_token']
+        . "&access_token=". $fb_app_token['access_token']
+    );
+    $fb_check_user_token = json_decode($fb_check_user_token_get, true);
+
+// Print Token Data
+    echo "ID: " . $fb_check_user_token['data']['user_id']
+        . "<br />Token: " . $fb_user_token['access_token'];
 });
 $app->run();
