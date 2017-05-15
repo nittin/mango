@@ -16,9 +16,24 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <script>(function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) {
+            return;
+        }
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
+    </script>
     <script async defer
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyClAPoOqXhqVipG1zfveIEuqS6G4YYbLv4"></script>
     <script src="https://js.pusher.com/4.0/pusher.min.js"></script>
+    <!-- inject-mobile:css -->
+    <!-- endinject -->
+
     <!-- inject-bower:css -->
     <link rel="stylesheet" href="lib/angular-material.css">
     <link rel="stylesheet" href="lib/angular-carousel.css">
@@ -52,6 +67,7 @@
 <script src="lib/lodash.js"></script>
 <script src="lib/angular.js"></script>
 <script src="lib/ngFacebook.js"></script>
+<script src="lib/ng-cordova.js"></script>
 <script src="lib/angular-route.js"></script>
 <script src="lib/angular-sanitize.js"></script>
 <script src="lib/angular-material.js"></script>
@@ -79,16 +95,10 @@
 <script src="components/back/user.filter.js"></script>
 <script src="components/back/user.service.js"></script>
 <!-- endinject -->
-<script>(function (d, s, id) {
-    var js, fjs = d.getElementsByTagName(s)[0];
-    if (d.getElementById(id)) {
-        return;
-    }
-    js = d.createElement(s);
-    js.id = id;
-    js.src = "https://connect.facebook.net/en_US/sdk.js";
-    fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));
-</script>
+
+<!-- inject-mobile:js -->
+
+<!-- endinject -->
+
 </body>
 </html>

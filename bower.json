@@ -18,7 +18,8 @@
     "angular-google-maps": "~2.4.1",
     "angular-carousel": "~1.0.1",
     "less": "^2.7.1",
-    "ng-facebook": "~0.1.6"
+    "ng-facebook": "~0.1.6",
+    "ngCordova": "~0.1.27"
   },
   "devDependencies": {
 

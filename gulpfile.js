@@ -23,22 +23,28 @@ var src = {
         'app/ctrl/**/*.js'
     ],
     html: 'app/view/**/*.html',
+    oauth: 'app/oauth/**/*',
     json: 'app/i18n/**/*.json',
     asset: 'app/asset/**/*',
     index: 'app/index.html',
+    mobile: 'mobile/www/components/*',
     bower: ['bower.json', '.bowerrc']
 };
 
 var getBuildConfig = function (environment) {
     var env = environment !== '' ? environment : 'default';
     return {
-        envFiles: 'build/*',
-        root: 'build/' + env,
-        root_child: 'build/' + env + '/*',
+        root: 'build/*',
+        branch: 'build/' + env,
+        mobile: 'mobile/www',
         all: 'app.js',
         html: 'build/' + env + '/view/',
         asset: 'build/' + env + '/asset/',
         json: 'build/' + env + '/i18n/',
+        oauth: 'build/' + env + '/oauth/',
+        mobile_html: 'mobile/www/view/',
+        mobile_asset: 'mobile/www/asset/',
+        mobile_json: 'mobile/www/i18n/',
         js: {
             app: 'app.min.js',
             vendors: 'vendors.min.js'
@@ -53,12 +59,7 @@ var getBuildConfig = function (environment) {
 // remove all file and sub folder which are inner 'build' folder
 var cleaner = function () {
     var build = getBuildConfig();
-    return gulp.src([build.envFiles]).pipe(clean({force: true}));
-};
-
-var cleanerEnv = function () {
-    var build = getBuildConfig(this.environment);
-    return gulp.src([build.root_child]).pipe(clean({force: true}));
+    return gulp.src([build.root]).pipe(clean({force: true}));
 };
 
 // concat *.js to `vendor.js` and *.css to `vendor.css`
@@ -76,45 +77,65 @@ var builder = function () {
 
             .pipe(angularFilesort())
             .pipe(uglify({mangle: false}))
-            .pipe(gulp.dest(build.root)),
+            .pipe(gulp.dest(build.branch))
+            .pipe(gulp.dest(build.mobile)),
         css: gulp.src(mainBowerFiles('**/*.css'))
             .pipe(concat(build.css.vendors))
             .pipe(cssmin())
-            .pipe(gulp.dest(build.root))
+            .pipe(gulp.dest(build.branch))
+            .pipe(gulp.dest(build.mobile))
     };
-    var srcJs = ['app/env/env.' + this.environment + '.js'].concat(src.js);
+    var appJs = ['app/env/env.' + this.environment + '.js'].concat(src.js);
     var appStream = {
         //find init file
-        js: gulp.src(srcJs)
+        js: gulp.src(appJs)
             // .pipe(angularFilesort())
 
             //append all *.js which ignore init file
             .pipe(concat(build.js.app))
-            .pipe(uglify({mangle: false}))
+            // .pipe(uglify({mangle: false}))
             .pipe(insert.prepend('/*' + version + '*/\n'))
-            .pipe(gulp.dest(build.root)),
+            .pipe(gulp.dest(build.branch))
+            .pipe(gulp.dest(build.mobile)),
         css: gulp.src(src.less)
             .pipe(less())
             .pipe(cssmin())
             .pipe(replace(/url\(\.\.\/img/g, 'url(img'))
             .pipe(rename({basename: 'app', suffix: '.min'}))
             .pipe(insert.prepend('/*' + version + '*/\n'))
-            .pipe(gulp.dest(build.root))
+            .pipe(gulp.dest(build.branch))
+            .pipe(gulp.dest(build.mobile))
     };
+    
+    var mobileStream = gulp.src(src.mobile);
+
+    gulp.src([src.html]).pipe(gulp.dest(build.mobile_html));
+    gulp.src([src.json]).pipe(gulp.dest(build.mobile_json));
+    gulp.src([src.asset]).pipe(gulp.dest(build.mobile_asset));
+    gulp.src(src.index)
+        .pipe(inject(series(vendorStream.js, vendorStream.css),
+            {name: 'inject-bower', ignorePath: build.mobile, addRootSlash: false, addSuffix: suffix}))
+        .pipe(inject(series(appStream.js, appStream.css),
+            {name: 'inject-app', ignorePath: build.mobile, addRootSlash: false, addSuffix: suffix}))
+        .pipe(inject(mobileStream,
+            { name: 'inject-mobile', ignorePath: build.mobile, addRootSlash: false, addSuffix: suffix}))
+        .pipe(gulp.dest(build.mobile));
+
     gulp.src([src.html]).pipe(gulp.dest(build.html));
     gulp.src([src.json]).pipe(gulp.dest(build.json));
     gulp.src([src.asset]).pipe(gulp.dest(build.asset));
+    gulp.src([src.oauth]).pipe(gulp.dest(build.oauth));
     return gulp.src(src.index)
         .pipe(inject(series(vendorStream.js, vendorStream.css),
-            {name: 'inject-bower', ignorePath: build.root, addRootSlash: false, addSuffix: suffix}))
+            {name: 'inject-bower', ignorePath: build.branch, addRootSlash: false, addSuffix: suffix}))
         .pipe(inject(series(appStream.js, appStream.css),
-            {name: 'inject-app', ignorePath: build.root, addRootSlash: false, addSuffix: suffix}))
-        .pipe(gulp.dest(build.root));
+            {name: 'inject-app', ignorePath: build.branch, addRootSlash: false, addSuffix: suffix}))
+        .pipe(gulp.dest(build.branch));
 };
 
 // build tasks
-gulp.task('_build_ci', builder.bind({environment: 'ci'}));
-gulp.task('_build_product', builder.bind({environment: 'product'}));
+gulp.task('build_ci', builder.bind({environment: 'ci'}));
+gulp.task('build_product', builder.bind({environment: 'product'}));
 
 // clean tasks
 gulp.task('clean_all', cleaner);

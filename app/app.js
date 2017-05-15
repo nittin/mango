@@ -7,6 +7,7 @@ angular.module('myApp', [
     'ngMessages',
     'ngSanitize',
     'ngTouch',
+    'ngCordova',
     'uiGmapgoogle-maps',
     'ngFacebook',
     'angular-carousel',
@@ -26,6 +27,12 @@ angular.module('myApp', [
     $facebookProvider.setPermissions('public_profile,email,user_friends');
     $facebookProvider.setVersion('v2.9');
 })
+    .value('$mobile', {exist: false})
+    .run(function ($mobile) {
+        if (window.monaca) {
+            $mobile.exist = true;
+        }
+    })
     .controller('MasterCtrl', function ($rootScope, $scope, $q) {
-        
+
     });
