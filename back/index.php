@@ -1,7 +1,7 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
@@ -201,10 +201,26 @@ $app->get('/photo', function (Request $request, Response $response) {
     imagedestroy($image_marker);
     imagedestroy($image);
 });
-$app->get('/oauth/', function (Request $request, Response $response) use($_KEY_FB_APP, $_KEY_FB_SECRET, $_KEY_FB_REDIRECT){
+$app->post('/oauth', function (Request $request, Response $response) use(
+    $_KEY_FB_APP, $_KEY_FB_SECRET, $_KEY_FB_REDIRECT, $_KEY_FB_CI_APP, $_KEY_FB_CI_SECRET, $_KEY_FB_CI_REDIRECT){
     header('Content-type: application/json');
 
-    $CODE = $request->getQueryParams()['code'];
+    $domain = $this->get('settings')['db']['domain'];
+    $username = $this->get('settings')['db']['user'];
+    $dbname = $this->get('settings')['db']['dbname'];
+    $pass = $this->get('settings')['db']['pass'];
+
+    $data = $request->getParsedBody();
+    $code = $data["code"];
+    $environment = $data["env"];
+    $fb_app_id = $_KEY_FB_APP;
+    $fb_secret = $_KEY_FB_SECRET;
+    $fb_redirect = $_KEY_FB_REDIRECT;
+    if ($environment == "ci") {
+        $fb_app_id = $_KEY_FB_CI_APP;
+        $fb_secret = $_KEY_FB_CI_SECRET;
+        $fb_redirect = $_KEY_FB_CI_REDIRECT;
+    }
     function cURLget ($ch_url) {
         $ch = curl_init();
         curl_setopt($ch,CURLOPT_URL,$ch_url);
@@ -216,20 +232,20 @@ $app->get('/oauth/', function (Request $request, Response $response) use($_KEY_F
     };
 
 
-// App  Token
+// Obtain App Token
     $fb_app_token_get = cURLget("https://graph.facebook.com/v2.9/oauth/access_token"
-        . "?client_id=" . $_KEY_FB_APP
-        . "&client_secret=". $_KEY_FB_SECRET
+        . "?client_id=" . $fb_app_id
+        . "&client_secret=". $fb_secret
         . "&grant_type=client_credentials"
     );
     $fb_app_token = json_decode($fb_app_token_get, true);
 
 // Obtain User Token
     $fb_user_token_get = cURLget("https://graph.facebook.com/v2.9/oauth/access_token"
-        . "?client_id=" . $_KEY_FB_APP
-        . "&client_secret=". $_KEY_FB_SECRET
-        . "&redirect_uri=" . urlencode($_KEY_FB_REDIRECT)
-        . "&code=" . $CODE
+        . "?client_id=" . $fb_app_id
+        . "&client_secret=". $fb_secret
+        . "&redirect_uri=" . urlencode($fb_redirect)
+        . "&code=" . $code
     );
     $fb_user_token = json_decode($fb_user_token_get, true);
 // Check Token
@@ -238,9 +254,22 @@ $app->get('/oauth/', function (Request $request, Response $response) use($_KEY_F
         . "&access_token=". $fb_app_token['access_token']
     );
     $fb_check_user_token = json_decode($fb_check_user_token_get, true);
+    /* Redirect browser */
+    $d_user_id = $fb_check_user_token['data']['user_id'];
+    $d_expire = $fb_check_user_token['data']['expires_at'] * 1000;
+    $d_scope = implode(",", $fb_check_user_token['data']['scopes']);
+    $d_token = $fb_user_token['access_token'];
 
-// Print Token Data
-    echo "ID: " . $fb_check_user_token['data']['user_id']
-        . "<br />Token: " . $fb_user_token['access_token'];
+    $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
+    mysql_select_db($dbname, $link) or die('Cannot select the DB');
+    /* grab the posts from the db */
+    $query = "INSERT INTO user_token(id, token, scope, expire) "
+        ."VALUES('$d_user_id', '$d_token', '$d_scope', '$d_expire')"
+        ."ON DUPLICATE KEY UPDATE "
+        ."token='$d_token', scope='$d_scope', expire='$d_expire'";
+    $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
+
+    $answer = array('id' => $d_user_id, 'token' => $d_token);
+    return json_encode($answer);
 });
 $app->run();

@@ -31,7 +31,7 @@ var src = {
     bower: ['bower.json', '.bowerrc']
 };
 
-var getBuildConfig = function (environment) {
+var getBuild = function (environment) {
     var env = environment !== '' ? environment : 'default';
     return {
         root: 'build/*',
@@ -58,14 +58,14 @@ var getBuildConfig = function (environment) {
 
 // remove all file and sub folder which are inner 'build' folder
 var cleaner = function () {
-    var build = getBuildConfig();
+    var build = getBuild();
     return gulp.src([build.root]).pipe(clean({force: true}));
 };
 
 // concat *.js to `vendor.js` and *.css to `vendor.css`
 var builder = function () {
     var prefix = this.environment ? '_' + this.environment : '';
-    var build = getBuildConfig(this.environment);
+    var build = getBuild(this.environment);
 
     var now = new Date();
     var version = prefix + now.toISOString().replace(/T/, ' ').replace(/\..+/, '')
@@ -76,7 +76,7 @@ var builder = function () {
             .pipe(concat(build.js.vendors))
 
             .pipe(angularFilesort())
-            .pipe(uglify({mangle: false}))
+            // .pipe(uglify({mangle: false}))
             .pipe(gulp.dest(build.branch))
             .pipe(gulp.dest(build.mobile)),
         css: gulp.src(mainBowerFiles('**/*.css'))
@@ -85,7 +85,7 @@ var builder = function () {
             .pipe(gulp.dest(build.branch))
             .pipe(gulp.dest(build.mobile))
     };
-    var appJs = ['app/env/env.' + this.environment + '.js'].concat(src.js);
+    var appJs = ['app/env/env.' + this.environment + '.js', 'app/env/env.js'].concat(src.js);
     var appStream = {
         //find init file
         js: gulp.src(appJs)
@@ -127,9 +127,9 @@ var builder = function () {
     gulp.src([src.oauth]).pipe(gulp.dest(build.oauth));
     return gulp.src(src.index)
         .pipe(inject(series(vendorStream.js, vendorStream.css),
-            {name: 'inject-bower', ignorePath: build.branch, addRootSlash: false, addSuffix: suffix}))
+            {name: 'inject-bower', ignorePath: build.mobile, addRootSlash: false, addSuffix: suffix}))
         .pipe(inject(series(appStream.js, appStream.css),
-            {name: 'inject-app', ignorePath: build.branch, addRootSlash: false, addSuffix: suffix}))
+            {name: 'inject-app', ignorePath: build.mobile, addRootSlash: false, addSuffix: suffix}))
         .pipe(gulp.dest(build.branch));
 };
 

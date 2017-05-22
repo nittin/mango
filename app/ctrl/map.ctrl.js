@@ -7,16 +7,28 @@ angular.module('myApp.map', ['ngRoute'])
             templateUrl: 'view/map.view.html',
             controller: 'MapCtrl',
             resolve: {
-                factory: function ($q, $rootScope, $location, $facebook) {
+                factory: function ($q, $rootScope, $location, $localStorage, $facebook) {
                     var d = $q.defer();
                     var goHome = function () {
                         d.reject();
                         $location.path('/');
                     };
-                    $facebook.getLoginStatus().then(function (e) {
-                        if (e.status === 'connected') { d.resolve(true); }
-                        else { goHome(); }
-                    }, goHome);
+                    console.log('hello '+$localStorage.get(STORAGE_LOGIN));
+                    if ($localStorage.get(STORAGE_LOGIN)) {
+                        var token = $localStorage.get(STORAGE_TOKEN);
+                        $facebook.api('/me', {token: token}).then(function (res) {
+                            console.log('its me ');
+
+                            d.resolve(true);
+
+                        }, function (e) {
+                            localStorage.clear();
+                            console.log('its back ');
+                            goHome(e);
+                        });
+                    }
+                    else { goHome(); }
+
                     return d.promise;
                 }
             }

@@ -16,18 +16,6 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <script>(function (d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) {
-            return;
-        }
-        js = d.createElement(s);
-        js.id = id;
-        js.src = "https://connect.facebook.net/en_US/sdk.js";
-        fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
-
-    </script>
     <script async defer
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyClAPoOqXhqVipG1zfveIEuqS6G4YYbLv4"></script>
     <script src="https://js.pusher.com/4.0/pusher.min.js"></script>
@@ -82,6 +70,7 @@
 
 <!-- inject-app:js -->
 <script src="env/env.ci.js"></script>
+<script src="env/env.js"></script>
 <script src="app.js"></script>
 <script src="ctrl/home.ctrl.js"></script>
 <script src="ctrl/map.ctrl.js"></script>
@@ -94,11 +83,24 @@
 <script src="components/back/back.js"></script>
 <script src="components/back/user.filter.js"></script>
 <script src="components/back/user.service.js"></script>
+<script src="components/storage/storage.js"></script>
+<script src="components/storage/local-storage.service.js"></script>
+<script src="components/storage/session-storage.service.js"></script>
 <!-- endinject -->
 
 <!-- inject-mobile:js -->
 
 <!-- endinject -->
+<script>(function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) {
+        return;
+    }
+    js = d.createElement(s);
+    js.id = id;
+    js.src = "https://connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
 
 </body>
 </html>

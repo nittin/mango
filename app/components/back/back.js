@@ -9,6 +9,7 @@ angular.module('myApp.back', [
 ])
 
     .value('environment', {
+        oauth: BACK_HOST_NAME + 'back/oauth',
         user: BACK_HOST_NAME + 'back/users',
         userDetail: BACK_HOST_NAME + 'back/users/',
         cropPhoto: BACK_HOST_NAME + 'back/photo?url='
