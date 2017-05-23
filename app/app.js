@@ -9,7 +9,6 @@ angular.module('myApp', [
     'ngTouch',
     'ngCordova',
     'uiGmapgoogle-maps',
-    'ngFacebook',
     'angular-carousel',
     'myApp.home',
     'myApp.map',
@@ -19,15 +18,12 @@ angular.module('myApp', [
     'myApp.storage',
     'myApp.back'
 ])
-    .config(function ($locationProvider, $routeProvider, $facebookProvider) {
+    .config(function ($locationProvider, $routeProvider) {
         $locationProvider.hashPrefix('');
 
         $routeProvider.otherwise({redirectTo: '/'});
         //main 192365741272526
         //test 192972897878477
-        $facebookProvider.setAppId(FB_APP_ID);
-        $facebookProvider.setPermissions('public_profile,email,user_friends');
-        $facebookProvider.setVersion('v2.9');
     })
     .value('$mobile', {exist: false})
     .run(function ($mobile) {

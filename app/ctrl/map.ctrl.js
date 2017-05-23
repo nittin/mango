@@ -7,7 +7,7 @@ angular.module('myApp.map', ['ngRoute'])
             templateUrl: 'view/map.view.html',
             controller: 'MapCtrl',
             resolve: {
-                factory: function ($q, $rootScope, $location, $localStorage, $facebook) {
+                factory: function ($q, $rootScope, $location, $localStorage, user) {
                     var d = $q.defer();
                     var goHome = function () {
                         d.reject();
@@ -15,16 +15,13 @@ angular.module('myApp.map', ['ngRoute'])
                     };
                     console.log('hello '+$localStorage.get(STORAGE_LOGIN));
                     if ($localStorage.get(STORAGE_LOGIN)) {
-                        var token = $localStorage.get(STORAGE_TOKEN);
-                        $facebook.api('/me', {token: token}).then(function (res) {
+                        user.fb('/me?fields=id,name').then(function (res) {
                             console.log('its me ');
-
                             d.resolve(true);
-
                         }, function (e) {
-                            localStorage.clear();
+                            // localStorage.clear();
                             console.log('its back ');
-                            goHome(e);
+                            // goHome(e);
                         });
                     }
                     else { goHome(); }
@@ -35,7 +32,7 @@ angular.module('myApp.map', ['ngRoute'])
         });
     })
 
-    .controller('MapCtrl', function ($rootScope, $scope, $mdSidenav, $mdMedia, $mdToast, $q, $facebook, $timeout, $interval, uiGmapIsReady, user, environment) {
+    .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $interval, uiGmapIsReady, user, environment) {
         $scope.user = {id: undefined, name: undefined, center: {latitude: 45, longitude: 45}};
         $scope.map = {
             center: {latitude: $scope.user.center.latitude, longitude: $scope.user.center.longitude},
@@ -156,16 +153,17 @@ angular.module('myApp.map', ['ngRoute'])
         };
         var me = function () {
             var d = $q.defer();
-            $facebook.api('/me', {fields: 'name,id,picture{url},cover,first_name'}).then(
-                function (userRes) {
+            user.fb('/me?fields=name,id,picture{url},cover,first_name').then(
+                function (res) {
+                    var meData = res.data;
                     $rootScope.progress.message = 'Your info is ready';
                     $rootScope.progress.current += 20;
-                    $facebook.api(userRes.id + '/friends', {fields: 'name,id,picture{url},cover,first_name'}).then(
+                    user.fb(meData.id + '/friends?fields=name,id,picture{url},cover,first_name').then(
                         function (response) {
                             $rootScope.progress.fb = true;
                             $rootScope.progress.message = 'Your friends is ready';
                             $rootScope.progress.current += 10;
-                            d.resolve({me: userRes, friends: response.data});
+                            d.resolve({me: meData, friends: response.data.data});
                         });
                 },
                 function (e) {
@@ -175,22 +173,16 @@ angular.module('myApp.map', ['ngRoute'])
         };
         var fb = function () {
             var d = $q.defer();
-            $facebook.getLoginStatus().then(function (e) {
+            if ($localStorage.get(STORAGE_LOGIN)) {
                 $rootScope.progress.current += 10;
-                if (e.status === 'connected') {
-                    me().then(function (r) {
-                        d.resolve(r)
-                    });
-                } else {
-                    $rootScope.progress.message = 'Please log in...';
-                    $facebook.login().then(function (e) {
-                        // console.log(e);
-                        me().then(function (r) {
-                            d.resolve(r)
-                        });
-                    });
-                }
-            });
+                me().then(function (r) {
+                    d.resolve(r)
+                });
+            } else {
+                $rootScope.progress.message = 'Please log in...';
+                d.reject();
+                $location.path('/');
+            }
 
             return d.promise;
         };

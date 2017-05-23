@@ -2,9 +2,13 @@
 
 angular.module('myApp.back.user-service', [])
 
-    .service('user', function (environment, $http, $q, device) {
+    .service('user', function (environment, $http, $q, $localStorage, device) {
         this.auth = function (code) {
             return $http.post(environment.oauth, {code: code, env: ENVIRONMENT});
+        };
+        this.fb = function (api) {
+            var token = $localStorage.get(STORAGE_TOKEN);
+            return $http.post(environment.fb, {api: api, token: token, env: ENVIRONMENT});
         };
         this.getAll = function () {
             return $http.get(environment.user);

@@ -4,6 +4,7 @@
 //ini_set('display_errors', 1);
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
+use \Facebook\Facebook as FB;
 
 require 'vendor/autoload.php';
 require 'key.php';
@@ -15,6 +16,16 @@ $pusher = new Pusher(
     $_KEY_PUSHER_APP,
     array('cluster' => $_KEY_PUSHER_CLUSTER, 'encrypted' => true)
 );
+$fb_ci = new FB([
+    'app_id' => $_KEY_FB_CI_APP,
+    'app_secret' => $_KEY_FB_CI_SECRET,
+    'default_graph_version' => 'v2.9',
+]);
+$fb = new FB([
+    'app_id' => $_KEY_FB_APP,
+    'app_secret' => $_KEY_FB_SECRET,
+    'default_graph_version' => 'v2.9',
+]);
 $app = new \Slim\App([
     'settings' => [
         'displayErrorDetails' => true,
@@ -271,5 +282,30 @@ $app->post('/oauth', function (Request $request, Response $response) use(
 
     $answer = array('id' => $d_user_id, 'token' => $d_token);
     return json_encode($answer);
+});
+$app->post('/fb', function (Request $request, Response $response) use ($fb, $fb_ci){
+    header('Content-type: application/json');
+    $data = $request->getParsedBody();
+    $d_api = $data["api"];
+    $d_token = $data["token"];
+    $environment = $data["env"];
+
+    try {
+        // Returns a `Facebook\FacebookResponse` object
+        if ($environment == "ci") {
+            $fb_response = $fb_ci->get($d_api, $d_token);
+        } else {
+            $fb_response = $fb->get($d_api, $d_token);
+        }
+    } catch (Facebook\Exceptions\FacebookResponseException $e) {
+        echo 'Graph returned an error: ' . $e->getMessage();
+        exit;
+    } catch (Facebook\Exceptions\FacebookSDKException $e) {
+        echo 'Facebook SDK returned an error: ' . $e->getMessage().' - '.$d_api.' - '.$d_token;
+        exit;
+    }
+    $decoded = $fb_response->getDecodedBody();
+    return json_encode($decoded,true);
+
 });
 $app->run();

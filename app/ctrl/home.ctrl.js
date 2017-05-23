@@ -7,7 +7,7 @@ angular.module('myApp.home', ['ngRoute'])
             templateUrl: 'view/home.view.html',
             controller: 'HomeCtrl',
             resolve: {
-                factory: function ($q, $rootScope, $location, $localStorage, $facebook, user) {
+                factory: function ($q, $rootScope, $location, $localStorage, user) {
                     var d = $q.defer();
                     var goMap = function () {
                         d.reject();
@@ -31,7 +31,7 @@ angular.module('myApp.home', ['ngRoute'])
         });
     })
 
-    .controller('HomeCtrl', function ($rootScope, $scope, $window, $location, $localStorage, $http, $facebook, $mobile, $cordovaInAppBrowser, user) {
+    .controller('HomeCtrl', function ($rootScope, $scope, $window, $location, $localStorage, $http, $mobile, $cordovaInAppBrowser, user) {
         $scope.start = function () {
             var client_id = FB_APP_ID; //your App ID or API Key
             var redirect_uri = FB_RE_URL;  //// YOUR CALLBACK URL
@@ -73,7 +73,6 @@ angular.module('myApp.home', ['ngRoute'])
                 window.addEventListener('message', function (e) {
                     console.log(e.data);
                     user.auth(e.data).then(function (res) {
-                        $rootScope.$broadcast('fb.auth.authResponseChange', {status: 'connected'}, FB);
                         $localStorage.set(STORAGE_ID, res.data.id);
                         $localStorage.set(STORAGE_TOKEN, res.data.token);
                         $localStorage.set(STORAGE_LOGIN, true);
