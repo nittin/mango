@@ -20,8 +20,6 @@ angular.module('myApp', [
     .config(function ($locationProvider, $routeProvider) {
         $locationProvider.hashPrefix('');
         $routeProvider.otherwise({redirectTo: '/'});
-        //main 192365741272526
-        //test 192972897878477
     })
     .value('$mobile', {exist: false, ios: false, android: false, type: ''})
     .run(function ($mobile) {

@@ -7,7 +7,20 @@ angular.module('myApp.home', ['ngRoute'])
             templateUrl: 'view/home.view.html',
             controller: 'HomeCtrl',
             resolve: {
-                factory: function ($q, $rootScope, $location, $localStorage, user) {
+                factory: function ($q, $rootScope, $location, $localStorage, user, $mobile) {
+                    var auth = function (code) {
+                        user.auth(code).then(function (res) {
+                            if (res.data && res.data.id) {
+                                $localStorage.set(STORAGE_ID, res.data.id);
+                                $localStorage.set(STORAGE_TOKEN, res.data.token);
+                                $localStorage.set(STORAGE_LOGIN, true);
+                                if (!$mobile.exist) {
+                                    window.location.href = FB_RE_URL + 'map';
+                                }
+                            }
+                        });
+                    };
+
                     var d = $q.defer();
                     var goMap = function () {
                         d.reject();
@@ -18,7 +31,11 @@ angular.module('myApp.home', ['ngRoute'])
                     var code = reg ? reg[2] : null;
                     if (code) {
                         window.opener.postMessage(code, '*');
-                        
+                        reg = new RegExp("[?&]state(=([^&#]*)|&|#|$)").exec(window.location.href);
+                        var state = reg ? reg[2] : null;
+                        if (!state) {
+                            auth(code);
+                        }
                     } else if ($localStorage.get(STORAGE_LOGIN)) {
                         goMap();
                     } else {
@@ -49,15 +66,17 @@ angular.module('myApp.home', ['ngRoute'])
             authorize_url += '&redirect_uri=' + encodeURIComponent(redirect_uri).replace(/'/g,"%27").replace(/"/g,"%22");
             authorize_url += '&display=' + display;
             authorize_url += '&scope=public_profile,email';
-            var authWindow = window.open(authorize_url, '_blank', 'location=yes,clearcache=yes,toolbar=yes');
+            authorize_url += $mobile.exist ? '&state=remote' : '';
+            var target = $mobile.exist ? '_blank' : '_self';
+            var authWindow = window.open(authorize_url, target, 'location=yes,clearcache=no,toolbar=yes');
             if (authWindow.addEventListener) {
                 console.log('listen loadstart');
                 authWindow.addEventListener('loadstart', function (event) {
                     if (event.url.indexOf('?code=') >= 0) {
                         console.log('load pass: ' + event.url);
                         authWindow.close();
-                        var code = event.url.split('?')[1].split('#')[0];
-                        $rootScope.access = code;
+                        var code = event.url.split('?code=')[1].split('&')[0];
+                        $rootScope.access = event.url;
                         // window.location.href=a;
                         auth(code);
                     }
