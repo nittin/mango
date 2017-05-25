@@ -1,6 +1,6 @@
 <?php
 
-//error_reporting(E_ALL);
+//error_reporting(E_ERROR);
 //ini_set('display_errors', 1);
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
@@ -100,6 +100,7 @@ $app->get('/users/{id}', function (Request $request, Response $response) {
         }
     }
 
+    mysql_free_result($result);
     return json_encode(array('users'=>$posts));
 });
 $app->post('/users', function (Request $request, Response $response) use ($pusher) {

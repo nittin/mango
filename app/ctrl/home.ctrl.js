@@ -32,6 +32,14 @@ angular.module('myApp.home', ['ngRoute'])
     })
 
     .controller('HomeCtrl', function ($rootScope, $scope, $window, $location, $localStorage, $http, $mobile, $cordovaInAppBrowser, user) {
+        var auth = function (code) {
+            user.auth(code).then(function (res) {
+                $localStorage.set(STORAGE_ID, res.data.id);
+                $localStorage.set(STORAGE_TOKEN, res.data.token);
+                $localStorage.set(STORAGE_LOGIN, true);
+                $location.path('/map');
+            });
+        };
         $scope.start = function () {
             var client_id = FB_APP_ID; //your App ID or API Key
             var redirect_uri = FB_RE_URL;  //// YOUR CALLBACK URL
@@ -41,47 +49,28 @@ angular.module('myApp.home', ['ngRoute'])
             authorize_url += '&redirect_uri=' + encodeURIComponent(redirect_uri).replace(/'/g,"%27").replace(/"/g,"%22");
             authorize_url += '&display=' + display;
             authorize_url += '&scope=public_profile,email';
-            if (1) {
-                var options = {
-                    location: 'yes',
-                    clearcache: 'no',
-                    toolbar: 'yes'
-                };
-                $rootScope.$on('$cordovaInAppBrowser:loadstart', function (e, event) {
+            var authWindow = window.open(authorize_url, '_blank', 'location=yes,clearcache=yes,toolbar=yes');
+            if (authWindow.addEventListener) {
+                console.log('listen loadstart');
+                authWindow.addEventListener('loadstart', function (event) {
                     if (event.url.indexOf('?code=') >= 0) {
                         console.log('load pass: ' + event.url);
-
-                        $cordovaInAppBrowser.close();
-                        // console.log('load ok: ' + window.location.href);
-                        //
+                        authWindow.close();
                         var code = event.url.split('?')[1].split('#')[0];
-
-                        // var a = window.location.href.split('#')[0] + '?' + code;
-
                         $rootScope.access = code;
                         // window.location.href=a;
-                        user.auth(code).then(function (res) {
-                            $rootScope.$broadcast('fb.auth.authResponseChange', {status:'connected'}, FB);
-                            $localStorage.set(STORAGE_ID, res.data.id);
-                            $localStorage.set(STORAGE_TOKEN, res.data.token);
-                            $localStorage.set(STORAGE_LOGIN, true);
-                            $location.path('/map');
-                        });
+                        auth(code);
                     }
                 });
-                var authWindow = window.open(authorize_url, '_blank','location=yes,clearcache=yes,toolbar=yes');
+            } else {
+                console.log('listen message');
+
                 window.addEventListener('message', function (e) {
                     console.log(e.data);
-                    user.auth(e.data).then(function (res) {
-                        $localStorage.set(STORAGE_ID, res.data.id);
-                        $localStorage.set(STORAGE_TOKEN, res.data.token);
-                        $localStorage.set(STORAGE_LOGIN, true);
-                        $location.path('/map');
-                    });
+                    auth(e.data);
                     authWindow.close();
                 }, false);
-            } else {
-                // window.location.href = authorize_url;
             }
         };
+
     });

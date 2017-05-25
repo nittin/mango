@@ -20,7 +20,7 @@ angular.module('myApp.map', ['ngRoute'])
                             d.resolve(true);
                         }, function (e) {
                             // localStorage.clear();
-                            console.log('its back ');
+                            console.log('its should back ' + angular.toJson(e));
                             // goHome(e);
                         });
                     }
@@ -187,9 +187,9 @@ angular.module('myApp.map', ['ngRoute'])
             return d.promise;
         };
         $rootScope.progress.message = 'Init map...';
-        $q.all([map(), center(), fb()]).then(function (r) {
-            var position = r[1];
-            var fbInfo = r[2];
+        $q.all([map(), center(), fb()]).then(function (thread) {
+            var position = thread[1];
+            var fbInfo = thread[2];
 
             $scope.map.center.latitude = position.latitude;
             $scope.map.center.longitude = position.longitude;
