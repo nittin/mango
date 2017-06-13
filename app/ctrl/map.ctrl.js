@@ -41,12 +41,35 @@ angular.module('myApp.map', ['ngRoute'])
         };
         $scope.marker = {
             list: [],
-            size: {w: 40, h: 58},
+            size: {w: 35, h: 35, h1: 55},
             options: {scrollwheel: false},
+            cluster:  {
+                styles:[{
+                    textColor: 'white',
+                    textSize: 14,
+                    url: environment.assets + 'marker.png',
+                    height: 35,
+                    width: 35
+                },{
+                    textColor: 'white',
+                    textSize: 14,
+                    url: environment.assets + 'marker.png',
+                    height: 35,
+                    width: 35
+                }]
+            },
+
+            click: function (marker, eventName, model) {
+                $scope.marker.open(model);
+            },
             open: function (marker) {
+                var self = this;
                 $scope.marker.list.forEach(function (i, index) {
                     if (i.id !== marker.id) {
                         i.popup.show = false;
+                        i.options.icon.url = i.photo.marker;
+                        i.options.icon.scaledSize.width = self.size.w;
+                        i.options.icon.scaledSize.height = self.size.h;
                     } else {
                         $scope.carousel.active = index;
                     }
@@ -71,6 +94,9 @@ angular.module('myApp.map', ['ngRoute'])
                 }
                 $rootScope.direct.current = marker;
                 marker.popup.show = true;
+                marker.options.icon.url = marker.photo.pin;
+                marker.options.icon.scaledSize.width = this.size.w;
+                marker.options.icon.scaledSize.height = this.size.h1;
 
                 return false;
             },
@@ -158,13 +184,14 @@ angular.module('myApp.map', ['ngRoute'])
                     var meData = res.data;
                     $rootScope.progress.message = 'Your info is ready';
                     $rootScope.progress.current += 20;
-                    user.fb(meData.id + '/friends?fields=name,id,picture{url},cover,first_name').then(
+                    user.fb('/me/friends?fields=name,id,picture{url},cover,first_name').then(
                         function (response) {
                             $rootScope.progress.fb = true;
                             $rootScope.progress.message = 'Your friends is ready';
                             $rootScope.progress.current += 10;
                             d.resolve({me: meData, friends: response.data.data});
                         });
+
                 },
                 function (e) {
                     d.reject(e);
@@ -207,6 +234,11 @@ angular.module('myApp.map', ['ngRoute'])
                         i.device = parseInt(target.device, 10);
                         i.lat = parseFloat(target.lat);
                         i.lng = parseFloat(target.lng);
+                        var photo = {
+                            marker: environment.markerPhoto + i.id + '.png',
+                            pin: environment.pinPhoto + i.id + '.png',
+                            origin: environment.originPhoto + i.id + '.jpg'
+                        };
                         $scope.marker.list.push({
                             coords: {latitude: i.lat, longitude: i.lng},
                             show: false,
@@ -214,9 +246,10 @@ angular.module('myApp.map', ['ngRoute'])
                             name: i.name,
                             id: i.id,
                             fb: i,
+                            photo: photo,
                             options: {
                                 icon: {
-                                    url: environment.cropPhoto + encodeURIComponent(i.picture.data.url),
+                                    url: photo.marker,
                                     scaledSize: {
                                         width: $scope.marker.size.w, height: $scope.marker.size.h
                                     }
@@ -242,15 +275,21 @@ angular.module('myApp.map', ['ngRoute'])
                 } else {//Insert
                     user.create(fbInfo.me.id, fbInfo.me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC, friendChain);
                 }
+                var photo = {
+                    marker: environment.markerPhoto + fbInfo.me.id + '.png',
+                    pin: environment.pinPhoto + fbInfo.me.id + '.png',
+                    origin: environment.originPhoto + fbInfo.me.id + '.jpg'
+                };
                 $scope.marker.list.push({
                     coords: {latitude: position.latitude, longitude: position.longitude},
                     show: false,
                     name: fbInfo.me.name,
                     id: fbInfo.me.id,
                     fb: fbInfo.me,
+                    photo: photo,
                     options: {
                         icon: {
-                            url: environment.cropPhoto + encodeURIComponent(fbInfo.me.picture.data.url),
+                            url: photo.marker,
                             scaledSize: {
                                 width: $scope.marker.size.w, height: $scope.marker.size.h
                             }

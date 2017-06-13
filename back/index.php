@@ -213,8 +213,46 @@ $app->get('/photo', function (Request $request, Response $response) {
     imagedestroy($image_marker);
     imagedestroy($image);
 });
-$app->post('/oauth', function (Request $request, Response $response) use(
-    $_KEY_FB_APP, $_KEY_FB_SECRET, $_KEY_FB_REDIRECT, $_KEY_FB_CI_APP, $_KEY_FB_CI_SECRET, $_KEY_FB_CI_REDIRECT){
+$app->get('/testphoto', function (Request $request, Response $response) {
+
+    $image_origin = imagecreatefromjpeg("assets/users/origin/1749952611685681.jpg");
+    $image_50x50 = imagecreatetruecolor(50, 50);
+
+    $o_width = imagesx($image_origin);
+    $o_height = imagesy($image_origin);
+    imagecopyresampled($image_50x50, $image_origin, 0, 0, 0, 0, 50, 50, $o_width, $o_height);
+    $image_circle = imageCreateCorners($image_50x50,50,50, 25);
+    $image_marker = imagecreatefrompng('assets/img/marker.png');
+    $image_pin = imagecreatefrompng('assets/img/pin.png');
+
+    imagealphablending($image_marker, true);
+    imagesavealpha($image_marker, true);
+    imagecopy($image_marker, $image_circle, 10, 10, 0, 0, 50, 50);
+    imagepng($image_marker, "assets/users/marker/1749952611685681.png");
+
+    imagealphablending($image_pin, true);
+    imagesavealpha($image_pin, true);
+    imagecopy($image_pin, $image_circle, 10, 10, 0, 0, 50, 50);
+    imagepng($image_pin, "assets/users/pin/1749952611685681.png");
+
+
+
+    header('Content-Type: image/png');
+    imagepng($image_marker);
+    imagedestroy($image_marker);
+});
+$app->post('/photo/me', function (Request $request, Response $response) {
+    header('Content-type: application/json');
+    $url = $request->getQueryParams()['url'];
+
+    $data = $request->getParsedBody();
+    $d_id = $data["id"];
+    copy($url, "assets/users/origin/$d_id.jpg");
+
+    $answer = array('success' => true, 'id' => $d_id);
+    return json_encode($answer);
+});
+$app->post('/oauth', function (Request $request, Response $response) use($_KEY_FB_APP, $_KEY_FB_SECRET, $_KEY_FB_REDIRECT, $_KEY_FB_CI_APP, $_KEY_FB_CI_SECRET, $_KEY_FB_CI_REDIRECT){
     header('Content-type: application/json');
 
     $domain = $this->get('settings')['db']['domain'];
@@ -272,6 +310,13 @@ $app->post('/oauth', function (Request $request, Response $response) use(
     $d_scope = implode(",", $fb_check_user_token['data']['scopes']);
     $d_token = $fb_user_token['access_token'];
 
+
+// get photo
+    $fb_user_photo_url = "https://graph.facebook.com/$d_user_id/picture"
+        . "?width=200&height=200&access_token=" . $d_token;
+    makemarker($fb_user_photo_url, $d_user_id);
+
+
     $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
     mysql_select_db($dbname, $link) or die('Cannot select the DB');
     /* grab the posts from the db */
@@ -281,7 +326,25 @@ $app->post('/oauth', function (Request $request, Response $response) use(
         ."token='$d_token', scope='$d_scope', expire='$d_expire'";
     $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
 
-    $answer = array('id' => $d_user_id, 'token' => $d_token);
+
+    /* update all db photo
+    $query2 = "SELECT * FROM user";
+    $result2 = mysql_query($query2,$link) or die('Errant query:  '.$query2);
+    $posts = array();
+    if(mysql_num_rows($result2)) {
+        while($post = mysql_fetch_assoc($result2)) {
+            $posts[] = $post;
+        }
+    }
+    foreach ($posts as &$value) {
+        $d_user_id = $value['id'];
+        $fb_user_photo_url = "https://graph.facebook.com/$d_user_id/picture"
+            . "?width=200&height=200&access_token=" . $d_token;
+        makemarker($fb_user_photo_url, $d_user_id);
+    }
+    */
+
+    $answer = array('id' => $d_user_id, 'token' => $d_token, 'photo' => $fb_user_photo_url);
     return json_encode($answer);
 });
 $app->post('/fb', function (Request $request, Response $response) use ($fb, $fb_ci){

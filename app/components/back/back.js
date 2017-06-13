@@ -13,5 +13,9 @@ angular.module('myApp.back', [
         user: BACK_HOST_NAME + 'back/users',
         userDetail: BACK_HOST_NAME + 'back/users/',
         cropPhoto: BACK_HOST_NAME + 'back/photo?url=',
+        markerPhoto: BACK_HOST_NAME + 'back/assets/users/marker/',
+        pinPhoto: BACK_HOST_NAME + 'back/assets/users/pin/',
+        originPhoto: BACK_HOST_NAME + 'back/assets/users/origin/',
+        assets: BACK_HOST_NAME + 'back/assets/img/',
         fb: BACK_HOST_NAME + 'back/fb'
     });

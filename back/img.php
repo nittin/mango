@@ -50,3 +50,31 @@ function imageCreateCorners($src, $w, $h, $radius)
 
     return $dest;
 }
+
+function makemarker($uri, $d_user_id){
+    $image_origin_uri = "assets/users/origin/$d_user_id.jpg";
+    $image_marker_uri = "assets/users/marker/$d_user_id.png";
+    $image_pin_uri = "assets/users/pin/$d_user_id.png";
+    copy($uri, $image_origin_uri);
+    $image_origin = imagecreatefromjpeg($image_origin_uri);
+    $image_50x50 = imagecreatetruecolor(50, 50);
+
+    $o_width = imagesx($image_origin);
+    $o_height = imagesy($image_origin);
+    imagecopyresampled($image_50x50, $image_origin, 0, 0, 0, 0, 50, 50, $o_width, $o_height);
+
+    $image_circle = imageCreateCorners($image_50x50,50,50, 25);
+    $image_marker = imagecreatefrompng('assets/img/marker.png');
+    $image_pin = imagecreatefrompng('assets/img/pin.png');
+
+    imagealphablending($image_marker, true);
+    imagesavealpha($image_marker, true);
+    imagecopy($image_marker, $image_circle, 10, 10, 0, 0, 50, 50);
+    imagepng($image_marker, $image_marker_uri);
+
+    imagealphablending($image_pin, true);
+    imagesavealpha($image_pin, true);
+    imagecopy($image_pin, $image_circle, 10, 10, 0, 0, 50, 50);
+    imagepng($image_pin, $image_pin_uri);
+
+}
