@@ -14,7 +14,6 @@
         .cluster img {
             width: 100%;
         }
-        
     }
     .list {
         .status-light {
@@ -34,19 +33,49 @@
         bottom: 0;
         z-index: 10;
         width: 100%;
-        overflow-y: hidden;
-        overflow-x: auto;
+        overflow: visible;
+
         .cards-wrap {
-            height: 126px;
-            margin: 0 24px;
+            height: 200px;
+            margin: 0 16px;
             overflow: visible;
+            >li{
+                bottom: 0;
+            }
             .card {
                 margin: 0 4px;
+                overflow: hidden;
+                height: 100%;
+                .card-head {
+                    height: 100px;
+                    position: relative;
+                    .user-cover {
+                        height: 100%;
+                        position: relative;
+                        z-index: 0;
+                    }
+                    .user-photo {
+                        position: absolute;
+                        bottom: -16px;
+                        width: 100%;
+                        z-index: 1;
+                        text-align: center;
+                        .user-round-photo {
+                            display: inline-block;
+                            border-radius: 50%;
+                            overflow: hidden;
+                            height: 50px;
+                        }
+                    }
+                }
             }
-            .card-item{
-                width: calc(~"100vw - 64px");
+            .card-item {
+                width: calc(~"100vw - 72px");
                 .md-card-image {
                     height: 70px;
+                }
+                .card-txt {
+                    text-align: ce;
                 }
             }
         }

@@ -1,11 +1,13 @@
 <section layout-gt-xs="row" layout-xs="column" layout-fill flex class="map">
     <div class="sidebar" layout-gt-xs="column" layout-xs="row" layout-align="center center">
 
-        <md-button class="md-icon-button" aria-label="World" ng-class="{active:submenu.active===0}" ng-click="submenu.active=0;submenu.toggle()">
+        <md-button class="md-icon-button" aria-label="World" ng-class="{active:submenu.active===0}"
+                   ng-click="submenu.active=0;submenu.toggle()">
             <md-icon aria-label="World" class="material-icons md-24">public</md-icon>
         </md-button>
 
-        <md-button class="md-icon-button" aria-label="Group" ng-class="{active:submenu.active===1}" ng-click="submenu.active=1">
+        <md-button class="md-icon-button" aria-label="Group" ng-class="{active:submenu.active===1}"
+                   ng-click="submenu.active=1">
             <md-icon aria-label="Group" class="material-icons md-24">people</md-icon>
         </md-button>
 
@@ -23,7 +25,8 @@
             <div flex></div>
             <div class="md-toolbar-tools">
                 <h2 flex md-truncate>{{me.name}}</h2>
-                <md-button class="md-icon-button" ng-click="openId($root.me.id)" ng-disabled="!$root.progress.all" aria-label="Find me">
+                <md-button class="md-icon-button" ng-click="openId($root.me.id)" ng-disabled="!$root.progress.all"
+                           aria-label="Find me">
                     <md-icon aria-label="Friend" class="material-icons md-24">face</md-icon>
                     <md-tooltip md-delay="400" md-direction="right">Find me</md-tooltip>
                 </md-button>
@@ -46,7 +49,9 @@
                     <img alt="{{i.name}}" ng-src="{{i.picture.data.url}}" class="md-avatar"/>
                     <p md-truncate>{{i.name}}</p>
                     <md-button class="md-icon-button status-light" md-no-ink aria-label="Status">
-                        <md-icon aria-label="" class="material-icons md-24" ng-class="i.date|old:'old-'">{{i.device===1?'desktop_windows':i.device===2?'smartphone':'brightness_1'}}</md-icon>
+                        <md-icon aria-label="" class="material-icons md-24" ng-class="i.date|old:'old-'">
+                            {{i.device===1?'desktop_windows':i.device===2?'smartphone':'brightness_1'}}
+                        </md-icon>
                         <md-tooltip md-delay="400" md-direction="right">{{i.date|ago}}</md-tooltip>
                     </md-button>
                 </md-list-item>
@@ -69,59 +74,61 @@
             <div layout-padding>{{$root.progress.message}}</div>
         </div>
         <ui-gmap-google-map flex center="map.center" zoom="map.zoom" bounds="map.bounds" pan="true">
-            <!--<ui-gmap-marker ng-repeat="m in marker.list" idkey="m.id" coords="m.coords" options="m.options"-->
-                            <!--click="marker.open(m)" events="marker.event">-->
-                <!--<ui-gmap-window class="marker-popup" ng-if="!inSmallScreen" show="m.popup.show" options="m.popup.options" closeClick="marker.close(m.popup)">-->
-                    <!--<div class="marker-popup-content">-->
-                        <!--<div class="marker-popup-cover"><img ng-src="{{m.fb.cover.source}}" alt="No cover photo"/></div>-->
-                        <!--<div class="marker-popup-avt"><img ng-src="{{m.fb.picture.data.url}}" alt="Avatar"/></div>-->
-                        <!--<div class="marker-popup-info" layout="row">-->
-                            <!--<b flex md-truncate class="marker-popup-info-name">{{m.fb.first_name}}</b>-->
-                            <!--<div ng-show="!$root.direct.current.me">-->
-                                <!--<span>{{m.distance/1000|number}}km</span>-->
-                                <!--<button class="md-button md-icon-button popup-icon-button"-->
-                                        <!--ng-click="$root.direct.toMe()" ng-disable="!$root.direct.current.distance"-->
-                                        <!--aria-label="Direction">-->
-                                    <!--<md-icon aria-label="Go" class="material-icons md-16 md-green">directions</md-icon>-->
-                                <!--</button>-->
-                            <!--</div>-->
-                            <!--<div ng-show="$root.direct.current.me">I'm here!</div>-->
-                        <!--</div>-->
-                    <!--</div>-->
-                <!--</ui-gmap-window>-->
-            <!--</ui-gmap-marker>-->
             <ui-gmap-markers models="marker.list" coords="'coords'" options="'options'" click="marker.click"
                              doCluster="true" clusterOptions="marker.cluster">
             </ui-gmap-markers>
         </ui-gmap-google-map>
-        <div class="cards-swipe transit-up-down"  ng-if="carousel.active!==-1">
+        <div class="cards-swipe transit-up-down" ng-if="carousel.active!==-1">
             <ul class="cards-wrap" rn-carousel rn-carousel-index="carousel.active" rn-carousel-duration="400"
                 rn-carousel-easing="easeOutCubic">
                 <li ng-repeat="m in marker.list">
                     <md-card class="card">
-                        <md-card-header>
-                            <md-card-avatar>
-                                <img ng-src="{{m.fb.picture.data.url}}" alt="Avatar"/>
-                            </md-card-avatar>
-                            <md-card-header-text>
-                                <span class="md-title" md-truncate>{{m.fb.name}}</span>
-                                <span class="md-subhead">
+                        <div class="card-head">
+                            <div class="user-cover" md-colors="::{backgroundColor:'primary'}">
+
+                                <div layout="row" layout-align="space-around start">
+                                    <div layout="row" flex>
+                                        <md-button class="md-icon-button" aria-label="More">
+                                            <md-icon class="material-icons">more_vert</md-icon>
+                                        </md-button>
+                                    </div>
+                                    <div layout="row">
+                                        <md-button class="md-icon-button" aria-label="Close" ng-click="marker.close()">
+                                            <md-icon class="material-icons">keyboard_arrow_down</md-icon>
+                                        </md-button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="user-photo">
+                                <div class="user-round-photo">
+                                    <img ng-src="{{m.fb.picture.data.url}}" alt="::{{m.fb.name}}"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <md-card-content class="card-item">
+                            <div class="card-txt">
+                                <div class="md-title" md-truncate>{{m.fb.name}}</div>
+                                <div class="md-caption">
                                     <span ng-if="!m.me">{{m.distance/1000|number}}km</span>
                                     <span ng-if="!m.me">{{m.date|ago}}</span>
                                     <span ng-if="m.me">I'm here!</span>
-                                </span>
-                            </md-card-header-text>
-                        </md-card-header>
-                        <div class="card-item" >
-                            <md-card-actions layout="row" layout-align="end center">
-                                <md-button class="md-icon-button" aria-label="Say hello">
+                                </div>
+                            </div>
+
+                            <md-card-actions layout="row" layout-align="center start">
+                                <md-button ng-if="!m.me" class="md-icon-button" aria-label="Say hello">
                                     <md-icon class="material-icons md-green">pan_tool</md-icon>
                                 </md-button>
-                                <md-button ng-if="!m.me" class="md-icon-button" ng-click="$root.direct.toMe()"  aria-label="Go to">
+                                <md-button class="md-icon-button" aria-label="Focus">
+                                    <md-icon class="material-icons md-green">gps_fixed</md-icon>
+                                </md-button>
+                                <md-button ng-if="!m.me" class="md-icon-button" ng-click="$root.direct.toMe()"
+                                           aria-label="Go to">
                                     <md-icon class="material-icons md-green">directions</md-icon>
                                 </md-button>
                             </md-card-actions>
-                        </div>
+                        </md-card-content>
                     </md-card>
                 </li>
             </ul>

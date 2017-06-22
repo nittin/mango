@@ -100,14 +100,17 @@ angular.module('myApp.map', ['ngRoute'])
 
                 return false;
             },
-            close: function (popup) {
-                popup.show = false;
+            close: function () {
+                var self = this;
+                $scope.marker.list.forEach(function (i, index) {
+                    i.popup.show = false;
+                    i.options.icon.url = i.photo.marker;
+                    i.options.icon.scaledSize.width = self.size.w;
+                    i.options.icon.scaledSize.height = self.size.h;
+                });
                 $scope.carousel.active = -1;
             },
             event: {
-                click:function (m,e,agr) {
-                    var a=e;
-                }
             }
         };
         $rootScope.direct = {
