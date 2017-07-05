@@ -105,7 +105,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <md-card-content class="card-item">
                             <div class="card-txt">
                                 <div class="md-title" md-truncate>{{m.fb.name}}</div>
@@ -115,15 +114,14 @@
                                     <span ng-if="m.me">I'm here!</span>
                                 </div>
                             </div>
-
                             <md-card-actions layout="row" layout-align="center start">
-                                <md-button ng-if="!m.me" class="md-icon-button" aria-label="Say hello">
+                                <md-button class="md-icon-button" ng-click="carousel.actions.hi(m)" ng-if="!m.me" ng-disabled="m.status.waving" aria-label="Say hello">
                                     <md-icon class="material-icons md-green">pan_tool</md-icon>
                                 </md-button>
-                                <md-button class="md-icon-button" aria-label="Focus">
+                                <md-button class="md-icon-button" ng-click="carousel.actions.focus(m)" aria-label="Focus">
                                     <md-icon class="material-icons md-green">gps_fixed</md-icon>
                                 </md-button>
-                                <md-button ng-if="!m.me" class="md-icon-button" ng-click="$root.direct.toMe()"
+                                <md-button class="md-icon-button" ng-click="$root.direct.toMe()" ng-if="!m.me"
                                            aria-label="Go to">
                                     <md-icon class="material-icons md-green">directions</md-icon>
                                 </md-button>

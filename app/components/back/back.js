@@ -5,7 +5,8 @@
 
 angular.module('myApp.back', [
     'myApp.back.user-service',
-    'myApp.back.user-filter'
+    'myApp.back.user-filter',
+    'myApp.back.notify-service'
 ])
 
     .value('environment', {
@@ -17,5 +18,6 @@ angular.module('myApp.back', [
         pinPhoto: BACK_HOST_NAME + 'back/assets/users/pin/',
         originPhoto: BACK_HOST_NAME + 'back/assets/users/origin/',
         assets: BACK_HOST_NAME + 'back/assets/img/',
+        wave: BACK_HOST_NAME + 'back/notify/wave',
         fb: BACK_HOST_NAME + 'back/fb'
     });

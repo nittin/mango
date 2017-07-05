@@ -176,6 +176,21 @@ $app->put('/users', function (Request $request, Response $response) use ($pusher
     $answer = array('success' => true, 'id' => $d_id);
     return json_encode($answer);
 });
+$app->post('/notify/wave', function (Request $request, Response $response) use ($pusher)  {
+    header('Content-type: application/json');
+
+    $data = $request->getParsedBody();
+    $d_id = $data["id"];
+    $d_name = $data["name"];
+    $d_target = $data["target_id"];
+    $message['content'] = $d_name.' say hi!';
+    $message['id'] = $d_id;
+    $message['name'] = $d_name;
+        $pusher->trigger($d_target, 'user-wave', $message);
+    /* answer user*/
+    $answer = array('success' => true, 'id' => $d_id);
+    return json_encode($answer);
+});
 
 $app->get('/assets/{height}/{width}/{id}/{type}', function (Request $request, Response $response) {
     $dir = dirname(__DIR__) . "/back/assets/img/";
@@ -327,8 +342,9 @@ $app->post('/oauth', function (Request $request, Response $response) use($_KEY_F
     $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
 
 
-    /* update all db photo
-    $query2 = "SELECT * FROM user";
+
+    //update all db photo
+    /*$query2 = "SELECT * FROM user";
     $result2 = mysql_query($query2,$link) or die('Errant query:  '.$query2);
     $posts = array();
     if(mysql_num_rows($result2)) {
@@ -341,8 +357,8 @@ $app->post('/oauth', function (Request $request, Response $response) use($_KEY_F
         $fb_user_photo_url = "https://graph.facebook.com/$d_user_id/picture"
             . "?width=200&height=200&access_token=" . $d_token;
         makemarker($fb_user_photo_url, $d_user_id);
-    }
-    */
+    }*/
+    //end update all db photo
 
     $answer = array('id' => $d_user_id, 'token' => $d_token, 'photo' => $fb_user_photo_url);
     return json_encode($answer);

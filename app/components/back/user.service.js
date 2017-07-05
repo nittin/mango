@@ -3,6 +3,7 @@
 angular.module('myApp.back.user-service', [])
 
     .service('user', function (environment, $http, $q, $localStorage, device) {
+        this.current = {};
         this.auth = function (code) {
             return $http.post(environment.oauth, {code: code, env: ENVIRONMENT});
         };

@@ -32,7 +32,7 @@ angular.module('myApp.map', ['ngRoute'])
         });
     })
 
-    .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $interval, uiGmapIsReady, user, environment) {
+    .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $interval, uiGmapIsReady, user, notify, environment) {
         $scope.user = {id: undefined, name: undefined, center: {latitude: 45, longitude: 45}};
         $scope.map = {
             center: {latitude: $scope.user.center.latitude, longitude: $scope.user.center.longitude},
@@ -137,7 +137,22 @@ angular.module('myApp.map', ['ngRoute'])
             }
         };
         $scope.carousel = {
-            active: -1
+            active: -1,
+            statusMap: {},
+            actions: {
+                hi: function (marker) {
+                    if (!marker.status.waving) {
+                        marker.status.waving = true;
+                        $timeout(function () {
+                            notify.wave(marker.id);
+                            marker.status.waving = false;
+                        }, PREVENT_SPAM_TIME);
+                    }
+                },
+                focus: function (marker) {
+
+                }
+            }
         };
         $scope.$watch('carousel.active', function (i) {
             if (i > -1) {
@@ -258,6 +273,7 @@ angular.module('myApp.map', ['ngRoute'])
                                     }
                                 }
                             },
+                            status: {},
                             popup: {options: {visible: true}}
                         });
                         bounds.extend(new google.maps.LatLng(i.lat, i.lng));
@@ -299,9 +315,11 @@ angular.module('myApp.map', ['ngRoute'])
                         }
                     },
                     me: true,
+                    status: {},
                     popup: {options: {visible: true}}
                 });
                 $rootScope.me = fbInfo.me;
+                user.current = fbInfo.me;
                 $rootScope.me.coords = {latitude: position.latitude, longitude: position.longitude};
                 $rootScope.progress.current += 19;
                 $rootScope.progress.message = 'Go to your map now...';
@@ -353,10 +371,26 @@ angular.module('myApp.map', ['ngRoute'])
                 cluster: PUSHER.cluster,
                 encrypted: true
             });
-            var channelId = $rootScope.me.id;
-            var userChannel = pusher.subscribe($rootScope.me.id);
+            var myChannel = $rootScope.me.id;
+            var userChannel = pusher.subscribe(myChannel);
             var worldChannel = pusher.subscribe('world-channel');
-            userChannel.bind('user-online', function(data) {
+            userChannel.bind('user-online', function (data) {
+                var friend = $rootScope.friends.filter(function (i) {
+                    return i.id === data.id && $rootScope.me.id !== data.id;
+                })[0];
+                if (friend) {
+                    friend.date = data.date;
+                    $mdToast.show({
+                        hideDelay: 5000,
+                        position: 'top right',
+                        controller: 'ToastCtrl',
+                        templateUrl: 'view/toast.template.html',
+                        toastClass: 'notifier',
+                        locals: {data: friend}
+                    });
+                }
+            });
+            userChannel.bind('user-wave', function (data) {
                 var friend = $rootScope.friends.filter(function (i) {
                     return i.id === data.id && $rootScope.me.id !== data.id;
                 })[0];
