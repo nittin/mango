@@ -78,23 +78,25 @@
                              doCluster="true" clusterOptions="marker.cluster">
             </ui-gmap-markers>
         </ui-gmap-google-map>
-        <div class="cards-swipe transit-up-down" ng-if="carousel.active!==-1">
-            <ul class="cards-wrap" rn-carousel rn-carousel-index="carousel.active" rn-carousel-duration="400"
-                rn-carousel-easing="easeOutCubic">
+        <div class="cards-swipe transit-up-down" ng-if="carousel.active!==-1"
+             ng-class="{detail:carousel.detail}" ng-init="carousel.detail=null;carousel.lock=false">
+            <ul class="cards-wrap" rn-carousel rn-carousel-index="carousel.active"
+                rn-carousel-easing="easeOutCubic" rn-carousel-locked="carousel.lock">
                 <li ng-repeat="m in marker.list">
-                    <md-card class="card">
+                    <md-card class="card" ng-class="{active:carousel.active===$index}">
                         <div class="card-head">
                             <div class="user-cover" md-colors="::{backgroundColor:'primary'}">
-
                                 <div layout="row" layout-align="space-around start">
                                     <div layout="row" flex>
-                                        <md-button class="md-icon-button" aria-label="More">
-                                            <md-icon class="material-icons">more_vert</md-icon>
+                                        <md-button class="md-icon-button" aria-label="Close"
+                                                   ng-click="marker.close()">
+                                            <md-icon class="material-icons">close</md-icon>
                                         </md-button>
                                     </div>
                                     <div layout="row">
-                                        <md-button class="md-icon-button" aria-label="Close" ng-click="marker.close()">
-                                            <md-icon class="material-icons">keyboard_arrow_down</md-icon>
+                                        <md-button class="md-icon-button" aria-label="More"
+                                                   ng-click="carousel.detail?marker.less($event):marker.more(m, $event)">
+                                            <md-icon class="material-icons">{{carousel.detail?'keyboard_arrow_down':'keyboard_arrow_up'}}</md-icon>
                                         </md-button>
                                     </div>
                                 </div>
@@ -111,7 +113,7 @@
                                 <div class="md-caption">
                                     <span ng-if="!m.me">{{m.distance/1000|number}}km</span>
                                     <span ng-if="!m.me">{{m.date|ago}}</span>
-                                    <span ng-if="m.me">I'm here!</span>
+                                    <span ng-if="m.me">You're here!</span>
                                 </div>
                             </div>
                             <md-card-actions layout="row" layout-align="center start">

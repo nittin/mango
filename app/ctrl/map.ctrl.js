@@ -32,7 +32,7 @@ angular.module('myApp.map', ['ngRoute'])
         });
     })
 
-    .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $interval, uiGmapIsReady, user, notify, environment) {
+    .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $http, $interval, uiGmapIsReady, user, notify, environment) {
         $scope.user = {id: undefined, name: undefined, center: {latitude: 45, longitude: 45}};
         $scope.map = {
             center: {latitude: $scope.user.center.latitude, longitude: $scope.user.center.longitude},
@@ -110,6 +110,16 @@ angular.module('myApp.map', ['ngRoute'])
                 });
                 $scope.carousel.active = -1;
             },
+            more: function (marker, e) {
+                $scope.carousel.detail = marker.id;
+                // $scope.carousel.lock = true;
+                e.stopPropagation();
+            },
+            less: function (e) {
+                $scope.carousel.detail = null;
+                // $scope.carousel.lock = false;
+                e.stopPropagation();
+            },
             event: {
             }
         };
@@ -138,6 +148,8 @@ angular.module('myApp.map', ['ngRoute'])
         };
         $scope.carousel = {
             active: -1,
+            detail: null,
+            lock: false,
             statusMap: {},
             actions: {
                 hi: function (marker) {
@@ -174,7 +186,13 @@ angular.module('myApp.map', ['ngRoute'])
                 direction.service = new google.maps.DirectionsService;
                 direction.render = new google.maps.DirectionsRenderer({suppressMarkers: true});
                 direction.render.setMap(instances[0].map);
-                d.resolve(instances);
+                $http.get('asset/json/map.json').then(function (res) {
+                    var styledMapType = new google.maps.StyledMapType(res.data,
+                        {name: 'Styled Map'});
+                    instances[0].map.mapTypes.set('road_map', styledMapType);
+                    instances[0].map.setMapTypeId('road_map');
+                    d.resolve(instances);
+                });
             }, function (e) {
                 d.reject(e)
             });
