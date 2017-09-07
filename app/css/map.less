@@ -1,4 +1,22 @@
 .map {
+    .tabs {
+        height: 100%;
+        md-tabs-wrapper {
+            display: none;
+        }
+        md-tabs-content-wrapper {
+            top: 0;
+        }
+        .btn-middle {
+            .transit(all, 400ms);
+            position: relative;
+            top: 30px;
+            &.active {
+                -webkit-transform: scale(0);
+                transform: scale(0);
+            }
+        }
+    }
     .map-area {
         position: relative;
         overflow: hidden;
@@ -34,8 +52,8 @@
         bottom: 0;
         z-index: 10;
         width: 100%;
-        overflow: hidden;
         height: 200px;
+        overflow: hidden;
 
         .cards-wrap {
             height: 100%;
@@ -67,12 +85,16 @@
                             border-radius: 50%;
                             overflow: hidden;
                             height: 50px;
+                            img{
+                                pointer-events: none;
+                            }
                         }
                     }
                 }
             }
             .card-item {
-                width: calc(~"100vw - 72px");
+                width: 100%;
+                box-sizing: border-box;
                 .md-card-image {
                     height: 70px;
                 }
@@ -85,20 +107,35 @@
             .cards-wrap, .card {
                 .transit(all, 1000ms);
             }
+            .card-head {
+                .transit(all, 500ms);
+            }
         }
         &.detail {
             height: 100%;
+            background: #c5c5c5;
             .cards-wrap {
                 height: 100%;
                 margin: 0;
                 .card {
                     margin: 0;
                     border-radius: 0;
+                    .card-head {
+                        height: 128px;
+                    }
                     &:not(.active){
-                        opacity: 0.5;
                     }
                 }
             }
         }
+    }
+    .form {
+        position: absolute;
+        top: 0;
+        z-index: 11;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #FFF;
     }
 }

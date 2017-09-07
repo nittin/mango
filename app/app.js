@@ -9,6 +9,7 @@ angular.module('myApp', [
     'ngCordova',
     'uiGmapgoogle-maps',
     'angular-carousel',
+    'myApp.master',
     'myApp.home',
     'myApp.map',
     'myApp.info',
@@ -29,7 +30,4 @@ angular.module('myApp', [
             $mobile.ios = window.monaca.isIOS;
             $mobile.type = $mobile.android ? 'android' : $mobile.ios ? 'ios' : 'other';
         }
-    })
-    .controller('MasterCtrl', function ($rootScope, $scope, $q, $mobile) {
-        $scope.device = $mobile.type;
     });

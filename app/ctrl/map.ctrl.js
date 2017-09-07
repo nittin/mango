@@ -37,20 +37,26 @@ angular.module('myApp.map', ['ngRoute'])
         $scope.map = {
             center: {latitude: $scope.user.center.latitude, longitude: $scope.user.center.longitude},
             bounds: {},
-            zoom: 15
+            zoom: 15,
+            events: {
+                click: function () {
+                    $scope.marker.close();
+                    $scope.$apply();
+                }
+            }
         };
         $scope.marker = {
             list: [],
             size: {w: 35, h: 35, h1: 55},
             options: {scrollwheel: false},
-            cluster:  {
-                styles:[{
+            cluster: {
+                styles: [{
                     textColor: 'white',
                     textSize: 14,
                     url: environment.assets + 'marker.png',
                     height: 35,
                     width: 35
-                },{
+                }, {
                     textColor: 'white',
                     textSize: 14,
                     url: environment.assets + 'marker.png',
@@ -110,17 +116,24 @@ angular.module('myApp.map', ['ngRoute'])
                 });
                 $scope.carousel.active = -1;
             },
-            more: function (marker, e) {
+            more: function (marker) {
                 $scope.carousel.detail = marker.id;
                 // $scope.carousel.lock = true;
-                e.stopPropagation();
             },
-            less: function (e) {
+            less: function () {
                 $scope.carousel.detail = null;
                 // $scope.carousel.lock = false;
-                e.stopPropagation();
             },
-            event: {
+            event: {}
+        };
+        $scope.group = {
+            list: [],
+            adding: false,
+            form: {
+                member: [],
+                query: function (criteria) {
+                    return criteria;
+                }
             }
         };
         $rootScope.direct = {
@@ -138,12 +151,16 @@ angular.module('myApp.map', ['ngRoute'])
             data: false,
             all: false
         };
-
         $scope.submenu = {
             active: 0,
             toggle: function () {
                 $mdSidenav('left').toggle().then(function () {
                 });
+            },
+            close: function () {
+                $timeout(function () {
+                    $mdSidenav('left').close();
+                })
             }
         };
         $scope.carousel = {
@@ -256,7 +273,10 @@ angular.module('myApp.map', ['ngRoute'])
 
             $scope.map.center.latitude = position.latitude;
             $scope.map.center.longitude = position.longitude;
-            $rootScope.friends = fbInfo.friends;
+            $rootScope.friends = fbInfo.friends.map(function (i) {
+                i.image = i.picture.data.url;
+                return i;
+            });
             var bounds = new google.maps.LatLngBounds();
 
             $rootScope.progress.message = 'Start set your friends list';

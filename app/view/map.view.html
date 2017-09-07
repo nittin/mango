@@ -1,79 +1,112 @@
 <section layout-gt-xs="row" layout-xs="column" layout-fill flex class="map">
     <div class="sidebar" layout-gt-xs="column" layout-xs="row" layout-align="center center">
 
-        <md-button class="md-icon-button" aria-label="World" ng-class="{active:submenu.active===0}"
-                   ng-click="submenu.active=0;submenu.toggle()">
-            <md-icon aria-label="World" class="material-icons md-24">public</md-icon>
+        <md-button class="md-icon-button" aria-label="Menu" ng-click="submenu.toggle()">
+            <md-icon aria-label="Menu" class="material-icons md-24" md-colors="::{color:'grey-50'}">menu</md-icon>
         </md-button>
 
-        <md-button class="md-icon-button" aria-label="Group" ng-class="{active:submenu.active===1}"
-                   ng-click="submenu.active=1">
-            <md-icon aria-label="Group" class="material-icons md-24">people</md-icon>
-        </md-button>
+        <div layout-gt-xs="column" layout-xs="row" flex layout-align-gt-xs="center center" layout-align-xs="end center">
+            <md-button class="md-icon-button" aria-label="World" ng-class="{active:submenu.active===0}"
+                       ng-click="submenu.active=0;">
+                <md-icon aria-label="World" class="material-icons md-24">public</md-icon>
+            </md-button>
 
-        <md-button class="md-icon-button" ng-class="{active:submenu.active===2}" ng-click="submenu.active=2">
-            <md-icon aria-label="Friend" class="material-icons md-24">person_pin</md-icon>
-        </md-button>
+            <md-button class="md-icon-button" aria-label="Group" ng-class="{active:submenu.active===1}"
+                       ng-click="submenu.active=1">
+                <md-icon aria-label="Group" class="material-icons md-24">people</md-icon>
+            </md-button>
+
+            <md-button class="md-icon-button" ng-class="{active:submenu.active===2}" ng-click="submenu.active=2">
+                <md-icon aria-label="Friend" class="material-icons md-24">person_pin</md-icon>
+            </md-button>
+        </div>
     </div>
-    <md-sidenav
-            class="md-sidenav-left"
-            md-component-id="left"
-            md-is-locked-open="$mdMedia('gt-sm')"
-            md-whiteframe="4">
-
-        <md-toolbar class="md-tall">
-            <div flex></div>
-            <div class="md-toolbar-tools">
-                <h2 flex md-truncate>{{me.name}}</h2>
-                <md-button class="md-icon-button" ng-click="openId($root.me.id)" ng-disabled="!$root.progress.all"
-                           aria-label="Find me">
-                    <md-icon aria-label="Friend" class="material-icons md-24">face</md-icon>
-                    <md-tooltip md-delay="400" md-direction="right">Find me</md-tooltip>
-                </md-button>
-            </div>
-        </md-toolbar>
-
-        <md-content>
-            <md-list class="list">
-                <md-subheader class="md-no-sticky">
-                    <div layout="row">
-                        <span flex>Online friends </span><b ng-if="$root.progress.all">({{$root.friends.length}})</b>
+    <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-sm')" md-whiteframe="4">
+        <md-tabs class="tabs" md-selected="submenu.active" flex md-no-ink md-no-ink-bar>
+            <md-tab layout="column">
+                <md-tab-body>
+                    <div layout="column" layout-fill>
+                        <md-toolbar class="md-tall">
+                            <div flex></div>
+                            <div class="md-toolbar-tools">
+                                <h2 flex md-truncate>{{inSmallScreen?me.first_name:me.name}}'s friends</h2>
+                                <md-button class="md-icon-button" ng-click="openId($root.me.id)" ng-disabled="!$root.progress.all"
+                                           aria-label="Find me">
+                                    <md-icon aria-label="Friend" class="material-icons md-24">face</md-icon>
+                                    <md-tooltip md-delay="400" md-direction="right">Find me</md-tooltip>
+                                </md-button>
+                            </div>
+                        </md-toolbar>
+                        <md-content flex>
+                            <md-list class="list">
+                                <md-subheader class="md-no-sticky">
+                                    <div layout="row">
+                                        <span flex>Online friends </span><b ng-if="$root.progress.all">({{$root.friends.length}})</b>
+                                    </div>
+                                </md-subheader>
+                                <md-list-item layout="row" ng-if="!$root.progress.all">
+                                    <div flex layout="row" layout-align="center center">
+                                        <md-progress-circular class="md-hue-2" md-diameter="20"></md-progress-circular>
+                                    </div>
+                                </md-list-item>
+                                <md-list-item ng-repeat="i in $root.friends|orderBy:'-date'" ng-click="openId(i.id)">
+                                    <img alt="{{i.first_name}}" ng-src="{{i.picture.data.url}}" class="md-avatar"/>
+                                    <p md-truncate>{{inSmallScreen?i.first_name:i.name}}</p>
+                                    <md-button class="md-icon-button status-light" md-no-ink aria-label="Status">
+                                        <md-icon aria-label="" class="material-icons md-24" ng-class="i.date|old:'old-'">
+                                            {{i.device===1?'desktop_windows':i.device===2?'smartphone':'brightness_1'}}
+                                        </md-icon>
+                                        <md-tooltip md-delay="400" md-direction="right">{{i.date|ago}}</md-tooltip>
+                                    </md-button>
+                                </md-list-item>
+                                <md-subheader class="md-no-sticky">
+                                    <div layout="row">
+                                        <span flex>Offline friends </span><b ng-if="$root.progress.all">({{0}})</b>
+                                    </div>
+                                </md-subheader>
+                                <md-list-item layout="row" ng-if="!$root.progress.all">
+                                    <div flex layout="row" layout-align="center center">
+                                        <md-progress-circular class="md-hue-2" md-diameter="20"></md-progress-circular>
+                                    </div>
+                                </md-list-item>
+                            </md-list>
+                        </md-content>
                     </div>
-                </md-subheader>
-                <md-list-item layout="row" ng-if="!$root.progress.all">
-                    <div flex layout="row" layout-align="center center">
-                        <md-progress-circular class="md-hue-2" md-diameter="20"></md-progress-circular>
+                </md-tab-body>
+            </md-tab>
+            <md-tab>
+                <md-tab-body>
+                    <div layout="column" layout-fill>
+                        <md-toolbar class="md-tall">
+                            <div flex></div>
+                            <div class="md-toolbar-tools">
+                                <h2 flex md-truncate>{{inSmallScreen?me.first_name:me.name}}'s groups</h2>
+                                <md-button class="md-fab btn-middle" aria-label="Create group"
+                                           ng-class="{active:group.adding}" ng-click="group.adding=true"></md-icon>
+                                    <md-icon aria-label="Add" class="material-icons">add</md-icon>
+                                </md-button>
+                            </div>
+                        </md-toolbar>
+                        <md-content flex>
+                            <md-list class="list">
+                                <md-subheader class="md-no-sticky">
+                                    <div layout="row">
+                                        <span flex>Online groups </span>
+                                    </div>
+                                </md-subheader>
+                            </md-list>
+                        </md-content>
                     </div>
-                </md-list-item>
-                <md-list-item ng-repeat="i in $root.friends|orderBy:'-date'" ng-click="openId(i.id)">
-                    <img alt="{{i.name}}" ng-src="{{i.picture.data.url}}" class="md-avatar"/>
-                    <p md-truncate>{{i.name}}</p>
-                    <md-button class="md-icon-button status-light" md-no-ink aria-label="Status">
-                        <md-icon aria-label="" class="material-icons md-24" ng-class="i.date|old:'old-'">
-                            {{i.device===1?'desktop_windows':i.device===2?'smartphone':'brightness_1'}}
-                        </md-icon>
-                        <md-tooltip md-delay="400" md-direction="right">{{i.date|ago}}</md-tooltip>
-                    </md-button>
-                </md-list-item>
-                <md-subheader class="md-no-sticky">
-                    <div layout="row">
-                        <span flex>Offline friends </span><b ng-if="$root.progress.all">({{0}})</b>
-                    </div>
-                </md-subheader>
-                <md-list-item layout="row" ng-if="!$root.progress.all">
-                    <div flex layout="row" layout-align="center center">
-                        <md-progress-circular class="md-hue-2" md-diameter="20"></md-progress-circular>
-                    </div>
-                </md-list-item>
-            </md-list>
-        </md-content>
+                </md-tab-body>
+            </md-tab>
+        </md-tabs>
     </md-sidenav>
     <md-content flex layout="column" class="map-area">
         <div class="map-mask" layout="column" layout-align="center center" ng-if="$root.progress.current<100">
             <md-progress-circular md-mode="determinate" value="{{$root.progress.current}}"></md-progress-circular>
             <div layout-padding>{{$root.progress.message}}</div>
         </div>
-        <ui-gmap-google-map flex center="map.center" zoom="map.zoom" bounds="map.bounds" pan="true">
+        <ui-gmap-google-map flex center="map.center" zoom="map.zoom" bounds="map.bounds" pan="true" events="map.events">
             <ui-gmap-markers models="marker.list" coords="'coords'" options="'options'" click="marker.click"
                              doCluster="true" clusterOptions="marker.cluster">
             </ui-gmap-markers>
@@ -95,7 +128,7 @@
                                     </div>
                                     <div layout="row">
                                         <md-button class="md-icon-button" aria-label="More"
-                                                   ng-click="carousel.detail?marker.less($event):marker.more(m, $event)">
+                                                   ng-click="carousel.detail?marker.less():marker.more(m)">
                                             <md-icon class="material-icons">{{carousel.detail?'keyboard_arrow_down':'keyboard_arrow_up'}}</md-icon>
                                         </md-button>
                                     </div>
@@ -132,6 +165,49 @@
                     </md-card>
                 </li>
             </ul>
+        </div>
+        <div class="form transit-left-right" ng-if="group.adding" layout="column" md-whiteframe="4">
+            <md-toolbar class="md-tall">
+                <div flex></div>
+                <div class="md-toolbar-tools">
+                    <h2 flex md-truncate>New group</h2>
+                    <md-button class="md-icon-button" ng-click="group.adding=false" aria-label="Close">
+                        <md-icon class="material-icons md-24">close</md-icon>
+                    </md-button>
+                </div>
+            </md-toolbar>
+            <md-content flex>
+                <md-subheader class="md-no-sticky">
+                    <div layout="row">
+                        <span flex>Please fill your group info</span>
+                    </div>
+                </md-subheader>
+                <form name="fields" layout-padding ng-submit="group.adding=false">
+                    <md-contact-chips
+                            ng-model="group.form.member"
+                            md-contacts="$root.friends"
+                            md-contact-name="first_name"
+                            md-contact-image="image"
+                            md-require-match="true"
+                            md-highlight-flags="i"
+                            filter-selected="true"
+                            secondary-placeholder="Type a friend name"
+                            placeholder="To">
+                    </md-contact-chips>
+                    <md-input-container class="md-block">
+                        <label>Name</label>
+                        <input ng-model="name">
+                    </md-input-container>
+                    <md-input-container class="md-block">
+                        <label>Description</label>
+                        <textarea ng-model="description" md-maxlength="150" rows="1" md-select-on-focus></textarea>
+                    </md-input-container>
+                    <div layout="row" layout-align="center center">
+                        <md-button class="md-raised" ng-click="group.adding=false">Cancel</md-button>
+                        <md-button class="md-raised md-primary" type="submit">Create</md-button>
+                    </div>
+                </form>
+            </md-content>
         </div>
     </md-content>
 </section>
