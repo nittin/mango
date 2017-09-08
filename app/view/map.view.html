@@ -23,7 +23,7 @@
     </div>
     <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-sm')" md-whiteframe="4">
         <md-tabs class="tabs" md-selected="submenu.active" flex md-no-ink md-no-ink-bar>
-            <md-tab layout="column">
+            <md-tab>
                 <md-tab-body>
                     <div layout="column" layout-fill>
                         <md-toolbar class="md-tall">
@@ -94,6 +94,10 @@
                                         <span flex>Online groups </span>
                                     </div>
                                 </md-subheader>
+                                <md-list-item ng-repeat="i in group.list|orderBy:'-date'" ng-click="">
+                                    <img class="md-avatar"/>
+                                    <p md-truncate>{{i.name}}</p>
+                                </md-list-item>
                             </md-list>
                         </md-content>
                     </div>
@@ -182,25 +186,37 @@
                         <span flex>Please fill your group info</span>
                     </div>
                 </md-subheader>
-                <form name="fields" layout-padding ng-submit="group.adding=false">
-                    <md-contact-chips
-                            ng-model="group.form.member"
-                            md-contacts="$root.friends"
-                            md-contact-name="first_name"
-                            md-contact-image="image"
-                            md-require-match="true"
-                            md-highlight-flags="i"
-                            filter-selected="true"
-                            secondary-placeholder="Type a friend name"
-                            placeholder="To">
-                    </md-contact-chips>
+                <form name="fields" layout-padding ng-submit="group.create()">
+                    <md-chips class="md-contact-chips" ng-model="group.form.member" md-autocomplete-snap md-require-match="true">
+                        <md-chip>
+                            <div class="md-contact-avatar"><img ng-src="{{$root.me.picture.data.url}}"></div>
+                            <div class="md-contact-name">{{$root.me.name}}</div>
+                        </md-chip>
+                        <md-autocomplete
+                                md-menu-class="md-contact-chips-suggestions"
+                                md-items="item in $root.friends"
+                                md-search-text="group.form.query"
+                                md-item-text="item.name"
+                                md-no-cache="true"
+                                md-autoselect
+                                placeholder="Type a friend name">
+                            <div class="md-contact-suggestion">
+                                <img ng-src="{{item.picture.data.url}}" alt="{{item.first_name}}"/>
+                                <span class="md-contact-name" md-highlight-text="group.form.query" md-highlight-flags="i">{{item.name}}</span>
+                            </div>
+                        </md-autocomplete>
+                        <md-chip-template>
+                            <div class="md-contact-avatar"><img ng-src="{{$chip.picture.data.url}}"></div>
+                            <div class="md-contact-name">{{$chip.first_name}}</div>
+                        </md-chip-template>
+                    </md-chips>
                     <md-input-container class="md-block">
                         <label>Name</label>
-                        <input ng-model="name">
+                        <input ng-model="group.form.name">
                     </md-input-container>
                     <md-input-container class="md-block">
                         <label>Description</label>
-                        <textarea ng-model="description" md-maxlength="150" rows="1" md-select-on-focus></textarea>
+                        <textarea ng-model="group.form.description" md-maxlength="150" rows="1" md-select-on-focus></textarea>
                     </md-input-container>
                     <div layout="row" layout-align="center center">
                         <md-button class="md-raised" ng-click="group.adding=false">Cancel</md-button>

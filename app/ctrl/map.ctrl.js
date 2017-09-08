@@ -32,7 +32,7 @@ angular.module('myApp.map', ['ngRoute'])
         });
     })
 
-    .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $http, $interval, uiGmapIsReady, user, notify, environment) {
+    .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $http, $interval, uiGmapIsReady, user, notify, environment, $group) {
         $scope.user = {id: undefined, name: undefined, center: {latitude: 45, longitude: 45}};
         $scope.map = {
             center: {latitude: $scope.user.center.latitude, longitude: $scope.user.center.longitude},
@@ -127,13 +127,28 @@ angular.module('myApp.map', ['ngRoute'])
             event: {}
         };
         $scope.group = {
+            first: true,
+            init: function () {
+                $group.getAll().then(function (res) {
+                    $scope.group.list = res.data.groups;
+                });
+            },
             list: [],
             adding: false,
             form: {
+                query: '',
                 member: [],
-                query: function (criteria) {
-                    return criteria;
-                }
+                name: '',
+                description: ''
+            },
+            create: function () {
+                var members = this.form.member.map(function (i) {
+                    return i.id;
+                }).join(',');
+                $group.create(this.form.name, this.form.description, members).then(function (res) {
+                    $scope.group.adding = false;
+                    $scope.group.init();
+                });
             }
         };
         $rootScope.direct = {
@@ -365,6 +380,7 @@ angular.module('myApp.map', ['ngRoute'])
                     $rootScope.progress.current += 1;
                     startSubscribe();
                 }, 2000);
+                $scope.group.init();
             });
             $rootScope.progress.all = true;
         });

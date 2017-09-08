@@ -6,6 +6,7 @@
 angular.module('myApp.back', [
     'myApp.back.user-service',
     'myApp.back.user-filter',
+    'myApp.back.group-service',
     'myApp.back.notify-service'
 ])
 
@@ -18,6 +19,7 @@ angular.module('myApp.back', [
         pinPhoto: BACK_HOST_NAME + 'back/assets/users/pin/',
         originPhoto: BACK_HOST_NAME + 'back/assets/users/origin/',
         assets: BACK_HOST_NAME + 'back/assets/img/',
+        group: BACK_HOST_NAME + 'back/groups',
         wave: BACK_HOST_NAME + 'back/notify/wave',
         fb: BACK_HOST_NAME + 'back/fb'
     });
