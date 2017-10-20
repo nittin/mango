@@ -7,6 +7,8 @@ use \Psr\Http\Message\ResponseInterface as Response;
 use \Facebook\Facebook as FB;
 
 require 'vendor/autoload.php';
+require 'component/user.php';
+require 'component/group.php';
 require 'key.php';
 require 'img.php';
 
@@ -39,6 +41,7 @@ $app = new \Slim\App([
             'world' => 'world-channel'
         ]
     ],
+    'pusher' => $pusher
 ]);
 $app->options('/{routes:.+}', function ($request, $response, $args) {
     return $response;
@@ -50,131 +53,6 @@ $app->add(function ($req, $res, $next) {
         ->withHeader('Access-Control-Allow-Origin', '*')
         ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-});
-
-$app->get('/users', function (Request $request, Response $response) {
-    header('Content-type: application/json');
-
-    $domain = $this->get('settings')['db']['domain'];
-    $username = $this->get('settings')['db']['user'];
-    $dbname = $this->get('settings')['db']['dbname'];
-    $pass = $this->get('settings')['db']['pass'];
-    $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
-    mysql_select_db($dbname, $link) or die('Cannot select the DB');
-
-    /* grab the posts from the db */
-    $query = "SELECT * FROM user";
-    $result = mysql_query($query,$link) or die('Errant query:  '.$query);
-
-    /* create one master array of the records */
-    $posts = array();
-    if(mysql_num_rows($result)) {
-        while($post = mysql_fetch_assoc($result)) {
-            $posts[] = $post;
-        }
-    }
-
-    return json_encode(array('users'=>$posts));
-});
-
-$app->get('/users/{id}', function (Request $request, Response $response) {
-    header('Content-type: application/json');
-
-    $domain = $this->get('settings')['db']['domain'];
-    $username = $this->get('settings')['db']['user'];
-    $dbname = $this->get('settings')['db']['dbname'];
-    $pass = $this->get('settings')['db']['pass'];
-
-    $d_id = $request->getAttribute('id');
-    $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
-    mysql_select_db($dbname, $link) or die('Cannot select the DB');
-
-    /* grab the posts from the db */
-    $query = "SELECT * FROM user WHERE user.id IN ($d_id)";
-    $result = mysql_query($query,$link) or die('Errant query:  '.$query);
-    /* create one master array of the records */
-    $posts = array();
-    if(mysql_num_rows($result)) {
-        while($post = mysql_fetch_assoc($result)) {
-            $posts[] = $post;
-        }
-    }
-
-    mysql_free_result($result);
-    return json_encode(array('users'=>$posts));
-});
-$app->post('/users', function (Request $request, Response $response) use ($pusher) {
-    header('Content-type: application/json');
-
-    $domain = $this->get('settings')['db']['domain'];
-    $username = $this->get('settings')['db']['user'];
-    $dbname = $this->get('settings')['db']['dbname'];
-    $pass = $this->get('settings')['db']['pass'];
-    $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
-    mysql_select_db($dbname, $link) or die('Cannot select the DB');
-
-    $data = $request->getParsedBody();
-    $d_id = $data["id"];
-    $d_name = $data["name"];
-    $d_lat = $data["lat"];
-    $d_lng = $data["lng"];
-    $d_status = $data["status"];
-    $d_date = $data["date"];
-    $d_device = $data["device"];
-    $d_friends = $data["friends"];
-    /* grab the posts from the db */
-    $query = "INSERT INTO user(id, name, lat, lng, friends, status, device, date) "
-        ."VALUES('$d_id', N'$d_name', '$d_lat', '$d_lng', '$d_friends', '$d_status', '$d_device', '$d_date')";
-    $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
-    /* push notification to friends*/
-    $message['content'] = 'new user';
-    $message['id'] = $d_id;
-    $message['name'] = $d_name;
-    $message['date'] = $d_date;
-    $message['type'] = 1;
-    $friend_array = explode(",", $d_friends);
-    foreach ($friend_array as $f) {
-        $pusher->trigger($f, 'user-online', $message);
-    }
-    $answer = array('success' => true, 'id' => mysql_insert_id());
-    return json_encode($answer);
-});
-$app->put('/users', function (Request $request, Response $response) use ($pusher)  {
-    header('Content-type: application/json');
-
-    $domain = $this->get('settings')['db']['domain'];
-    $username = $this->get('settings')['db']['user'];
-    $dbname = $this->get('settings')['db']['dbname'];
-    $dbtable = 'user';
-    $pass = $this->get('settings')['db']['pass'];
-    $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
-    mysql_select_db($dbname, $link) or die('Cannot select the DB');
-
-    $data = $request->getParsedBody();
-    $d_id = $data["id"];
-    $d_name = $data["name"];
-    $d_lat = $data["lat"];
-    $d_lng = $data["lng"];
-    $d_status = $data["status"];
-    $d_date = $data["date"];
-    $d_device = $data["device"];
-    $d_friends = $data["friends"];
-    /* grab the posts from the db */
-    $query = "UPDATE $dbtable SET name =  N'$d_name',lat = '$d_lat',lng = '$d_lng',friends = '$d_friends',status = '$d_status',device = '$d_device', date = '$d_date' WHERE CONCAT(`$dbtable`.`id`) = '$d_id'";
-    $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
-    /* push notification to friends*/
-    $message['content'] = 'online';
-    $message['id'] = $d_id;
-    $message['name'] = $d_name;
-    $message['date'] = $d_date;
-    $message['type'] = 2;
-    $friend_array = explode(",", $d_friends);
-    foreach ($friend_array as $f) {
-        $pusher->trigger($f, 'user-online', $message);
-    }
-    /* answer user*/
-    $answer = array('success' => true, 'id' => $d_id);
-    return json_encode($answer);
 });
 $app->post('/notify/wave', function (Request $request, Response $response) use ($pusher)  {
     header('Content-type: application/json');
@@ -189,70 +67,6 @@ $app->post('/notify/wave', function (Request $request, Response $response) use (
         $pusher->trigger($d_target, 'user-wave', $message);
     /* answer user*/
     $answer = array('success' => true, 'id' => $d_id);
-    return json_encode($answer);
-});
-
-$app->get('/groups', function (Request $request, Response $response) {
-    header('Content-type: application/json');
-
-    $domain = $this->get('settings')['db']['domain'];
-    $username = $this->get('settings')['db']['user'];
-    $dbname = $this->get('settings')['db']['dbname'];
-    $dbtable = 'group';
-    $pass = $this->get('settings')['db']['pass'];
-    $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
-    mysql_select_db($dbname, $link) or die('Cannot select the DB');
-
-    $d_user = $url = $request->getQueryParams()['user'];
-
-    /* grab the posts from the db */
-    $query = "SELECT g.* FROM `group` AS g,`user_group` WHERE g.`id`=`user_group`.`group` AND `user_group`.`user` = '$d_user'";
-    $result = mysql_query($query, $link) or die('Errant query:  '.$query);
-
-    /* create one master array of the records */
-    $posts = array();
-    if(mysql_num_rows($result)) {
-        while($post = mysql_fetch_assoc($result)) {
-            $posts[] = $post;
-        }
-    }
-    return json_encode(array('groups'=>$posts));
-});
-$app->post('/groups', function (Request $request, Response $response) use ($pusher) {
-    header('Content-type: application/json');
-
-    $domain = $this->get('settings')['db']['domain'];
-    $username = $this->get('settings')['db']['user'];
-    $dbname = $this->get('settings')['db']['dbname'];
-    $pass = $this->get('settings')['db']['pass'];
-    $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
-    mysql_select_db($dbname, $link) or die('Cannot select the DB');
-
-    $data = $request->getParsedBody();
-//    $now = new DateTime();
-    $d_date = '';
-    $d_admin = $data["admin"];
-    $d_name = $data["name"];
-    $d_description = $data["description"];
-    $d_members = $data["members"];
-    /* grab the posts from the db */
-    $query = "INSERT INTO `group`(name, description, admin, date) "
-        ."VALUES(N'$d_name', N'$d_description', '$d_admin', '$d_date')";
-    $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
-    $d_group = mysql_insert_id();
-    /*Insert rest member*/
-    $member_array = explode(",", $d_members);
-    foreach ($member_array as $item) {
-        $query = "INSERT INTO `user_group`(user, `group`, role, status, date) "
-            ."VALUES('$item', '$d_group', '0', '0', '$d_date')";
-        $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
-    }
-    /*Insert admin*/
-    $query = "INSERT INTO `user_group`(user, `group`, role, status, date) "
-        ."VALUES('$d_admin', '$d_group', '1', '1', '$d_date')";
-    $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
-
-    $answer = array('success' => true, 'id' => $d_group);
     return json_encode($answer);
 });
 
@@ -452,4 +266,14 @@ $app->post('/fb', function (Request $request, Response $response) use ($fb, $fb_
     return json_encode($decoded,true);
 
 });
+
+$app->get('/users', \UserController::class . ':listed');
+$app->get('/users/{id}', \UserController::class . ':contact');
+$app->post('/users', \UserController::class . ':create');
+$app->put('/users', \UserController::class . ':update');
+
+$app->get('/groups', \GroupController::class . ':listed');
+$app->post('/groups', \GroupController::class . ':create');
+$app->put('/groups', \GroupController::class . ':update');
+
 $app->run();

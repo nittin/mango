@@ -38,6 +38,21 @@
         }
     }
 }
+.transit-down-up {
+    .transit(all, 500ms);
+    &.ng-enter {
+        .transform(translateY(-100%));
+        &.ng-enter-active {
+            .transform(translateY(0));
+        }
+    }
+    &.ng-leave {
+        .transit-down-up.ng-enter.ng-enter-active;
+        &.ng-leave-active {
+            .transit-down-up.ng-enter;
+        }
+    }
+}
 .transit-left-right {
     .transit(all, 500ms);
     &.ng-enter {

@@ -1,10 +1,8 @@
 <section layout-gt-xs="row" layout-xs="column" layout-fill flex class="map">
     <div class="sidebar" layout-gt-xs="column" layout-xs="row" layout-align="center center">
-
         <md-button class="md-icon-button" aria-label="Menu" ng-click="submenu.toggle()">
             <md-icon aria-label="Menu" class="material-icons md-24" md-colors="::{color:'grey-50'}">menu</md-icon>
         </md-button>
-
         <div layout-gt-xs="column" layout-xs="row" flex layout-align-gt-xs="center center" layout-align-xs="end center">
             <md-button class="md-icon-button" aria-label="World" ng-class="{active:submenu.active===0}"
                        ng-click="submenu.active=0;">
@@ -94,9 +92,18 @@
                                         <span flex>Online groups </span>
                                     </div>
                                 </md-subheader>
-                                <md-list-item ng-repeat="i in group.list|orderBy:'-date'" ng-click="">
-                                    <img class="md-avatar"/>
-                                    <p md-truncate>{{i.name}}</p>
+                                <md-list-item class="md-2-line" ng-repeat="i in group.list|orderBy:'-date'" ng-click="openId()">
+                                    <md-icon class="material-icons md-avatar-icon">people</md-icon>
+                                    <div class="md-list-item-text">
+                                        <h3 md-truncate>{{i.name}}</h3>
+                                        <p md-truncate>
+                                            <img ng-repeat="j in i.members|limitTo:5" ng-src="{{j.photo.origin}}" class="md-avatar avatar-small">
+                                            <span>{{i.description}}</span>
+                                        </p>
+                                    </div>
+                                    <div class="md-secondary md-icon-button" aria-label="new">
+                                        <md-icon class="material-icons">new_releases</md-icon>
+                                    </div>
                                 </md-list-item>
                             </md-list>
                         </md-content>
@@ -115,14 +122,14 @@
                              doCluster="true" clusterOptions="marker.cluster">
             </ui-gmap-markers>
         </ui-gmap-google-map>
-        <div class="cards-swipe transit-up-down" ng-if="carousel.active!==-1"
+        <div class="cards-swipe cards-swipe-bottom transit-up-down" ng-if="carousel.active!==-1"
              ng-class="{detail:carousel.detail}" ng-init="carousel.detail=null;carousel.lock=false">
             <ul class="cards-wrap" rn-carousel rn-carousel-index="carousel.active"
                 rn-carousel-easing="easeOutCubic" rn-carousel-locked="carousel.lock">
                 <li ng-repeat="m in marker.list">
                     <md-card class="card" ng-class="{active:carousel.active===$index}">
                         <div class="card-head">
-                            <div class="user-cover" md-colors="::{backgroundColor:'primary'}">
+                            <div class="card-head-cover" md-colors="::{backgroundColor:'primary'}">
                                 <div layout="row" layout-align="space-around start">
                                     <div layout="row" flex>
                                         <md-button class="md-icon-button" aria-label="Close"
@@ -170,6 +177,50 @@
                 </li>
             </ul>
         </div>
+        <div class="cards-swipe cards-swipe-top transit-down-up" ng-if="submenu.active===1"
+             ng-class="{detail:group.carousel.detail}" ng-init="group.carousel.detail=null;">
+            <ul class="cards-wrap" rn-carousel rn-carousel-index="group.carousel.active"
+                rn-carousel-easing="easeOutCubic" rn-carousel-locked="carousel.lock">
+                <li ng-repeat="m in group.list">
+                    <md-card class="card" md-theme="'primary'" ng-class="{active:group.carousel.active===$index}">
+                        <md-list class="group-head">
+                            <md-list-item class="group-head-line md-2-line">
+                                <md-icon class="material-icons md-avatar-icon">people</md-icon>
+                                <div class="md-list-item-text">
+                                    <h3>{{m.name}}</h3>
+                                    <p>{{m.description}}</p>
+                                </div>
+                                <md-button class="md-secondary md-icon-button" aria-label="edit"
+                                           ng-click="group.carousel.detail?group.carousel.less():group.carousel.more(m)">
+                                    <md-icon class="material-icons">{{group.carousel.detail?'close':'more_vert'}}</md-icon>
+                                </md-button>
+                            </md-list-item>
+                            <md-list-item class="group-tray-list">
+                                <div class="layout-row" flex>
+                                    <img ng-repeat="j in m.members|limitTo:5" ng-src="{{j.photo.origin}}" class="md-avatar avatar-small"/>
+                                    <div flex class="group-tray-road" md-colors="{background:'accent-400'}"  md-colors-watch="true"></div>
+                                    <img ng-repeat="j in m.members|limitTo:0" ng-src="{{j.photo.origin}}" class="md-avatar avatar-small"/>
+                                    <md-button class="md-fab md-accent md-fab-small" aria-label="target">
+                                        <md-icon class="material-icons">flag</md-icon>
+                                    </md-button>
+                                </div>
+                            </md-list-item>
+                        </md-list>
+                        <md-card-content class="card-item card-item-collapse" layout="column" ng-if="false" flex>
+
+                            <div layout="column"  >
+                                <div class="card-txt">
+                                    <div class="md-title" md-truncate>{{m.name}}</div>
+                                    <div class="md-caption"></div>
+                                </div>
+                                <md-card-actions layout="row" layout-align="center start">
+                                </md-card-actions>
+                            </div>
+                        </md-card-content>
+                    </md-card>
+                </li>
+            </ul>
+        </div>
         <div class="form transit-left-right" ng-if="group.adding" layout="column" md-whiteframe="4">
             <md-toolbar class="md-tall">
                 <div flex></div>
@@ -190,7 +241,7 @@
                     <md-chips class="md-contact-chips" ng-model="group.form.member" md-autocomplete-snap md-require-match="true">
                         <md-chip>
                             <div class="md-contact-avatar"><img ng-src="{{$root.me.picture.data.url}}"></div>
-                            <div class="md-contact-name">{{$root.me.name}}</div>
+                            <div class="md-contact-name">{{$root.me.first_name}}</div>
                         </md-chip>
                         <md-autocomplete
                                 md-menu-class="md-contact-chips-suggestions"

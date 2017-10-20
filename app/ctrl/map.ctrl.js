@@ -130,7 +130,16 @@ angular.module('myApp.map', ['ngRoute'])
             first: true,
             init: function () {
                 $group.getAll().then(function (res) {
-                    $scope.group.list = res.data.groups;
+                    res.data.forEach(function (i) {
+                        i.members.forEach(function (j) {
+                            j.photo = {
+                                marker: environment.markerPhoto + j.id + '.png',
+                                pin: environment.pinPhoto + j.id + '.png',
+                                origin: environment.originPhoto + j.id + '.jpg'
+                            };
+                        });
+                    });
+                    $scope.group.list = res.data;
                 });
             },
             list: [],
@@ -149,6 +158,19 @@ angular.module('myApp.map', ['ngRoute'])
                     $scope.group.adding = false;
                     $scope.group.init();
                 });
+            },
+            carousel: {
+                active: 0,
+                detail: null,
+                statusMap: {},
+                actions: {},
+                more: function (group) {
+                    $scope.group.carousel.detail = group.id;
+                    $scope.carousel.active = -1;
+                },
+                less: function () {
+                    $scope.group.carousel.detail = null;
+                }
             }
         };
         $rootScope.direct = {
@@ -176,6 +198,26 @@ angular.module('myApp.map', ['ngRoute'])
                 $timeout(function () {
                     $mdSidenav('left').close();
                 })
+            }
+        };
+        $scope.carousel = {
+            active: -1,
+            detail: null,
+            lock: false,
+            statusMap: {},
+            actions: {
+                hi: function (marker) {
+                    if (!marker.status.waving) {
+                        marker.status.waving = true;
+                        $timeout(function () {
+                            notify.wave(marker.id);
+                            marker.status.waving = false;
+                        }, PREVENT_SPAM_TIME);
+                    }
+                },
+                focus: function (marker) {
+
+                }
             }
         };
         $scope.carousel = {
@@ -297,7 +339,7 @@ angular.module('myApp.map', ['ngRoute'])
             $rootScope.progress.message = 'Start set your friends list';
             var friendChain = fbInfo.friends.map(function (i) { return i.id }).join(',');
             user.check(friendChain).then(function (r) {
-                var all = r.data.users;
+                var all = r.data;
                 $rootScope.friends.forEach(function (i, index) {
                     var target = all.filter(function (j) { return i.id === j.id; })[0];
                     if (target) {
@@ -342,7 +384,7 @@ angular.module('myApp.map', ['ngRoute'])
             });
             user.check(fbInfo.me.id).then(function (r) {
                 var nowUTC = new Date(new Date().toISOString()).getTime();
-                if (r.data.users[0]) {//Update
+                if (r.data[0]) {//Update
                     user.update(fbInfo.me.id, fbInfo.me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC, friendChain);
                 } else {//Insert
                     user.create(fbInfo.me.id, fbInfo.me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC, friendChain);
