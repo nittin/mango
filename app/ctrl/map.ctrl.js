@@ -171,6 +171,26 @@ angular.module('myApp.map', ['ngRoute'])
                 less: function () {
                     $scope.group.carousel.detail = null;
                 }
+            },
+            open: function (group) {
+                var self = this;
+                this.list.forEach(function (i, index) {
+                    if (i.id !== group.id) {
+
+                    } else {
+                        self.carousel.active = index;
+                    }
+                });
+                $scope.marker.list.forEach(function (i) {
+                    i.options.visible = group.members.filter(function (j) { return j.id === i.id }).length ? true : false;
+                });
+                return false;
+            },
+            close: function () {
+                this.carousel.active = -1;
+            },
+            select: function (group) {
+                this.open(group);
             }
         };
         $rootScope.direct = {
@@ -220,26 +240,6 @@ angular.module('myApp.map', ['ngRoute'])
                 }
             }
         };
-        $scope.carousel = {
-            active: -1,
-            detail: null,
-            lock: false,
-            statusMap: {},
-            actions: {
-                hi: function (marker) {
-                    if (!marker.status.waving) {
-                        marker.status.waving = true;
-                        $timeout(function () {
-                            notify.wave(marker.id);
-                            marker.status.waving = false;
-                        }, PREVENT_SPAM_TIME);
-                    }
-                },
-                focus: function (marker) {
-
-                }
-            }
-        };
         $scope.$watch('carousel.active', function (i) {
             if (i > -1) {
                 $scope.marker.open($scope.marker.list[i]);
@@ -255,8 +255,7 @@ angular.module('myApp.map', ['ngRoute'])
         var map = function () {
             var d = $q.defer();
             uiGmapIsReady.promise(1).then(function (instances) {
-                $rootScope.progress.message = 'Google Map ready';
-                $rootScope.progress.current += 20;
+                d.notify('Google Map ready');
                 direction.service = new google.maps.DirectionsService;
                 direction.render = new google.maps.DirectionsRenderer({suppressMarkers: true});
                 direction.render.setMap(instances[0].map);
@@ -276,8 +275,7 @@ angular.module('myApp.map', ['ngRoute'])
             var d = $q.defer();
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function (position) {
-                    $rootScope.progress.message = 'Your location is detected';
-                    $rootScope.progress.current += 10;
+                    d.notify('Your location is detected');
                     d.resolve(position.coords);
                 }, function () {
                     d.reject();
@@ -292,13 +290,11 @@ angular.module('myApp.map', ['ngRoute'])
             user.fb('/me?fields=name,id,picture{url},cover,first_name').then(
                 function (res) {
                     var meData = res.data;
-                    $rootScope.progress.message = 'Your info is ready';
-                    $rootScope.progress.current += 20;
+                    d.notify('Your info is ready');
                     user.fb('/me/friends?fields=name,id,picture{url},cover,first_name').then(
                         function (response) {
                             $rootScope.progress.fb = true;
-                            $rootScope.progress.message = 'Your friends is ready';
-                            $rootScope.progress.current += 10;
+                            d.notify('Your friends is ready');
                             d.resolve({me: meData, friends: response.data.data});
                         });
 
@@ -311,19 +307,17 @@ angular.module('myApp.map', ['ngRoute'])
         var fb = function () {
             var d = $q.defer();
             if ($localStorage.get(STORAGE_LOGIN)) {
-                $rootScope.progress.current += 10;
                 me().then(function (r) {
                     d.resolve(r)
                 });
             } else {
-                $rootScope.progress.message = 'Please log in...';
+                d.notify('Please log in...');
                 d.reject();
                 $location.path('/');
             }
 
             return d.promise;
         };
-        $rootScope.progress.message = 'Init map...';
         $q.all([map(), center(), fb()]).then(function (thread) {
             var position = thread[1];
             var fbInfo = thread[2];
@@ -336,7 +330,6 @@ angular.module('myApp.map', ['ngRoute'])
             });
             var bounds = new google.maps.LatLngBounds();
 
-            $rootScope.progress.message = 'Start set your friends list';
             var friendChain = fbInfo.friends.map(function (i) { return i.id }).join(',');
             user.check(friendChain).then(function (r) {
                 var all = r.data;
@@ -379,8 +372,6 @@ angular.module('myApp.map', ['ngRoute'])
                     northeast: {latitude: bounds.getNorthEast().lat(), longitude: bounds.getNorthEast().lng()},
                     southwest: {latitude: bounds.getSouthWest().lat(), longitude: bounds.getSouthWest().lng()}
                 };
-                $rootScope.progress.current += 10;
-                $rootScope.progress.message = 'Get your friends info done';
             });
             user.check(fbInfo.me.id).then(function (r) {
                 var nowUTC = new Date(new Date().toISOString()).getTime();
@@ -416,10 +407,8 @@ angular.module('myApp.map', ['ngRoute'])
                 $rootScope.me = fbInfo.me;
                 user.current = fbInfo.me;
                 $rootScope.me.coords = {latitude: position.latitude, longitude: position.longitude};
-                $rootScope.progress.current += 19;
-                $rootScope.progress.message = 'Go to your map now...';
+
                 $timeout(function () {
-                    $rootScope.progress.current += 1;
                     startSubscribe();
                 }, 2000);
                 $scope.group.init();

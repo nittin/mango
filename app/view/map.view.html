@@ -92,7 +92,7 @@
                                         <span flex>Online groups </span>
                                     </div>
                                 </md-subheader>
-                                <md-list-item class="md-2-line" ng-repeat="i in group.list|orderBy:'-date'" ng-click="openId()">
+                                <md-list-item class="md-2-line" ng-repeat="i in group.list|orderBy:'-date'" ng-click="group.select(i)">
                                     <md-icon class="material-icons md-avatar-icon">people</md-icon>
                                     <div class="md-list-item-text">
                                         <h3 md-truncate>{{i.name}}</h3>
@@ -113,7 +113,7 @@
         </md-tabs>
     </md-sidenav>
     <md-content flex layout="column" class="map-area">
-        <div class="map-mask" layout="column" layout-align="center center" ng-if="$root.progress.current<100">
+        <div class="map-mask" layout="column" layout-align="center center" ng-if="!$root.progress.all">
             <md-progress-circular md-mode="determinate" value="{{$root.progress.current}}"></md-progress-circular>
             <div layout-padding>{{$root.progress.message}}</div>
         </div>
