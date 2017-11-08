@@ -18,9 +18,14 @@ angular.module('myApp', [
     'myApp.storage',
     'myApp.back'
 ])
-    .config(function ($locationProvider, $routeProvider) {
+    .config(function ($locationProvider, $routeProvider, $mdThemingProvider) {
         $locationProvider.hashPrefix('');
         $routeProvider.otherwise({redirectTo: '/'});
+        $mdThemingProvider.theme('lime')
+            .primaryPalette('lime')
+            .accentPalette('orange')
+            .warnPalette('blue').dark();
+        $mdThemingProvider.alwaysWatchTheme(true);
     })
     .value('$mobile', {exist: false, ios: false, android: false, type: ''})
     .run(function ($mobile) {

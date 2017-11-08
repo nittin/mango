@@ -182,7 +182,7 @@
             <ul class="cards-wrap" rn-carousel rn-carousel-index="group.carousel.active"
                 rn-carousel-easing="easeOutCubic" rn-carousel-locked="carousel.lock">
                 <li ng-repeat="m in group.list">
-                    <md-card class="card" md-theme="'primary'" ng-class="{active:group.carousel.active===$index}">
+                    <md-content md-theme="lime" class="card" ng-class="{active:group.carousel.active===$index}">
                         <md-list class="group-head">
                             <md-list-item class="group-head-line md-2-line">
                                 <md-icon class="material-icons md-avatar-icon">people</md-icon>
@@ -192,14 +192,18 @@
                                 </div>
                                 <md-button class="md-secondary md-icon-button" aria-label="edit"
                                            ng-click="group.carousel.detail?group.carousel.less():group.carousel.more(m)">
-                                    <md-icon class="material-icons">{{group.carousel.detail?'close':'more_vert'}}</md-icon>
+                                    <md-icon class="material-icons">{{group.carousel.detail?'close':'more_vert'}}
+                                    </md-icon>
                                 </md-button>
                             </md-list-item>
                             <md-list-item class="group-tray-list">
                                 <div class="layout-row" flex>
-                                    <img ng-repeat="j in m.members|limitTo:5" ng-src="{{j.photo.origin}}" class="md-avatar avatar-small"/>
-                                    <div flex class="group-tray-road" md-colors="{background:'accent-400'}"  md-colors-watch="true"></div>
-                                    <img ng-repeat="j in m.members|limitTo:0" ng-src="{{j.photo.origin}}" class="md-avatar avatar-small"/>
+                                    <img ng-repeat="j in m.members|limitTo:5" ng-src="{{j.photo.origin}}"
+                                         class="md-avatar avatar-small"/>
+                                    <div flex class="group-tray-road" md-colors="{background:'accent-400'}"
+                                         md-colors-watch="true"></div>
+                                    <img ng-repeat="j in m.members|limitTo:0" ng-src="{{j.photo.origin}}"
+                                         class="md-avatar avatar-small"/>
                                     <md-button class="md-fab md-accent md-fab-small" aria-label="target">
                                         <md-icon class="material-icons">flag</md-icon>
                                     </md-button>
@@ -207,8 +211,7 @@
                             </md-list-item>
                         </md-list>
                         <md-card-content class="card-item card-item-collapse" layout="column" ng-if="false" flex>
-
-                            <div layout="column"  >
+                            <div layout="column">
                                 <div class="card-txt">
                                     <div class="md-title" md-truncate>{{m.name}}</div>
                                     <div class="md-caption"></div>
@@ -217,7 +220,7 @@
                                 </md-card-actions>
                             </div>
                         </md-card-content>
-                    </md-card>
+                    </md-content>
                 </li>
             </ul>
         </div>
@@ -238,6 +241,15 @@
                     </div>
                 </md-subheader>
                 <form name="fields" layout-padding ng-submit="group.create()">
+                    <div layout="row" layout-align="center start" layout-wrap>
+                        <md-button ng-repeat="theme in group.themes" class="md-fab md-mini"
+                                   md-colors="{background:'{{theme}}'}" md-colors-watch="false"
+                                   ng-click="group.form.theme=theme">
+                            <md-icon aria-label="{{theme}}" class="material-icons md-24"
+                                     ng-if="!group.form.theme&&$index===0||group.form.theme===theme"
+                                     md-colors="::{color:'grey-50'}">check</md-icon>
+                        </md-button>
+                    </div>
                     <md-chips class="md-contact-chips" ng-model="group.form.member" md-autocomplete-snap md-require-match="true">
                         <md-chip>
                             <div class="md-contact-avatar"><img ng-src="{{$root.me.picture.data.url}}"></div>

@@ -61,21 +61,27 @@
         &.cards-swipe-bottom {
             height: 200px;
             bottom: 0;
+            .cards-wrap{
+                margin: 0 16px;
+                .card {
+                    margin: 0 4px;
+                }
+            }
+
         }
         &.cards-swipe-top {
-            height: 100px;
+            height: 128px;
             top: 0;
             overflow: visible;
         }
         .cards-wrap {
             height: 100%;
-            margin: 0 16px;
+            margin: 0;
             overflow: visible;
             >li{
                 bottom: 0;
             }
             .card {
-                margin: 0 4px;
                 overflow: hidden;
                 height: 100%;
                 .card-head {

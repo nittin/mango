@@ -32,7 +32,7 @@ angular.module('myApp.map', ['ngRoute'])
         });
     })
 
-    .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $http, $interval, uiGmapIsReady, user, notify, environment, $group) {
+    .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $http, $interval, uiGmapIsReady, user, notify, environment, $group, $mdColorPalette) {
         $scope.user = {id: undefined, name: undefined, center: {latitude: 45, longitude: 45}};
         $scope.map = {
             center: {latitude: $scope.user.center.latitude, longitude: $scope.user.center.longitude},
@@ -148,8 +148,10 @@ angular.module('myApp.map', ['ngRoute'])
                 query: '',
                 member: [],
                 name: '',
-                description: ''
+                description: '',
+                theme: ''
             },
+            themes: Object.keys($mdColorPalette),
             create: function () {
                 var members = this.form.member.map(function (i) {
                     return i.id;
