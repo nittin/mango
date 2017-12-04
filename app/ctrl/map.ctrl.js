@@ -156,7 +156,7 @@ angular.module('myApp.map', ['ngRoute'])
                 var members = this.form.member.map(function (i) {
                     return i.id;
                 }).join(',');
-                $group.create(this.form.name, this.form.description, members).then(function (res) {
+                $group.create(this.form.name, this.form.description, this.form.theme, members).then(function (res) {
                     $scope.group.adding = false;
                     $scope.group.init();
                 });
@@ -184,7 +184,9 @@ angular.module('myApp.map', ['ngRoute'])
                     }
                 });
                 $scope.marker.list.forEach(function (i) {
-                    i.options.visible = group.members.filter(function (j) { return j.id === i.id }).length ? true : false;
+                    i.options.visible = group.members.filter(function (j) {
+                        return j.id === i.id
+                    }).length > 0;
                 });
                 return false;
             },

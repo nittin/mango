@@ -9,12 +9,13 @@ angular.module('myApp.back.group-service', [])
             var id = user.current.id;
             return $http.get(environment.group, {params: {user: id}});
         };
-        this.create = function (name, description, members) {
+        this.create = function (name, description, theme, members) {
             var admin = user.current.id;
             return $http.post(environment.group, {
                 admin: admin,
                 name: name,
                 description: description,
+                theme: theme,
                 members: members
             });
         };

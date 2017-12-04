@@ -93,7 +93,8 @@
                                     </div>
                                 </md-subheader>
                                 <md-list-item class="md-2-line" ng-repeat="i in group.list|orderBy:'-date'" ng-click="group.select(i)">
-                                    <md-icon class="material-icons md-avatar-icon">people</md-icon>
+                                    <md-icon class="material-icons md-avatar-icon"
+                                             md-colors="::{backgroundColor: '{{i.theme}}'}">people</md-icon>
                                     <div class="md-list-item-text">
                                         <h3 md-truncate>{{i.name}}</h3>
                                         <p md-truncate>
@@ -182,7 +183,7 @@
             <ul class="cards-wrap" rn-carousel rn-carousel-index="group.carousel.active"
                 rn-carousel-easing="easeOutCubic" rn-carousel-locked="carousel.lock">
                 <li ng-repeat="m in group.list">
-                    <md-content md-theme="lime" class="card" ng-class="{active:group.carousel.active===$index}">
+                    <md-content md-theme="lime-dark" class="card" ng-class="{active:group.carousel.active===$index}">
                         <md-list class="group-head">
                             <md-list-item class="group-head-line md-2-line">
                                 <md-icon class="material-icons md-avatar-icon">people</md-icon>
@@ -210,7 +211,7 @@
                                 </div>
                             </md-list-item>
                         </md-list>
-                        <md-card-content class="card-item card-item-collapse" layout="column" ng-if="false" flex>
+                        <md-card-content class="card-item card-item-collapse" layout="column" ng-if="group.carousel.detail" flex>
                             <div layout="column">
                                 <div class="card-txt">
                                     <div class="md-title" md-truncate>{{m.name}}</div>
@@ -241,7 +242,7 @@
                     </div>
                 </md-subheader>
                 <form name="fields" layout-padding ng-submit="group.create()">
-                    <div layout="row" layout-align="center start" layout-wrap>
+                    <div layout="row" layout-align="start start" layout-wrap>
                         <md-button ng-repeat="theme in group.themes" class="md-fab md-mini"
                                    md-colors="{background:'{{theme}}'}" md-colors-watch="false"
                                    ng-click="group.form.theme=theme">
