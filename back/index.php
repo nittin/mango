@@ -275,5 +275,7 @@ $app->put('/users', \UserController::class . ':update');
 $app->get('/groups', \GroupController::class . ':listed');
 $app->post('/groups', \GroupController::class . ':create');
 $app->put('/groups', \GroupController::class . ':update');
+$app->get('/groups/post', \GroupController::class . ':listPost');
+$app->post('/groups/post', \GroupController::class . ':setPost');
 
 $app->run();

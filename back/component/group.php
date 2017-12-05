@@ -127,7 +127,7 @@ class GroupController
         return json_encode($posted);
     }
 
-    public function createPost($request, $response, $args) {
+    public function setPost($request, $response, $args) {
         header('Content-type: application/json');
 
         $pusher = $this->container->get('pusher');
@@ -141,27 +141,22 @@ class GroupController
         $data = $request->getParsedBody();
 //    $now = new DateTime();
         $d_date = '';
+        $d_id = $data["id"];
         $d_group = $data["group"];
         $d_user = $data["user"];
         $d_content = $data["content"];
         $d_lat = $data["lat"];
         $d_lng = $data["lng"];
-        /* grab the posts from the db */
-        $query = "INSERT INTO `group_post`(`group`, user, date, content, lat, lng) "
-            ."VALUES('$d_group', '$d_user', '$d_date', N'$d_content', '$d_lat', '$d_lng', '$d_date')";
+        if($d_id){
+            $query = "UPDATE `group_post` SET content=N'$d_content', lat='$d_lat', lng='$d_lng', date='$d_date'"
+                ."WHERE id='$d_id'";
+        } else {
+            $query = "INSERT INTO `group_post`(`group`, user, date, content, lat, lng) "
+                ."VALUES('$d_group', '$d_user', '$d_date', N'$d_content', '$d_lat', '$d_lng', '$d_date')";
+        }
         $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
         $d_group = mysql_insert_id();
-        /*Insert rest member*/
-        $member_array = explode(",", $d_members);
-        foreach ($member_array as $item) {
-            $query = "INSERT INTO `user_group`(user, `group`, role, status, date) "
-                ."VALUES('$item', '$d_group', '0', '0', '$d_date')";
-            $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
-        }
-        /*Insert admin*/
-        $query = "INSERT INTO `user_group`(user, `group`, role, status, date) "
-            ."VALUES('$d_group', '$d_group', '1', '1', '$d_date')";
-        $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
+
 
         $answer = array('success' => true, 'id' => $d_group);
         return json_encode($answer);
