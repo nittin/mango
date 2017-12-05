@@ -32,6 +32,7 @@
     "stream-series": "^0.1.1"
   },
   "scripts": {
+    "run": "http-server -a localhost -p 8000 -c-1 ./app",
     "postinstall": "bower install",
 
     "update-deps": "npm update",

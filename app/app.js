@@ -21,7 +21,7 @@ angular.module('myApp', [
     .config(function ($locationProvider, $routeProvider, $mdThemingProvider) {
         $locationProvider.hashPrefix('');
         $routeProvider.otherwise({redirectTo: '/'});
-        $mdThemingProvider.theme('lime')
+        $mdThemingProvider.theme('lime-dark')
             .primaryPalette('lime')
             .accentPalette('orange')
             .warnPalette('blue').dark();
