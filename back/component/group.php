@@ -141,7 +141,7 @@ class GroupController
         $d_lat = $data["lat"];
         $d_lng = $data["lng"];
         if ($d_id) {
-            $query = "UPDATE `group_post` SET content=N'$d_description', lat='$d_lat', lng='$d_lng' "
+            $query = "UPDATE `group_post` SET description=N'$d_description', lat='$d_lat', lng='$d_lng' "
                 . "WHERE id='$d_id'";
         } else {
             $query = "INSERT INTO `group_post`(`group`, user, date, description, lat, lng) "
