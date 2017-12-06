@@ -28,6 +28,9 @@ $fb = new FB([
     'app_secret' => $_KEY_FB_SECRET,
     'default_graph_version' => 'v2.9',
 ]);
+if (!ini_get('date.timezone')) {
+    date_default_timezone_set('GMT');
+}
 $app = new \Slim\App([
     'settings' => [
         'displayErrorDetails' => true,
@@ -50,6 +53,7 @@ $app->options('/{routes:.+}', function ($request, $response, $args) {
 $app->add(function ($req, $res, $next) {
     $response = $next($req, $res);
     return $response
+        ->withHeader('Content-type', 'application/json')
         ->withHeader('Access-Control-Allow-Origin', '*')
         ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -277,5 +281,6 @@ $app->post('/groups', \GroupController::class . ':create');
 $app->put('/groups', \GroupController::class . ':update');
 $app->get('/groups/post', \GroupController::class . ':listPost');
 $app->post('/groups/post', \GroupController::class . ':setPost');
+$app->put('/groups/post', \GroupController::class . ':setPost');
 
 $app->run();

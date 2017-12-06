@@ -11,7 +11,6 @@ class GroupController
     }
 
     public function listed($request, $response, $args) {
-        header('Content-type: application/json');
 
         $domain = $this->container->get('settings')['db']['domain'];
         $username = $this->container->get('settings')['db']['user'];
@@ -53,7 +52,6 @@ class GroupController
     }
 
     public function create($request, $response, $args) {
-        header('Content-type: application/json');
 
         $pusher = $this->container->get('pusher');
         $domain = $this->container->get('settings')['db']['domain'];
@@ -97,8 +95,6 @@ class GroupController
     }
 
     public function listPost($request, $response, $args) {
-        header('Content-type: application/json');
-
         $domain = $this->container->get('settings')['db']['domain'];
         $username = $this->container->get('settings')['db']['user'];
         $dbname = $this->container->get('settings')['db']['dbname'];
@@ -128,8 +124,6 @@ class GroupController
     }
 
     public function setPost($request, $response, $args) {
-        header('Content-type: application/json');
-
         $pusher = $this->container->get('pusher');
         $domain = $this->container->get('settings')['db']['domain'];
         $username = $this->container->get('settings')['db']['user'];
@@ -139,26 +133,25 @@ class GroupController
         mysql_select_db($dbname, $link) or die('Cannot select the DB');
 
         $data = $request->getParsedBody();
-//    $now = new DateTime();
-        $d_date = '';
+        $now = (new DateTime())->getTimestamp();
         $d_id = $data["id"];
         $d_group = $data["group"];
         $d_user = $data["user"];
-        $d_content = $data["content"];
+        $d_description = $data["description"];
         $d_lat = $data["lat"];
         $d_lng = $data["lng"];
-        if($d_id){
-            $query = "UPDATE `group_post` SET content=N'$d_content', lat='$d_lat', lng='$d_lng', date='$d_date'"
-                ."WHERE id='$d_id'";
+        if ($d_id) {
+            $query = "UPDATE `group_post` SET content=N'$d_description', lat='$d_lat', lng='$d_lng' "
+                . "WHERE id='$d_id'";
         } else {
-            $query = "INSERT INTO `group_post`(`group`, user, date, content, lat, lng) "
-                ."VALUES('$d_group', '$d_user', '$d_date', N'$d_content', '$d_lat', '$d_lng', '$d_date')";
+            $query = "INSERT INTO `group_post`(`group`, user, date, description, lat, lng) "
+                ."VALUES('$d_group', '$d_user', '$now', N'$d_description', '$d_lat', '$d_lng')";
         }
         $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
-        $d_group = mysql_insert_id();
+        $d_post = mysql_insert_id();
 
 
-        $answer = array('success' => true, 'id' => $d_group);
+        $answer = array('success' => true, 'id' => $d_post);
         return json_encode($answer);
     }
 }
