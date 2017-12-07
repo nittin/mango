@@ -54,6 +54,7 @@ $app->add(function ($req, $res, $next) {
     $response = $next($req, $res);
     return $response
         ->withHeader('Content-type', 'application/json')
+        ->withHeader('Access-Control-Allow-Credentials', 'true')
         ->withHeader('Access-Control-Allow-Origin', '*')
         ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -149,8 +150,7 @@ $app->post('/photo/me', function (Request $request, Response $response) {
     $answer = array('success' => true, 'id' => $d_id);
     return json_encode($answer);
 });
-$app->post('/oauth', function (Request $request, Response $response) use($_KEY_FB_APP, $_KEY_FB_SECRET, $_KEY_FB_REDIRECT, $_KEY_FB_CI_APP, $_KEY_FB_CI_SECRET, $_KEY_FB_CI_REDIRECT){
-    header('Content-type: application/json');
+$app->post('/auth', function (Request $request, Response $response) use($_KEY_FB_APP, $_KEY_FB_SECRET, $_KEY_FB_REDIRECT, $_KEY_FB_CI_APP, $_KEY_FB_CI_SECRET, $_KEY_FB_CI_REDIRECT){
 
     $domain = $this->get('settings')['db']['domain'];
     $username = $this->get('settings')['db']['user'];
@@ -207,6 +207,9 @@ $app->post('/oauth', function (Request $request, Response $response) use($_KEY_F
     $d_scope = implode(",", $fb_check_user_token['data']['scopes']);
     $d_token = $fb_user_token['access_token'];
 
+    if (!$d_token) {
+        return json_encode(array('error' => 'Cannot auth with code: ', 'code' => $code));
+    }
 
 // get photo
     $fb_user_photo_url = "https://graph.facebook.com/$d_user_id/picture"

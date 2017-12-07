@@ -18,9 +18,10 @@ angular.module('myApp', [
     'myApp.storage',
     'myApp.back'
 ])
-    .config(function ($locationProvider, $routeProvider, $mdThemingProvider) {
+    .config(function ($locationProvider, $routeProvider, $mdThemingProvider, $httpProvider) {
         $locationProvider.hashPrefix('');
         $routeProvider.otherwise({redirectTo: '/'});
+        // $httpProvider.defaults.withCredentials = true;
         $mdThemingProvider.theme('lime-dark')
             .primaryPalette('lime')
             .accentPalette('orange')
