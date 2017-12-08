@@ -152,6 +152,8 @@ $app->post('/photo/me', function (Request $request, Response $response) {
 });
 $app->post('/auth', function (Request $request, Response $response) use($_KEY_FB_APP, $_KEY_FB_SECRET, $_KEY_FB_REDIRECT, $_KEY_FB_CI_APP, $_KEY_FB_CI_SECRET, $_KEY_FB_CI_REDIRECT){
 
+    $cookies_token = 'mango_session';
+
     $domain = $this->get('settings')['db']['domain'];
     $username = $this->get('settings')['db']['user'];
     $dbname = $this->get('settings')['db']['dbname'];
@@ -246,7 +248,10 @@ $app->post('/auth', function (Request $request, Response $response) use($_KEY_FB
     //end update all db photo
 
     $answer = array('id' => $d_user_id, 'token' => $d_token, 'photo' => $fb_user_photo_url);
-    return json_encode($answer);
+
+    $response->write(json_encode($answer));
+    $newResponse = $response->withHeader('Set-Cookie', "$cookies_token=$d_token; path=/; Secure; HttpOnly");
+    return $newResponse;
 });
 $app->post('/fb', function (Request $request, Response $response) use ($fb, $fb_ci){
     header('Content-type: application/json');
