@@ -5,11 +5,11 @@ angular.module('myApp.back.user-service', [])
     .service('user', function (environment, $http, $q, $localStorage, device) {
         this.current = {};
         this.auth = function (code) {
-            return $http.post(environment.oauth, {code: code, env: ENVIRONMENT});
+            return $http.post(environment.oauth, {code: code, env: environment.key});
         };
         this.fb = function (api) {
             var token = $localStorage.get(STORAGE_TOKEN);
-            return $http.post(environment.fb, {api: api, token: token, env: ENVIRONMENT});
+            return $http.post(environment.fb, {api: api, token: token, env: environment.key});
         };
         this.getAll = function () {
             return $http.get(environment.user);

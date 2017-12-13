@@ -11,6 +11,7 @@ angular.module('myApp.back', [
 ])
 
     .value('environment', {
+        key: ENVIRONMENT,
         oauth: BACK_HOST_NAME + 'back/auth',
         user: BACK_HOST_NAME + 'back/users',
         userDetail: BACK_HOST_NAME + 'back/users/',

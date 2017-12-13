@@ -19,7 +19,17 @@ class GroupController
         $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
         mysql_select_db($dbname, $link) or die('Cannot select the DB');
 
-        $d_user = $url = $request->getQueryParams()['user'];
+        /** Check user authenticate **/
+        $token = $request->getHeaderLine('Authorization');
+        $query_token = "SELECT id FROM user_token WHERE token='$token'";
+        $auth_result = mysql_query($query_token, $link) or die('Errant query:  ' . $query_token);
+        if (mysql_num_rows($auth_result)) {
+            $d_user = mysql_fetch_assoc($auth_result)['id'];
+        } else {
+            $answer = array('success' => false, 'message' => '401 User does not authorize');
+            $response->write(json_encode($answer));
+            return $response->withStatus(404);
+        }
 
         /* grab the posts from the db */
         $query = "SELECT g.* 
@@ -39,12 +49,17 @@ class GroupController
 
                 $user_result = mysql_query($query, $link) or die('Errant query:  '.$query);
                 $users = array();
+                $owned = false;
                 if(mysql_num_rows($user_result)) {
-                    while($user = mysql_fetch_assoc($user_result)) {
+                    while ($user = mysql_fetch_assoc($user_result)) {
+                        if ($user['id'] === $d_user && $user['role'] === '1') {
+                            $owned = true;
+                        }
                         $users[] = $user;
                     }
                 }
                 $group['members'] = $users;
+                $group['owned'] = $owned;
                 $groups[] = $group;
             }
         }
@@ -62,32 +77,32 @@ class GroupController
         mysql_select_db($dbname, $link) or die('Cannot select the DB');
 
         $data = $request->getParsedBody();
-//    $now = new DateTime();
-        $d_date = '';
-        $d_admin = $data["admin"];
-        $d_name = $data["name"];
-        $d_description = $data["description"];
-        $d_theme = $data["theme"];
-        $d_members = $data["members"];
-        /* grab the posts from the db */
+        $now = (new DateTime())->getTimestamp() * 1000;
+        $d_admin = $data['admin'];
+        $d_name = $data['name'];
+        $d_description = $data['description'];
+        $d_theme = $data['theme'];
+        $d_members = $data['members'];
+        /* Create group first*/
         $query = "INSERT INTO `group`(name, description, theme, admin, date) "
-            ."VALUES(N'$d_name', N'$d_description', '$d_theme', '$d_admin', '$d_date')";
+            ."VALUES(N'$d_name', N'$d_description', '$d_theme', '$d_admin', '$now')";
         $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
         $d_group = mysql_insert_id();
-        /*Insert rest member*/
+        /*Then, insert member without the admin*/
         $member_array = explode(",", $d_members);
         foreach ($member_array as $item) {
             $query = "INSERT INTO `user_group`(user, `group`, role, status, date) "
-                ."VALUES('$item', '$d_group', '0', '0', '$d_date')";
+                ."VALUES('$item', '$d_group', '0', '0', '$now')";
             $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
         }
-        /*Insert admin*/
+        /*Last, insert admin*/
         $query = "INSERT INTO `user_group`(user, `group`, role, status, date) "
-            ."VALUES('$d_admin', '$d_group', '1', '1', '$d_date')";
+            ."VALUES('$d_admin', '$d_group', '1', '1', '$now')";
         $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
+        /*Notify to all members*/
 
-        $answer = array('success' => true, 'id' => $d_group);
-        return json_encode($answer);
+        $response->write(json_encode(array('success' => true, 'id' => $d_group)));
+        return $response;
     }
 
     public function update($request, $response, $args)  {
@@ -102,10 +117,20 @@ class GroupController
         $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
         mysql_select_db($dbname, $link) or die('Cannot select the DB');
 
-        $d_user = $url = $request->getQueryParams()['user'];
-        $d_group = $url = $request->getQueryParams()['group'];
+        /** Check user authenticate **/
+        $token = $request->getHeaderLine('Authorization');
+        $query_token = "SELECT id FROM user_token WHERE token='$token'";
+        $auth_result = mysql_query($query_token, $link) or die('Errant query:  ' . $query_token);
+        if (mysql_num_rows($auth_result)) {
+            $d_user = mysql_fetch_assoc($auth_result)['id'];
+        } else {
+            $answer = array('success' => false, 'message' => '401 User does not authorize');
+            $response->write(json_encode($answer));
+            return $response->withStatus(404);
+        }
 
-        /* grab the posts from the db */
+        $d_group = $url = $request->getQueryParams()['group'];
+        /* Get group posts */
         $query = "SELECT gp.* 
         FROM `group_post` AS gp
         WHERE gp.`group` = '$d_group'";
@@ -120,7 +145,8 @@ class GroupController
                 $posted[] = $group;
             }
         }
-        return json_encode($posted);
+        $response->write(json_encode($posted));
+        return $response;
     }
 
     public function setPost($request, $response, $args) {
@@ -132,14 +158,24 @@ class GroupController
         $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
         mysql_select_db($dbname, $link) or die('Cannot select the DB');
 
+        $token = $request->getHeaderLine('Authorization');
+        $query_token = "SELECT id FROM user_token WHERE token='$token'";
+        $auth_result = mysql_query($query_token, $link) or die('Errant query:  ' . $query_token);
+        if (mysql_num_rows($auth_result)) {
+            $d_user = mysql_fetch_assoc($auth_result)['id'];
+        } else {
+            $answer = array('success' => false, 'message' => '401 User does not authorize');
+            $response->write(json_encode($answer));
+            return $response->withStatus(404);
+        }
+
         $data = $request->getParsedBody();
-        $now = (new DateTime())->getTimestamp();
-        $d_id = $data["id"];
-        $d_group = $data["group"];
-        $d_user = $data["user"];
-        $d_description = $data["description"];
-        $d_lat = $data["lat"];
-        $d_lng = $data["lng"];
+        $now = (new DateTime())->getTimestamp() * 1000;
+        $d_id = $data['id'];
+        $d_group = $data['group'];
+        $d_description = $data['description'];
+        $d_lat = $data['lat'];
+        $d_lng = $data['lng'];
         if ($d_id) {
             $query = "UPDATE `group_post` SET description=N'$d_description', lat='$d_lat', lng='$d_lng' "
                 . "WHERE id='$d_id'";
@@ -151,7 +187,8 @@ class GroupController
         $d_post = mysql_insert_id();
 
 
-        $answer = array('success' => true, 'id' => $d_post);
-        return json_encode($answer);
+        $answer = array('success' => true, 'id' => $d_post, 'at' => $now);
+        $response->write(json_encode($answer));
+        return $response;
     }
 }

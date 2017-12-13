@@ -29,11 +29,12 @@ angular.module('myApp', [
         $mdThemingProvider.alwaysWatchTheme(true);
     })
     .value('$mobile', {exist: false, ios: false, android: false, type: ''})
-    .run(function ($mobile) {
+    .run(function ($mobile, $rootScope, environment) {
         if (window.monaca) {
             $mobile.exist = true;
             $mobile.android = window.monaca.isAndroid;
             $mobile.ios = window.monaca.isIOS;
             $mobile.type = $mobile.android ? 'android' : $mobile.ios ? 'ios' : 'other';
         }
+        $rootScope.dev = environment.key === 'ci';
     });
