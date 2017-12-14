@@ -121,7 +121,9 @@ class UserController
         $d_device = $data["device"];
         $d_friends = $data["friends"];
         /* grab the posts from the db */
-        $query = "UPDATE $dbtable SET name =  N'$d_name',lat = '$d_lat',lng = '$d_lng',friends = '$d_friends',status = '$d_status',device = '$d_device', date = '$d_date' WHERE CONCAT(`$dbtable`.`id`) = '$d_id'";
+        $query = "UPDATE $dbtable SET name =  N'$d_name',lat = '$d_lat',lng = '$d_lng',"
+            ."friends = '$d_friends',status = '$d_status',device = '$d_device', date = '$d_date'"
+            ." WHERE CONCAT(`$dbtable`.`id`) = '$d_id'";
         $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
         /* push notification to friends*/
         $message['content'] = 'online';

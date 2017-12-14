@@ -30,6 +30,7 @@ class GroupController
             $response->write(json_encode($answer));
             return $response->withStatus(404);
         }
+        /** Continue after approve **/
 
         /* grab the posts from the db */
         $query = "SELECT g.* 
