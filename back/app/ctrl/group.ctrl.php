@@ -1,21 +1,15 @@
 <?php
-use \Interop\Container\ContainerInterface as ContainerInterface;
 
-class GroupController
+namespace App\Controllers;
+
+class GroupController extends Controller
 {
-    protected $container;
-
-    // constructor receives container instance
-    public function __construct(ContainerInterface $container) {
-        $this->container = $container;
-    }
-
-    public function listed($request, $response, $args) {
-
-        $domain = $this->container->get('settings')['db']['domain'];
-        $username = $this->container->get('settings')['db']['user'];
-        $dbname = $this->container->get('settings')['db']['dbname'];
-        $pass = $this->container->get('settings')['db']['pass'];
+    public function listed($request, $response, $args)
+    {
+        $domain = $this->container->get('settings')['db']['host'];
+        $username = $this->container->get('settings')['db']['username'];
+        $dbname = $this->container->get('settings')['db']['database'];
+        $pass = $this->container->get('settings')['db']['password'];
         $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
         mysql_select_db($dbname, $link) or die('Cannot select the DB');
 
@@ -37,21 +31,21 @@ class GroupController
         FROM `group` AS g,`user_group` 
         WHERE g.`id`=`user_group`.`group` AND `user_group`.`user` = '$d_user'";
 
-        $group_result = mysql_query($query, $link) or die('Errant query:  '.$query);
+        $group_result = mysql_query($query, $link) or die('Errant query:  ' . $query);
 
         /* create one master array of the records */
         $groups = array();
-        if(mysql_num_rows($group_result)) {
-            while($group = mysql_fetch_assoc($group_result)) {
+        if (mysql_num_rows($group_result)) {
+            while ($group = mysql_fetch_assoc($group_result)) {
                 $group_id = $group['id'];
                 $query = "SELECT u.`id`, u.`name`, `user_group`.role
                 FROM `user` AS u,`user_group` 
                 WHERE u.`id`=`user_group`.`user` AND `user_group`.`group` = '$group_id'";
 
-                $user_result = mysql_query($query, $link) or die('Errant query:  '.$query);
+                $user_result = mysql_query($query, $link) or die('Errant query:  ' . $query);
                 $users = array();
                 $owned = false;
-                if(mysql_num_rows($user_result)) {
+                if (mysql_num_rows($user_result)) {
                     while ($user = mysql_fetch_assoc($user_result)) {
                         if ($user['id'] === $d_user && $user['role'] === '1') {
                             $owned = true;
@@ -67,13 +61,13 @@ class GroupController
         return json_encode($groups);
     }
 
-    public function create($request, $response, $args) {
-
+    public function create($request, $response, $args)
+    {
         $pusher = $this->container->get('pusher');
-        $domain = $this->container->get('settings')['db']['domain'];
-        $username = $this->container->get('settings')['db']['user'];
-        $dbname = $this->container->get('settings')['db']['dbname'];
-        $pass = $this->container->get('settings')['db']['pass'];
+        $domain = $this->container->get('settings')['db']['host'];
+        $username = $this->container->get('settings')['db']['username'];
+        $dbname = $this->container->get('settings')['db']['database'];
+        $pass = $this->container->get('settings')['db']['password'];
         $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
         mysql_select_db($dbname, $link) or die('Cannot select the DB');
 
@@ -86,19 +80,19 @@ class GroupController
         $d_members = $data['members'];
         /* Create group first*/
         $query = "INSERT INTO `group`(name, description, theme, admin, date) "
-            ."VALUES(N'$d_name', N'$d_description', '$d_theme', '$d_admin', '$now')";
+            . "VALUES(N'$d_name', N'$d_description', '$d_theme', '$d_admin', '$now')";
         $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
         $d_group = mysql_insert_id();
         /*Then, insert member without the admin*/
         $member_array = explode(",", $d_members);
         foreach ($member_array as $item) {
             $query = "INSERT INTO `user_group`(user, `group`, role, status, date) "
-                ."VALUES('$item', '$d_group', '0', '0', '$now')";
+                . "VALUES('$item', '$d_group', '0', '0', '$now')";
             $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
         }
         /*Last, insert admin*/
         $query = "INSERT INTO `user_group`(user, `group`, role, status, date) "
-            ."VALUES('$d_admin', '$d_group', '1', '1', '$now')";
+            . "VALUES('$d_admin', '$d_group', '1', '1', '$now')";
         $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
         /*Notify to all members*/
 
@@ -106,15 +100,17 @@ class GroupController
         return $response;
     }
 
-    public function update($request, $response, $args)  {
-        
+    public function update($request, $response, $args)
+    {
+
     }
 
-    public function listPost($request, $response, $args) {
-        $domain = $this->container->get('settings')['db']['domain'];
-        $username = $this->container->get('settings')['db']['user'];
-        $dbname = $this->container->get('settings')['db']['dbname'];
-        $pass = $this->container->get('settings')['db']['pass'];
+    public function listPost($request, $response, $args)
+    {
+        $domain = $this->container->get('settings')['db']['host'];
+        $username = $this->container->get('settings')['db']['username'];
+        $dbname = $this->container->get('settings')['db']['database'];
+        $pass = $this->container->get('settings')['db']['password'];
         $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
         mysql_select_db($dbname, $link) or die('Cannot select the DB');
 
@@ -136,12 +132,12 @@ class GroupController
         FROM `group_post` AS gp
         WHERE gp.`group` = '$d_group'";
 
-        $group_result = mysql_query($query, $link) or die('Errant query:  '.$query);
+        $group_result = mysql_query($query, $link) or die('Errant query:  ' . $query);
 
         /* create one master array of the records */
         $posted = array();
-        if(mysql_num_rows($group_result)) {
-            while($group = mysql_fetch_assoc($group_result)) {
+        if (mysql_num_rows($group_result)) {
+            while ($group = mysql_fetch_assoc($group_result)) {
                 $group['me'] = $group['user'] == $d_user;
                 $posted[] = $group;
             }
@@ -150,12 +146,13 @@ class GroupController
         return $response;
     }
 
-    public function setPost($request, $response, $args) {
+    public function setPost($request, $response, $args)
+    {
         $pusher = $this->container->get('pusher');
-        $domain = $this->container->get('settings')['db']['domain'];
-        $username = $this->container->get('settings')['db']['user'];
-        $dbname = $this->container->get('settings')['db']['dbname'];
-        $pass = $this->container->get('settings')['db']['pass'];
+        $domain = $this->container->get('settings')['db']['host'];
+        $username = $this->container->get('settings')['db']['username'];
+        $dbname = $this->container->get('settings')['db']['database'];
+        $pass = $this->container->get('settings')['db']['password'];
         $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
         mysql_select_db($dbname, $link) or die('Cannot select the DB');
 
@@ -182,7 +179,7 @@ class GroupController
                 . "WHERE id='$d_id'";
         } else {
             $query = "INSERT INTO `group_post`(`group`, user, date, description, lat, lng) "
-                ."VALUES('$d_group', '$d_user', '$now', N'$d_description', '$d_lat', '$d_lng')";
+                . "VALUES('$d_group', '$d_user', '$now', N'$d_description', '$d_lat', '$d_lng')";
         }
         $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
         $d_post = mysql_insert_id();

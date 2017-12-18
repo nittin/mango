@@ -1,47 +1,25 @@
 <?php
-use \Interop\Container\ContainerInterface as ContainerInterface;
 
-class UserController
+namespace App\Controllers;
+use App\Models\User;
+
+class UserController extends Controller
 {
-    protected $container;
-
-    // constructor receives container instance
-    public function __construct(ContainerInterface $container) {
-        $this->container = $container;
+    public function listed($request, $response)
+    {
+        $users = User::all();
+        $response->write(json_encode($users));
+        return $response;
     }
 
-    public function listed($request, $response, $args) {
+    public function contact($request, $response)
+    {
         header('Content-type: application/json');
 
-        $domain = $this->container->get('settings')['db']['domain'];
-        $username = $this->container ->get('settings')['db']['user'];
-        $dbname = $this->container->get('settings')['db']['dbname'];
-        $pass = $this->container->get('settings')['db']['pass'];
-        $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
-        mysql_select_db($dbname, $link) or die('Cannot select the DB');
-
-        /* grab the posts from the db */
-        $query = "SELECT * FROM user";
-        $result = mysql_query($query,$link) or die('Errant query:  '.$query);
-
-        /* create one master array of the records */
-        $posts = array();
-        if(mysql_num_rows($result)) {
-            while($post = mysql_fetch_assoc($result)) {
-                $posts[] = $post;
-            }
-        }
-
-        return json_encode($posts);
-    }
-
-    public function contact($request, $response, $args) {
-        header('Content-type: application/json');
-
-        $domain = $this->container->get('settings')['db']['domain'];
-        $username = $this->container->get('settings')['db']['user'];
-        $dbname = $this->container->get('settings')['db']['dbname'];
-        $pass = $this->container->get('settings')['db']['pass'];
+        $domain = $this->container->get('settings')['db']['host'];
+        $username = $this->container->get('settings')['db']['username'];
+        $dbname = $this->container->get('settings')['db']['database'];
+        $pass = $this->container->get('settings')['db']['password'];
 
         $d_id = $request->getAttribute('id');
         $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
@@ -49,11 +27,11 @@ class UserController
 
         /* grab the posts from the db */
         $query = "SELECT * FROM user WHERE user.id IN ($d_id)";
-        $result = mysql_query($query,$link) or die('Errant query:  '.$query);
+        $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
         /* create one master array of the records */
         $posts = array();
-        if(mysql_num_rows($result)) {
-            while($post = mysql_fetch_assoc($result)) {
+        if (mysql_num_rows($result)) {
+            while ($post = mysql_fetch_assoc($result)) {
                 $posts[] = $post;
             }
         }
@@ -62,14 +40,15 @@ class UserController
         return json_encode($posts);
     }
 
-    public function create($request, $response, $args) {
+    public function create($request, $response, $args)
+    {
         header('Content-type: application/json');
 
         $pusher = $this->container->get('pusher');
-        $domain = $this->container->get('settings')['db']['domain'];
-        $username = $this->container->get('settings')['db']['user'];
-        $dbname = $this->container->get('settings')['db']['dbname'];
-        $pass = $this->container->get('settings')['db']['pass'];
+        $domain = $this->container->get('settings')['db']['host'];
+        $username = $this->container->get('settings')['db']['username'];
+        $dbname = $this->container->get('settings')['db']['database'];
+        $pass = $this->container->get('settings')['db']['password'];
         $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
         mysql_select_db($dbname, $link) or die('Cannot select the DB');
 
@@ -84,7 +63,7 @@ class UserController
         $d_friends = $data["friends"];
         /* grab the posts from the db */
         $query = "INSERT INTO user(id, name, lat, lng, friends, status, device, date) "
-            ."VALUES('$d_id', N'$d_name', '$d_lat', '$d_lng', '$d_friends', '$d_status', '$d_device', '$d_date')";
+            . "VALUES('$d_id', N'$d_name', '$d_lat', '$d_lng', '$d_friends', '$d_status', '$d_device', '$d_date')";
         $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
         /* push notification to friends*/
         $message['content'] = 'new user';
@@ -100,14 +79,15 @@ class UserController
         return json_encode($answer);
     }
 
-    public function update($request, $response, $args)  {
+    public function update($request, $response, $args)
+    {
         header('Content-type: application/json');
         $pusher = $this->container->get('pusher');
-        $domain = $this->container->get('settings')['db']['domain'];
-        $username = $this->container->get('settings')['db']['user'];
-        $dbname = $this->container->get('settings')['db']['dbname'];
+        $domain = $this->container->get('settings')['db']['host'];
+        $username = $this->container->get('settings')['db']['username'];
+        $dbname = $this->container->get('settings')['db']['database'];
         $dbtable = 'user';
-        $pass = $this->container->get('settings')['db']['pass'];
+        $pass = $this->container->get('settings')['db']['password'];
         $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
         mysql_select_db($dbname, $link) or die('Cannot select the DB');
 
@@ -122,8 +102,8 @@ class UserController
         $d_friends = $data["friends"];
         /* grab the posts from the db */
         $query = "UPDATE $dbtable SET name =  N'$d_name',lat = '$d_lat',lng = '$d_lng',"
-            ."friends = '$d_friends',status = '$d_status',device = '$d_device', date = '$d_date'"
-            ." WHERE CONCAT(`$dbtable`.`id`) = '$d_id'";
+            . "friends = '$d_friends',status = '$d_status',device = '$d_device', date = '$d_date'"
+            . " WHERE CONCAT(`$dbtable`.`id`) = '$d_id'";
         $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
         /* push notification to friends*/
         $message['content'] = 'online';

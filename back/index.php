@@ -1,14 +1,12 @@
 <?php
 
-//error_reporting(E_ERROR);
-//ini_set('display_errors', 1);
+error_reporting(E_ERROR);
+ini_set('display_errors', 1);
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 use \Facebook\Facebook as FB;
 
 require 'vendor/autoload.php';
-require 'component/user.php';
-require 'component/group.php';
 require 'key.php';
 require 'img.php';
 
@@ -35,10 +33,14 @@ $app = new \Slim\App([
     'settings' => [
         'displayErrorDetails' => true,
         'db' => [
-            'domain' => $_KEY_DB_SERVER,
-            'user' => $_KEY_USERNAME,
-            'pass' => $_KEY_PASSWORD,
-            'dbname' => $_KEY_DB
+            'driver' => 'mysql',
+            'host' => $_KEY_DB_SERVER,
+            'database' => $_KEY_DB,
+            'username' => $_KEY_USERNAME,
+            'password' => $_KEY_PASSWORD,
+            'charset' => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix' => ''
         ],
         'channel' => [
             'world' => 'world-channel'
@@ -46,6 +48,21 @@ $app = new \Slim\App([
     ],
     'pusher' => $pusher
 ]);
+$container = $app->getContainer();
+$capsule = new \Illuminate\Database\Capsule\Manager;
+$capsule->addConnection($container['settings']['db']);
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
+$container['db'] = function ($container) use ($capsule) {
+    return $capsule;
+};
+$container['UserController'] = function ($container) {
+    return new \App\Controllers\UserController($container);
+};
+$container['GroupController'] = function ($container) {
+    return new \App\Controllers\GroupController($container);
+};
+
 $app->options('/{routes:.+}', function ($request, $response, $args) {
     return $response;
 });
@@ -154,10 +171,10 @@ $app->post('/auth', function (Request $request, Response $response) use($_KEY_FB
 
     $cookies_token = 'mango_session';
 
-    $domain = $this->get('settings')['db']['domain'];
-    $username = $this->get('settings')['db']['user'];
-    $dbname = $this->get('settings')['db']['dbname'];
-    $pass = $this->get('settings')['db']['pass'];
+    $domain = $this->get('settings')['db']['host'];
+    $username = $this->get('settings')['db']['username'];
+    $dbname = $this->get('settings')['db']['database'];
+    $pass = $this->get('settings')['db']['password'];
 
     $data = $request->getParsedBody();
     $code = $data["code"];
@@ -279,16 +296,6 @@ $app->post('/fb', function (Request $request, Response $response) use ($fb, $fb_
 
 });
 
-$app->get('/users', \UserController::class . ':listed');
-$app->get('/users/{id}', \UserController::class . ':contact');
-$app->post('/users', \UserController::class . ':create');
-$app->put('/users', \UserController::class . ':update');
-
-$app->get('/groups', \GroupController::class . ':listed');
-$app->post('/groups', \GroupController::class . ':create');
-$app->put('/groups', \GroupController::class . ':update');
-$app->get('/groups/post', \GroupController::class . ':listPost');
-$app->post('/groups/post', \GroupController::class . ':setPost');
-$app->put('/groups/post', \GroupController::class . ':setPost');
+require 'app/routes.php';
 
 $app->run();
