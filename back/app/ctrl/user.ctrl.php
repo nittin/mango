@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Controllers;
+
+use App\Models\Token;
 use App\Models\User;
 
 class UserController extends Controller
@@ -14,30 +16,39 @@ class UserController extends Controller
 
     public function contact($request, $response)
     {
-        header('Content-type: application/json');
+        $user = User::whereIn('id', explode(',', $request->getAttribute('id')))->get();
+        $response->write(json_encode($user));
+        return $response;
+    }
 
-        $domain = $this->container->get('settings')['db']['host'];
-        $username = $this->container->get('settings')['db']['username'];
-        $dbname = $this->container->get('settings')['db']['database'];
-        $pass = $this->container->get('settings')['db']['password'];
-
-        $d_id = $request->getAttribute('id');
-        $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
-        mysql_select_db($dbname, $link) or die('Cannot select the DB');
-
-        /* grab the posts from the db */
-        $query = "SELECT * FROM user WHERE user.id IN ($d_id)";
-        $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
-        /* create one master array of the records */
-        $posts = array();
-        if (mysql_num_rows($result)) {
-            while ($post = mysql_fetch_assoc($result)) {
-                $posts[] = $post;
-            }
+    public function me($request, $response)
+    {
+        /** Check user authenticate **/
+        $token = $request->getHeaderLine('Authorization');
+        $auth = Token::where('token', $token)->get()->first();
+        if (!count($auth)) {
+            $response->write(json_encode($this->message['401']));
+            return $response->withStatus(401);
+        } else {
+            $user = User::find($auth['id']);
+            $response->write(json_encode($user));
+            return $response;
         }
+    }
 
-        mysql_free_result($result);
-        return json_encode($posts);
+    public function friends($request, $response)
+    {
+        $token = $request->getHeaderLine('Authorization');
+        $auth = Token::where('token', $token)->get()->first();
+        if (!count($auth)) {
+            $response->write(json_encode($this->message['401']));
+            return $response->withStatus(401);
+        } else {
+            $user = User::find($auth['id']);
+            $friends = User::whereIn('id', explode(',', $user['friends']))->get();
+            $response->write(json_encode($friends));
+            return $response;
+        }
     }
 
     public function create($request, $response, $args)
