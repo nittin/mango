@@ -6,5 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
-      protected $table = 'group_post';
+    protected $table = 'group_post';
+    public $timestamps = false;
 }

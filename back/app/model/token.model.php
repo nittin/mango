@@ -6,5 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Token extends Model
 {
-      protected $table = 'user_token';
+    protected $table = 'user_token';
+    public $timestamps = false;
 }
