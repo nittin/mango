@@ -45,8 +45,7 @@ $app = new \Slim\App([
         'channel' => [
             'world' => 'world-channel'
         ]
-    ],
-    'pusher' => $pusher
+    ]
 ]);
 $container = $app->getContainer();
 $capsule = new \Illuminate\Database\Capsule\Manager;
@@ -55,6 +54,9 @@ $capsule->setAsGlobal();
 $capsule->bootEloquent();
 $container['db'] = function ($container) use ($capsule) {
     return $capsule;
+};
+$container['pusher'] = function ($container) use ($pusher) {
+    return $pusher;
 };
 $container['UserController'] = function ($container) {
     return new \App\Controllers\UserController($container);
