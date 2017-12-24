@@ -2,66 +2,37 @@
 
 namespace App\Controllers;
 
+use App\Models\Group;
+use DateTime;
+
 class GroupController extends Controller
 {
-    public function listed($request, $response, $args)
+    private function pushNotification($friendsStr, $message)
     {
-        $domain = $this->container->get('settings')['db']['host'];
-        $username = $this->container->get('settings')['db']['username'];
-        $dbname = $this->container->get('settings')['db']['database'];
-        $pass = $this->container->get('settings')['db']['password'];
-        $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
-        mysql_select_db($dbname, $link) or die('Cannot select the DB');
-
-        /** Check user authenticate **/
-        $token = $request->getHeaderLine('Authorization');
-        $query_token = "SELECT id FROM user_token WHERE token='$token'";
-        $auth_result = mysql_query($query_token, $link) or die('Errant query:  ' . $query_token);
-        if (mysql_num_rows($auth_result)) {
-            $d_user = mysql_fetch_assoc($auth_result)['id'];
-        } else {
-            $answer = array('success' => false, 'message' => '401 User does not authorize');
-            $response->write(json_encode($answer));
-            return $response->withStatus(404);
-        }
-        /** Continue after approve **/
-
-        /* grab the posts from the db */
-        $query = "SELECT g.* 
-        FROM `group` AS g,`user_group` 
-        WHERE g.`id`=`user_group`.`group` AND `user_group`.`user` = '$d_user'";
-
-        $group_result = mysql_query($query, $link) or die('Errant query:  ' . $query);
-
-        /* create one master array of the records */
-        $groups = array();
-        if (mysql_num_rows($group_result)) {
-            while ($group = mysql_fetch_assoc($group_result)) {
-                $group_id = $group['id'];
-                $query = "SELECT u.`id`, u.`name`, `user_group`.role
-                FROM `user` AS u,`user_group` 
-                WHERE u.`id`=`user_group`.`user` AND `user_group`.`group` = '$group_id'";
-
-                $user_result = mysql_query($query, $link) or die('Errant query:  ' . $query);
-                $users = array();
-                $owned = false;
-                if (mysql_num_rows($user_result)) {
-                    while ($user = mysql_fetch_assoc($user_result)) {
-                        if ($user['id'] === $d_user && $user['role'] === '1') {
-                            $owned = true;
-                        }
-                        $users[] = $user;
-                    }
-                }
-                $group['members'] = $users;
-                $group['owned'] = $owned;
-                $groups[] = $group;
+        /* push notification to all friends*/
+        $pusher = $this->container->pusher;
+        $friend_array = explode(',', $friendsStr);
+        foreach ($friend_array as $f) {
+            if ($f) {
+                $pusher->trigger($f, 'groups', $message);
             }
         }
-        return json_encode($groups);
     }
 
-    public function create($request, $response, $args)
+    public function listed($request, $response)
+    {
+        $groups = Group::with(['members' => function ($query) { $query->orderBy('role', 'desc'); }])
+            ->whereHas('members', function ($q) { $q->where('user', $this->container->me); })
+            ->get()->each(function ($group) {
+                $group->members->each(function ($user) use ($group) {
+                    $user->admin = $group->admin == $user->id;
+                });
+            $group->owner = $group->admin == $this->container->me;
+        });
+        return $groups->toJson();
+    }
+
+    public function create($request, $response)
     {
         $pusher = $this->container->get('pusher');
         $domain = $this->container->get('settings')['db']['host'];
@@ -100,12 +71,12 @@ class GroupController extends Controller
         return $response;
     }
 
-    public function update($request, $response, $args)
+    public function update($request, $response)
     {
 
     }
 
-    public function listPost($request, $response, $args)
+    public function listPost($request, $response)
     {
         $domain = $this->container->get('settings')['db']['host'];
         $username = $this->container->get('settings')['db']['username'];
@@ -146,7 +117,7 @@ class GroupController extends Controller
         return $response;
     }
 
-    public function setPost($request, $response, $args)
+    public function setPost($request, $response)
     {
         $pusher = $this->container->get('pusher');
         $domain = $this->container->get('settings')['db']['host'];

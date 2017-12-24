@@ -7,6 +7,18 @@ use DateTime;
 
 class UserController extends Controller
 {
+    private function pushNotification($friendsStr, $message)
+    {
+        /* push notification to all friends*/
+        $pusher = $this->container->pusher;
+        $friend_array = explode(',', $friendsStr);
+        foreach ($friend_array as $f) {
+            if($f) {
+                $pusher->trigger($f, 'user-online', $message);
+            }
+        }
+    }
+
     public function listed($request, $response)
     {
         $users = User::all();
@@ -32,7 +44,7 @@ class UserController extends Controller
     {
         $me = User::find($this->container->me);
         $friends = User::whereIn('id', explode(',', $me['friends']))->get();
-        $response->write(json_encode($friends));
+        $response->write($friends->toJson());
         return $response;
     }
 
@@ -47,7 +59,6 @@ class UserController extends Controller
             'lat' => $input['lat'],
             'lng' => $input['lng'],
             'status' => $input['status'],
-            'date' => $now,
             'device' => $input['device'],
             'friends' => $input['friends']
         ]);
@@ -59,11 +70,7 @@ class UserController extends Controller
             'date' => $now,
             'type' => 1
         ];
-        $pusher = $this->container->get('pusher');
-        $friend_array = explode(',', $input['friends']);
-        foreach ($friend_array as $f) {
-            $pusher->trigger($f, 'user-online', $message);
-        }
+        $this->pushNotification($input['friends'], $message);
         $response->write(json_encode(['success' => true, 'id' => $user['id']]));
         return $response;
     }
@@ -78,7 +85,6 @@ class UserController extends Controller
             'lat' => $input['lat'],
             'lng' => $input['lng'],
             'status' => $input['status'],
-            'date' => $now,
             'device' => $input['device'],
             'friends' => $input['friends']
         ]);
@@ -91,11 +97,7 @@ class UserController extends Controller
             'date' => $now,
             'type' => 2
         ];
-        $pusher = $this->container->get('pusher');
-        $friend_array = explode(',', $input['friends']);
-        foreach ($friend_array as $f) {
-            $pusher->trigger($f, 'user-online', $message);
-        }
+        $this->pushNotification($input['friends'], $message);
         $response->write(json_encode(['success' => true, 'id' => $this->container->me]));
         return $response;
     }

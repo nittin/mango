@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class User extends Model
 {
+    const CREATED_AT = 'date';
+    const UPDATED_AT = 'date';
+
     protected $table = 'user';
     protected $fillable = [
         'id',
@@ -17,5 +20,7 @@ class User extends Model
         'device',
         'friends'
     ];
-    public $timestamps = false;
+    protected $dateFormat = 'U000';
+    protected $hidden = ['pivot'];
+    public $timestamps = true;
 }

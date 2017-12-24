@@ -45,14 +45,16 @@ $app = new \Slim\App([
         'channel' => [
             'world' => 'world-channel'
         ]
-    ],
-    'pusher' => $pusher
+    ]
 ]);
 $container = $app->getContainer();
 $capsule = new \Illuminate\Database\Capsule\Manager;
 $capsule->addConnection($container['settings']['db']);
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
+$container['pusher'] = function ($container) use ($pusher) {
+    return $pusher;
+};
 $container['db'] = function ($container) use ($capsule) {
     return $capsule;
 };
