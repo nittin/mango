@@ -53,7 +53,7 @@ class UserController extends Controller
         $input = $request->getParsedBody();
         $now = (new DateTime())->getTimestamp() * 1000;
 
-        $user = User::created([
+        $user = User::create([
             'id' => $input['id'],
             'name' => $input['name'],
             'lat' => $input['lat'],

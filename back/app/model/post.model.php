@@ -6,6 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
+    const CREATED_AT = 'date';
+    const UPDATED_AT = 'date';
     protected $table = 'group_post';
-    public $timestamps = false;
+    protected $dateFormat = 'U000';
+    protected $fillable = [
+        'description',
+        'lat',
+        'lng',
+        'expire'
+    ];
+    public $timestamps = true;
 }

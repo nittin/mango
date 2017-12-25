@@ -13,6 +13,7 @@ class Controller
         $this->container = $container;
         $this->message = [
             '401' => ['success' => false, 'message' => '401 User does not authorize'],
+            '403' => ['success' => false, 'message' => '403 User does not access'],
             '404' => ['success' => false, 'message' => 'Not found']
         ];
     }
