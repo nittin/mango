@@ -22,6 +22,7 @@ angular.module('myApp', [
         $locationProvider.hashPrefix('');
         $routeProvider.otherwise({redirectTo: '/'});
         // $httpProvider.defaults.withCredentials = true;
+        $httpProvider.interceptors.push('httpRequestInterceptor');
         $mdThemingProvider.theme('lime-dark')
             .primaryPalette('lime')
             .accentPalette('orange')
@@ -37,4 +38,14 @@ angular.module('myApp', [
             $mobile.type = $mobile.android ? 'android' : $mobile.ios ? 'ios' : 'other';
         }
         $rootScope.dev = environment.key === 'ci';
+    })
+    .factory('httpRequestInterceptor', function ($localStorage) {
+        return {
+            request: function ($config) {
+                if ($localStorage.get(STORAGE_TOKEN)) {
+                    $config.headers['Authorization'] = $localStorage.get(STORAGE_TOKEN);
+                }
+                return $config;
+            }
+        };
     });
