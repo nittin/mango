@@ -11,6 +11,7 @@ class Post extends Model
     protected $table = 'group_post';
     protected $dateFormat = 'U000';
     protected $fillable = [
+        'user',
         'description',
         'lat',
         'lng',

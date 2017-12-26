@@ -17,7 +17,7 @@ $app->group('', function () {
     $this->post('/groups', 'GroupController:create');
     $this->put('/groups', 'GroupController:update');
     $this->get('/groups/post', 'GroupController:listPost');
-    $this->post('/groups/post', 'GroupController:setPost');
-    $this->put('/groups/post', 'GroupController:setPost');
+    $this->post('/groups/post', 'GroupController:newPost');
+    $this->put('/groups/post', 'GroupController:editPost');
 
 })->add(new AuthComponent($container));

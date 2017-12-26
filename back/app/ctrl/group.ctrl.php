@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Group;
+use App\Models\Post;
 use DateTime;
 use function React\Promise\map;
 
@@ -93,10 +94,8 @@ class GroupController extends Controller
             $response->write(json_encode($this->message['404']));
             return $response->withStatus(404);
         }
-        $access = $groups->whereHas('members', function ($q) {
-            $q->where('user', $this->container->me);
-        })->get();
-        if ($access->isNotEmpty()) {
+        $access = $groups->members->contains('id', $this->container->me);
+        if ($access) {
             $response->write($groups->posts->toJson());
             return $response;
         } else {
@@ -105,47 +104,52 @@ class GroupController extends Controller
         }
     }
 
-    public function setPost($request, $response)
+    public function newPost($request, $response)
     {
-        $pusher = $this->container->get('pusher');
-        $domain = $this->container->get('settings')['db']['host'];
-        $username = $this->container->get('settings')['db']['username'];
-        $dbname = $this->container->get('settings')['db']['database'];
-        $pass = $this->container->get('settings')['db']['password'];
-        $link = mysql_connect($domain, $username, $pass) or die('Cannot connect to the DB');
-        mysql_select_db($dbname, $link) or die('Cannot select the DB');
-
-        $token = $request->getHeaderLine('Authorization');
-        $query_token = "SELECT id FROM user_token WHERE token='$token'";
-        $auth_result = mysql_query($query_token, $link) or die('Errant query:  ' . $query_token);
-        if (mysql_num_rows($auth_result)) {
-            $d_user = mysql_fetch_assoc($auth_result)['id'];
-        } else {
-            $answer = array('success' => false, 'message' => '401 User does not authorize');
-            $response->write(json_encode($answer));
+        $input = $request->getParsedBody();
+        $groups = Group::find($input['group']);
+        if (!$groups) {
+            $response->write(json_encode($this->message['404']));
             return $response->withStatus(404);
         }
+        $access = $groups->members->contains('id', $this->container->me);
+        if ($access) {
+            $groups->posts()->create([
+                'user' => $this->container->me,
+                'description' => $input['description'],
+                'lat' => $input['lat'],
+                'lng' => $input['lng'],
+                'expire' => $input['expire']
+            ]);
 
-        $data = $request->getParsedBody();
-        $now = (new DateTime())->getTimestamp() * 1000;
-        $d_id = $data['id'];
-        $d_group = $data['group'];
-        $d_description = $data['description'];
-        $d_lat = $data['lat'];
-        $d_lng = $data['lng'];
-        if ($d_id) {
-            $query = "UPDATE `group_post` SET description=N'$d_description', lat='$d_lat', lng='$d_lng' "
-                . "WHERE id='$d_id'";
+            $response->write(['success' => true]);
+            return $response;
         } else {
-            $query = "INSERT INTO `group_post`(`group`, user, date, description, lat, lng) "
-                . "VALUES('$d_group', '$d_user', '$now', N'$d_description', '$d_lat', '$d_lng')";
+            $response->write(json_encode($this->message['403']));
+            return $response->withStatus(403);
         }
-        $result = mysql_query($query, $link) or die('Errant query:  ' . $query);
-        $d_post = mysql_insert_id();
-
-
-        $answer = array('success' => true, 'id' => $d_post, 'at' => $now);
-        $response->write(json_encode($answer));
-        return $response;
+    }
+    public function editPost($request, $response)
+    {
+        $input = $request->getParsedBody();
+        $post = Post::find($input['id']);
+        if (!$post) {
+            $response->write(json_encode($this->message['404']));
+            return $response->withStatus(404);
+        }
+        $access = $post->user == $this->container->me;
+        if ($access) {
+            $post->description = $input['description'];
+            $post->lat = $input['lat'];
+            $post->lng = $input['lng'];
+            $post->expire = $input['expire'];
+            $post->save();
+            
+            $response->write(json_encode(['success' => true]));
+            return $response;
+        } else {
+            $response->write(json_encode($this->message['403']));
+            return $response->withStatus(403);
+        }
     }
 }
