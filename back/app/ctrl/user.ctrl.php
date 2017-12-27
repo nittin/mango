@@ -7,17 +7,6 @@ use DateTime;
 
 class UserController extends Controller
 {
-    private function pushNotification($friendsStr, $message)
-    {
-        /* push notification to all friends*/
-        $pusher = $this->container->pusher;
-        $friend_array = explode(',', $friendsStr);
-        foreach ($friend_array as $f) {
-            if($f) {
-                $pusher->trigger($f, 'user-online', $message);
-            }
-        }
-    }
 
     public function listed($request, $response)
     {
@@ -97,8 +86,16 @@ class UserController extends Controller
             'date' => $now,
             'type' => 2
         ];
-        $this->pushNotification($input['friends'], $message);
+        $this->pushNotification(explode(',', $input['friends']), $message);
         $response->write(json_encode(['success' => true, 'id' => $this->container->me]));
+        return $response;
+    }
+
+    public function pullNotifications($request, $response)
+    {
+        $notifications = User::find($this->container->me)->notifications();
+
+        $response->write($notifications->toJson());
         return $response;
     }
 }

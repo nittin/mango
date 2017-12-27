@@ -10,6 +10,7 @@ $app->group('', function () {
     $this->get('/users/{id}', 'UserController:contact');
     $this->get('/users/info/me', 'UserController:me');
     $this->get('/users/info/friends', 'UserController:friends');
+    $this->get('/users/notifications', 'UserController:pullNotifications');
     $this->post('/users', 'UserController:create');
     $this->put('/users', 'UserController:update');
 

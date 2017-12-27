@@ -23,4 +23,9 @@ class User extends Model
     protected $dateFormat = 'U000';
     protected $hidden = ['pivot'];
     public $timestamps = true;
+
+    public function notifications()
+    {
+        return $this->hasMany('App\Models\Notification', 'user', 'id');
+    }
 }

@@ -9,26 +9,6 @@ use function React\Promise\map;
 
 class GroupController extends Controller
 {
-    private function pushNotification($friendsStr, $message)
-    {
-        /* push notification to all friends*/
-        $pusher = $this->container->pusher;
-        $friend_array = explode(',', $friendsStr);
-        foreach ($friend_array as $f) {
-            if ($f) {
-                $pusher->trigger($f, 'groups-work', $message);
-            }
-        }
-    }
-
-    private function singleNotification($friend, $message)
-    {
-        $pusher = $this->container->pusher;
-        if ($friend) {
-            $pusher->trigger($friend, 'groups-work', $message);
-        }
-    }
-
     public function listed($request, $response)
     {
         $groups = Group::with(['members' => function ($query) {
@@ -129,6 +109,7 @@ class GroupController extends Controller
             return $response->withStatus(403);
         }
     }
+
     public function editPost($request, $response)
     {
         $input = $request->getParsedBody();
