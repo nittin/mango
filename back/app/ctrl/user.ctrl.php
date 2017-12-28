@@ -40,7 +40,6 @@ class UserController extends Controller
     public function create($request, $response)
     {
         $input = $request->getParsedBody();
-        $now = (new DateTime())->getTimestamp() * 1000;
 
         $user = User::create([
             'id' => $input['id'],
@@ -52,23 +51,18 @@ class UserController extends Controller
             'friends' => $input['friends']
         ]);
         /* push notification to all friends*/
-        $message = [
-            'content' => 'NEW_MEM',
-            'id' => $input['id'],
-            'name' => $input['name'],
-            'date' => $now,
-            'type' => 1
-        ];
-        $this->pushNotification($input['friends'], $message);
-        $response->write(json_encode(['success' => true, 'id' => $user['id']]));
+        $this->pushNotification($input['friends'], NOTIFY_ONLY_MESSAGE, 1, CHANNEL_USER_SIGN, '{0} has join', [[
+            'display' => $user['name'],
+            'value' => $user['id'],
+            'type' => RELATE_TYPE_USER,
+        ]]);
+        $response->write($this->message['200']);
         return $response;
     }
 
     public function update($request, $response)
     {
         $input = $request->getParsedBody();
-        $now = (new DateTime())->getTimestamp() * 1000;
-
         User::find($this->container->me)->update([
             'name' => $input['name'],
             'lat' => $input['lat'],
@@ -78,15 +72,11 @@ class UserController extends Controller
             'friends' => $input['friends']
         ]);
 
-        /* push notification to friends*/
-        $message = [
-            'content' => 'ONLINE',
-            'id' => $input['id'],
-            'name' => $input['name'],
-            'date' => $now,
-            'type' => 2
-        ];
-        $this->pushNotification(explode(',', $input['friends']), $message);
+        $this->pushNotification($input['friends'], NOTIFY_ONLY_MESSAGE, 2, CHANNEL_USER_SIGN, '{0} has change profile', [[
+            'display' => $input['name'],
+            'value' => $this->container->me,
+            'type' => RELATE_TYPE_USER,
+        ]]);
         $response->write(json_encode(['success' => true, 'id' => $this->container->me]));
         return $response;
     }
