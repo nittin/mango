@@ -4,6 +4,7 @@
  ** to gen autoload*/
 
 use App\Components\AuthComponent;
+require 'constant/notification.constant.php';
 
 $app->group('', function () {
     $this->get('/users', 'UserController:listed');

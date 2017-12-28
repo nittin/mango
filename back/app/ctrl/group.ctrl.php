@@ -55,7 +55,6 @@ class GroupController extends Controller
                 'status' => 1,
                 'date' => $now
             ]);
-            $this->singleNotification($id, $message);
         }, explode(',', $input['members']));
         $this->pushNotification($input['members'], NOTIFY_WITH_PULL_REQUEST, 10, CHANNEL_USER_SIGN, '{0} invite you join {1}', [[
             'display' => $this->container->me,

@@ -29,7 +29,7 @@ class Controller
         }
     }
 
-    protected function pushNotification($friends, $method, $type, $channel, $content, $relate)
+    protected function pushNotification($friends, $method, $type, $channel, $content, $from)
     {
         if (!$friends) {
             return;
@@ -44,14 +44,10 @@ class Controller
             case NOTIFY_WITHOUT_PULL_REQUEST:
                 User::whereIn('id', $friend_array)->notifications()->create([
                     'type' => $type,
-                    'content' => $content,
+                    'content' => is_array($content) ? join(',', $content) : $content,
+                    'from' => is_array($from) ? join(',', $from) : $from,
                     'status' => 0,
-                    'from' => 'center',
                 ]);
-                break;
-            case NOTIFY_ONLY_PULL_REQUEST:
-            case NOTIFY_ONLY_MESSAGE:
-            default:
                 break;
         }
 
@@ -59,29 +55,23 @@ class Controller
             case NOTIFY_ONLY_MESSAGE:
             case NOTIFY_WITH_PULL_REQUEST:
                 foreach ($friend_array as $f) {
-                    $pusher->trigger($f, $channel, [
-                        'type' => $type,
-                        'content' => $content,
-                        'relate' => $relate,
-                        'date' => $now
-                    ]);
+                    $message = $this->readNotification($type, $content, $from, $now);
+                    $pusher->trigger($f, $channel, $message);
                 }
                 break;
-            case NOTIFY_WITHOUT_PULL_REQUEST:
-                break;
-            case NOTIFY_ONLY_PULL_REQUEST:
-                return;
             default:
                 break;
         }
 
     }
 
-    protected function singleNotification($friend, $message)
+    protected function readNotification($type, $content, $from, $date)
     {
-        $pusher = $this->container->pusher;
-        if ($friend) {
-            $pusher->trigger($friend, 'groups-work', $message);
-        }
+        return  [
+            'type' => $type,
+            'content' => is_array($content) ? join(',', $content) : $content,
+            'from' => is_array($from) ? join(',', $from) : $from,
+            'date' => $date
+        ];
     }
 }
