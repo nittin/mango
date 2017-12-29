@@ -1,6 +1,6 @@
 <?php
 
-define('NOTIFY_WITH_PULL_REQUEST', 0);
+define('NOTIFY_PULL', 0);
 define('NOTIFY_INSTANT', 1);
 
 define('RELATE_TYPE_USER', 0);

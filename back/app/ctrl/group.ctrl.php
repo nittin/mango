@@ -57,7 +57,7 @@ class GroupController extends Controller
             ]);
         }, explode(',', $input['members']));
         $this->pushNotification($input['members'],
-            NOTIFY_WITH_PULL_REQUEST,
+            NOTIFY_PULL,
             1,
             CHANNEL_GROUP,
             [$this->container->me, $group['id']],
@@ -68,7 +68,17 @@ class GroupController extends Controller
 
     public function update($request, $response)
     {
+        $input = $request->getParsedBody();
+        $now = (new DateTime())->getTimestamp() * 1000;
 
+        $group = Group::find($input['id']);
+        $group->description = $input['description'];
+        $group->theme = $input['theme'];
+        $group->save();
+        $members = $group->members()->get()->map(function($i){return $i->id;})->toArray();
+        $this->pushNotification($members, NOTIFY_PULL, 2, CHANNEL_GROUP, [$this->container->me, $group['id']], [MEAN_A_USER, MEAN_A_GROUP]);
+        $response->write(json_encode(array('success' => true)));
+        return $response;
     }
 
     public function listPost($request, $response)

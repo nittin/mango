@@ -18,5 +18,6 @@ class Notification extends Model
         'meaning',
         'status'
     ];
+    protected $hidden = ['user'];
     public $timestamps = true;
 }

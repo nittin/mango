@@ -77,8 +77,15 @@ class UserController extends Controller
 
     public function pullNotifications($request, $response)
     {
-        $notifications = User::find($this->container->me)->notifications();
-
+        $notifications = User::find($this->container->me)->notifications()->limit(100)->get()->map(function ($i){
+            return [
+                'channel' => $i->channel,
+                'template' => $i->template,
+                'mention' => $this->readNotification($i->mention, $i->meaning),
+                'status' => $i->status,
+                'date' => $i->date->getTimestamp(),
+            ];
+        });
         $response->write($notifications->toJson());
         return $response;
     }
