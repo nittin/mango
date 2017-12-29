@@ -29,7 +29,7 @@ class Controller
         }
     }
 
-    protected function pushNotification($friends, $method, $type, $channel, $content, $from)
+    protected function pushNotification($friends, $method, $template, $channel, $mention, $meaning)
     {
         if (!$friends) {
             return;
@@ -41,37 +41,32 @@ class Controller
 
         switch ($method) {
             case NOTIFY_WITH_PULL_REQUEST:
-            case NOTIFY_WITHOUT_PULL_REQUEST:
-                User::whereIn('id', $friend_array)->notifications()->create([
-                    'type' => $type,
-                    'content' => is_array($content) ? join(',', $content) : $content,
-                    'from' => is_array($from) ? join(',', $from) : $from,
+                User::whereIn('id', $friend_array)->get()->notifications()->create([
+                    'template' => $template,
+                    'channel' => $channel,
+                    'mention' => is_array($mention) ? join(',', $mention) : $mention,
+                    'meaning' => is_array($meaning) ? join(',', $meaning) : $meaning,
                     'status' => 0,
                 ]);
-                break;
-        }
-
-        switch ($method) {
-            case NOTIFY_ONLY_MESSAGE:
-            case NOTIFY_WITH_PULL_REQUEST:
                 foreach ($friend_array as $f) {
-                    $message = $this->readNotification($type, $content, $from, $now);
+                    $message = ['command' => CMD_PULL_NOW, 'date' => $now];
                     $pusher->trigger($f, $channel, $message);
                 }
                 break;
-            default:
+
+            case NOTIFY_INSTANT:
+
+                foreach ($friend_array as $f) {
+                    $message = [
+                        'command' => CMD_SHOW_NOW,
+                        'template' => $template,
+                        'mention' => is_array($mention) ? join(',', $mention) : $mention,
+                        'meaning' => is_array($meaning) ? join(',', $meaning) : $meaning,
+                        'date' => $now
+                    ];
+                    $pusher->trigger($f, $channel, $message);
+                }
                 break;
         }
-
-    }
-
-    protected function readNotification($type, $content, $from, $date)
-    {
-        return  [
-            'type' => $type,
-            'content' => is_array($content) ? join(',', $content) : $content,
-            'from' => is_array($from) ? join(',', $from) : $from,
-            'date' => $date
-        ];
     }
 }

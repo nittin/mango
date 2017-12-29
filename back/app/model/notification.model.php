@@ -12,9 +12,10 @@ class Notification extends Model
     protected $dateFormat = 'U000';
     protected $fillable = [
         'user',
-        'type',
-        'content',
-        'from',
+        'channel',
+        'template',
+        'mention',
+        'meaning',
         'status'
     ];
     public $timestamps = true;

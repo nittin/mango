@@ -56,15 +56,12 @@ class GroupController extends Controller
                 'date' => $now
             ]);
         }, explode(',', $input['members']));
-        $this->pushNotification($input['members'], NOTIFY_WITH_PULL_REQUEST, 10, CHANNEL_USER_SIGN, '{0} invite you join {1}', [[
-            'display' => $this->container->me,
-            'value' => $this->container->me,
-            'type' => RELATE_TYPE_USER,
-        ],[
-            'display' => $group['name'],
-            'value' => $group['id'],
-            'type' => RELATE_TYPE_GROUP,
-        ]]);
+        $this->pushNotification($input['members'],
+            NOTIFY_WITH_PULL_REQUEST,
+            1,
+            CHANNEL_GROUP,
+            [$this->container->me, $group['id']],
+            [MEAN_A_USER, MEAN_A_GROUP]);
         $response->write(json_encode(array('success' => true, 'id' => $group['id'])));
         return $response;
     }

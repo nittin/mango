@@ -51,11 +51,8 @@ class UserController extends Controller
             'friends' => $input['friends']
         ]);
         /* push notification to all friends*/
-        $this->pushNotification($input['friends'], NOTIFY_ONLY_MESSAGE, 1, CHANNEL_USER_SIGN, '{0} has join', [[
-            'display' => $user['name'],
-            'value' => $user['id'],
-            'type' => RELATE_TYPE_USER,
-        ]]);
+        $this->pushNotification($input['friends'], NOTIFY_INSTANT, 1, CHANNEL_USER, $user['id'],MEAN_A_USER);
+
         $response->write($this->message['200']);
         return $response;
     }
@@ -72,12 +69,9 @@ class UserController extends Controller
             'friends' => $input['friends']
         ]);
 
-        $this->pushNotification($input['friends'], NOTIFY_ONLY_MESSAGE, 2, CHANNEL_USER_SIGN, '{0} has change profile', [[
-            'display' => $input['name'],
-            'value' => $this->container->me,
-            'type' => RELATE_TYPE_USER,
-        ]]);
-        $response->write(json_encode(['success' => true, 'id' => $this->container->me]));
+        $this->pushNotification($input['friends'], NOTIFY_INSTANT, 2, CHANNEL_USER, $this->container->me,MEAN_A_USER);
+
+        $response->write($this->message['200']);
         return $response;
     }
 
