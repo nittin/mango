@@ -53,7 +53,7 @@ class UserController extends Controller
         /* push notification to all friends*/
         $this->pushNotification($input['friends'], NOTIFY_INSTANT, 1, CHANNEL_USER, $user['id'],MEAN_A_USER);
 
-        $response->write($this->message['200']);
+        $response->write(json_encode($this->message['200']));
         return $response;
     }
 
@@ -71,7 +71,7 @@ class UserController extends Controller
 
         $this->pushNotification($input['friends'], NOTIFY_INSTANT, 2, CHANNEL_USER, $this->container->me,MEAN_A_USER);
 
-        $response->write($this->message['200']);
+        $response->write(json_encode($this->message['200']));
         return $response;
     }
 

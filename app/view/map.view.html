@@ -74,32 +74,31 @@
             </md-tab>
             <md-tab>
                 <md-tab-body>
+                    <map-group layout="column" layout-fill></map-group>
+                </md-tab-body>
+            </md-tab>
+            <md-tab>
+                <md-tab-body>
                     <div layout="column" layout-fill>
                         <md-toolbar class="md-tall">
                             <div flex></div>
                             <div class="md-toolbar-tools">
-                                <h2 flex md-truncate>{{inSmallScreen?me.first_name:me.name}}'s groups</h2>
-                                <md-button class="md-fab btn-middle" aria-label="Create group"
-                                           ng-class="{active:group.adding}" ng-click="group.adding=true"></md-icon>
-                                    <md-icon aria-label="Add" class="material-icons">add</md-icon>
-                                </md-button>
+
                             </div>
                         </md-toolbar>
                         <md-content flex>
                             <md-list class="list">
                                 <md-subheader class="md-no-sticky">
                                     <div layout="row">
-                                        <span flex>Online groups </span>
+                                        <span flex>Recent</span>
                                     </div>
                                 </md-subheader>
-                                <md-list-item class="md-2-line" ng-repeat="i in group.list|orderBy:'-date'" ng-click="group.select(i)">
-                                    <md-icon class="material-icons md-avatar-icon"
-                                             md-colors="::{backgroundColor: '{{i.theme}}'}">people</md-icon>
+                                <md-list-item class="md-2-line" ng-repeat="i in notification.list|orderBy:'-date'" ng-click="notification.select(i)">
+                                    <md-icon class="material-icons md-avatar-icon">chat bubble</md-icon>
                                     <div class="md-list-item-text">
-                                        <h3 md-truncate>{{i.name}}</h3>
+                                        <h3 translate translate-values="i.mention">{{'notification.'+i.channel+i.template}}</h3>
                                         <p md-truncate>
-                                            <img ng-repeat="j in i.members|limitTo:5" ng-src="{{j.photo.origin}}" class="md-avatar avatar-small">
-                                            <span>{{i.description}}</span>
+                                            <span>{{i.date|date:'short'}}</span>
                                         </p>
                                     </div>
                                     <div class="md-secondary md-icon-button" aria-label="new">

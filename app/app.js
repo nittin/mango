@@ -8,6 +8,7 @@ angular.module('myApp', [
     'ngTouch',
     'ngCordova',
     'uiGmapgoogle-maps',
+    'pascalprecht.translate',
     'angular-carousel',
     'myApp.master',
     'myApp.home',
@@ -18,11 +19,15 @@ angular.module('myApp', [
     'myApp.storage',
     'myApp.back'
 ])
-    .config(function ($locationProvider, $routeProvider, $mdThemingProvider, $httpProvider) {
+    .config(function ($locationProvider, $routeProvider, $mdThemingProvider, $httpProvider, $translateProvider) {
         $locationProvider.hashPrefix('');
         $routeProvider.otherwise({redirectTo: '/'});
         // $httpProvider.defaults.withCredentials = true;
         $httpProvider.interceptors.push('httpRequestInterceptor');
+        $translateProvider
+            .translations('en', LANG_EN)
+            .translations('vi', LANG_VI)
+            .preferredLanguage('en');
         $mdThemingProvider.theme('lime-dark')
             .primaryPalette('lime')
             .accentPalette('orange')

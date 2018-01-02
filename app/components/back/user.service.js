@@ -14,6 +14,9 @@ angular.module('myApp.back.user-service', [])
         this.getAll = function () {
             return $http.get(environment.user);
         };
+        this.getNotifications = function () {
+            return $http.get(environment.notifications);
+        };
         this.check = function (id) {
             return $http.get(environment.userDetail + id);
         };

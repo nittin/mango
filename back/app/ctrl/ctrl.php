@@ -29,6 +29,16 @@ class Controller
         }
     }
 
+    protected function cURL($ch_url)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $ch_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+        $ch_send = curl_exec($ch);
+        curl_close($ch);
+        return $ch_send;
+    }
     protected function pushNotification($friends, $method, $template, $channel, $mention, $meaning)
     {
         if (!$friends) {
@@ -70,8 +80,11 @@ class Controller
     {
         $mention_arr =is_array($mention) ? $mention : explode(',', (string)$mention);
         $meaning_arr = is_array($meaning) ? $meaning : explode(',', (string)$meaning);
-        return array_map(function ($a, $b) {
+        $result = (object)[];
+        array_map(function ($a, $b, $i) use ($result){
+            $result->{"$b$i"} = $a;
             return ['id' => $a, 'type' => $b];
-        }, $mention_arr, $meaning_arr);
+        }, $mention_arr, $meaning_arr, array_keys($meaning_arr));
+        return $result;
     }
 }

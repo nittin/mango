@@ -13,7 +13,6 @@ angular.module('myApp.map', ['ngRoute'])
                         d.reject();
                         $location.path('/');
                     };
-                    console.log('hello '+$localStorage.get(STORAGE_LOGIN));
                     if ($localStorage.get(STORAGE_LOGIN)) {
                         user.fb('/me?fields=id,name').then(function (res) {
                             console.log('its me ');
@@ -197,6 +196,21 @@ angular.module('myApp.map', ['ngRoute'])
                 this.open(group);
             }
         };
+        $scope.notification = {
+            first: true,
+            init: function () {
+                user.getNotifications().then(function (res) {
+                    res.data.forEach(function (i) {
+
+                    });
+                    $scope.notification.list = res.data;
+                });
+            },
+            list: [],
+            select: function (group) {
+                this.open(group);
+            }
+        };
         $rootScope.direct = {
             current: null,
             toMe: function () {
@@ -322,6 +336,9 @@ angular.module('myApp.map', ['ngRoute'])
 
             return d.promise;
         };
+        var done = function () {
+
+        };
         $q.all([map(), center(), fb()]).then(function (thread) {
             var position = thread[1];
             var fbInfo = thread[2];
@@ -416,6 +433,7 @@ angular.module('myApp.map', ['ngRoute'])
                     startSubscribe();
                 }, 2000);
                 $scope.group.init();
+                $scope.notification.init();
             });
             $rootScope.progress.all = true;
         });

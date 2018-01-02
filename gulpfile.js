@@ -18,6 +18,7 @@ var src = {
     css: 'app/**/*.css',
     less: 'app/app.less',
     js: [
+        'app/constant/**/*.js',
         'app/app.js',
         'app/components/**/*.js',
         'app/ctrl/**/*.js'

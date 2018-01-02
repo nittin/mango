@@ -14,9 +14,10 @@ angular.module('myApp.home', ['ngRoute'])
                                 $localStorage.set(STORAGE_ID, res.data.id);
                                 $localStorage.set(STORAGE_TOKEN, res.data.token);
                                 $localStorage.set(STORAGE_LOGIN, true);
-                                if (!$mobile.exist) {
-                                    window.location.href = FB_RE_URL + 'map';
-                                }
+                            }
+                        }).finally(function () {
+                            if (!$mobile.exist) {
+                                window.location.href = FB_RE_URL + 'map';
                             }
                         });
                     };

@@ -14,6 +14,7 @@ angular.module('myApp.back', [
         key: ENVIRONMENT,
         oauth: BACK_HOST_NAME + 'back/auth',
         user: BACK_HOST_NAME + 'back/users',
+        notifications: BACK_HOST_NAME + 'back/notifications',
         userDetail: BACK_HOST_NAME + 'back/users/',
         cropPhoto: BACK_HOST_NAME + 'back/photo?url=',
         markerPhoto: BACK_HOST_NAME + 'back/assets/users/marker/',

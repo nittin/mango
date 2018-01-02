@@ -20,7 +20,7 @@ class User extends Model
         'device',
         'friends'
     ];
-    protected $dateFormat = 'U000';
+    protected $dateFormat = 'U';
     protected $hidden = ['pivot'];
     public $timestamps = true;
 

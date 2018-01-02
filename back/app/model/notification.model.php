@@ -9,7 +9,7 @@ class Notification extends Model
     const CREATED_AT = 'date';
     const UPDATED_AT = 'date';
     protected $table = 'notification';
-    protected $dateFormat = 'U000';
+    protected $dateFormat = 'U';
     protected $fillable = [
         'user',
         'channel',
