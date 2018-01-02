@@ -25,9 +25,8 @@ $app->group('', function () {
     $this->post('/groups/post', 'GroupController:newPost');
     $this->put('/groups/post', 'GroupController:editPost');
     $this->get('/fb/me', 'FBController:me');
+    $this->get('/fb/valid', 'FBController:valid');
 
 })->add(new AuthComponent($container));
 
-$app->group('', function () {
-    $this->post('/auth', 'FBController:auth');
-})->add(new FBComponent($container));
+$app->post('/auth', 'FBController:auth');

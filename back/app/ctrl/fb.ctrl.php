@@ -15,34 +15,22 @@ class FBController extends Controller
         $data = $request->getParsedBody();
         $code = $data['code'];
         $environment = $data['env'] == 'ci' ? 'ci' : 'product';
-        $fb_setting = $this->container->get('settings')['fb'];
-        $fb_app = $fb_setting[$environment]['app'];
-        $fb_secret = $fb_setting[$environment]['secret'];
-        $fb_redirect = $fb_setting[$environment]['redirect'];
+        $redirectUri = $this->container->get('settings')['fb'][$environment];
+        $client = $this->container->fb[$environment]->getOAuth2Client();
 
         // Obtain User Token
-        $fb_user_token = json_decode($this->cURL("https://graph.facebook.com/v2.9/oauth/access_token"
-            . "?client_id=$fb_app"
-            . "&client_secret=$fb_secret"
-            . "&redirect_uri=$fb_redirect"
-            . "&code=$code"
-        ), true);
+        $d_token = $client->getAccessTokenFromCode($code, $redirectUri)->getValue();
 
-        $d_token = $fb_user_token['access_token'];
         if (!$d_token) { //Stop if check 'user code' fail
             $response->write(json_encode($this->message['401']));
             return $response->withStatus(401);
         }
-        // Get user info from this Token
-        $fb_check_user = json_decode($this->cURL("https://graph.facebook.com/debug_token"
-            . "?input_token=$d_token"
-            . "&access_token=$fb_app|$fb_secret"
-        ), true);
-//        $user = $fb->get("/debug_token?input_token=$d_token", "$fb_app|$fb_secret");
+        // Get user info from this Token ($d_token)
+        $fb_meta = $client->debugToken($d_token);
         /* Redirect browser */
-        $d_user_id = $fb_check_user['data']['user_id'];
-        $d_expire = $fb_check_user['data']['expires_at'] * 1000;
-        $d_scope = implode(',', $fb_check_user['data']['scopes']);
+        $d_user_id = $fb_meta->getUserId();
+        $d_expire = $fb_meta->getExpiresAt();
+        $d_scope = implode(',', $fb_meta->getScopes());
 
         // get photo
         $fb_user_photo_url = "https://graph.facebook.com/$d_user_id/picture?width=200&height=200&access_token=$d_token";
@@ -71,6 +59,19 @@ class FBController extends Controller
             return $response;
         } catch (FacebookResponseException $e) {
             $response->write(json_encode($this->message['401']));
+            return $response;
+        } catch (FacebookSDKException $e) {
+            $response->write(json_encode($this->message['401']));
+            return $response;
+        }
+
+    }
+
+    public function valid($request, $response)
+    {
+        try {
+            $meta = $this->container->fb_app->getOAuth2Client()->debugToken($this->container->token);
+            $response->write(json_encode(['valid' => $meta->getIsValid()]));
             return $response;
         } catch (FacebookSDKException $e) {
             $response->write(json_encode($this->message['401']));

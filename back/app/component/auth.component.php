@@ -8,7 +8,6 @@ use App\Models\User;
 class AuthComponent extends Component
 {
 
-
     public function __invoke($request, $response, $next)
     {
         /** Check user authenticate **/
@@ -36,8 +35,5 @@ class AuthComponent extends Component
                 return $next($request, $response);
             }
         }
-
-
     }
-
 }

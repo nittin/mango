@@ -47,8 +47,8 @@ $app = new \Slim\App([
             'world' => 'world-channel'
         ],
         'fb' => [
-            'product' => ['app' => $_KEY_FB_APP, 'secret' => $_KEY_FB_SECRET, 'redirect' => urlencode($_KEY_FB_REDIRECT)],
-            'ci' => ['app' => $_KEY_FB_CI_APP, 'secret' => $_KEY_FB_CI_SECRET, 'redirect' => urlencode($_KEY_FB_CI_REDIRECT)],
+            'ci' => $_KEY_FB_CI_REDIRECT,
+            'product' => $_KEY_FB_REDIRECT,
         ]
     ]
 ]);
