@@ -11,5 +11,9 @@ angular.module('myApp.back.session-storage-service', [])
             return angular.fromJson(value);
         };
 
+        this.clear = function () {
+            localStorage.clear();
+        };
+
         return this;
     });

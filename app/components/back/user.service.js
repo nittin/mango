@@ -11,6 +11,9 @@ angular.module('myApp.back.user-service', [])
             var token = $localStorage.get(STORAGE_TOKEN);
             return $http.post(environment.fb, {api: api, token: token, env: environment.key});
         };
+        this.valid = function () {
+            return $http.get(environment.valid);
+        };
         this.getAll = function () {
             return $http.get(environment.user);
         };

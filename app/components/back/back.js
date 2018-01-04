@@ -23,5 +23,7 @@ angular.module('myApp.back', [
         assets: BACK_HOST_NAME + 'back/assets/img/',
         group: BACK_HOST_NAME + 'back/groups',
         wave: BACK_HOST_NAME + 'back/notify/wave',
-        fb: BACK_HOST_NAME + 'back/fb'
+        fb: BACK_HOST_NAME + 'back/fb',
+        valid: BACK_HOST_NAME + 'back/fb/valid',
+        me: BACK_HOST_NAME + 'back/fb/me',
     });

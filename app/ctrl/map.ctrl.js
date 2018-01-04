@@ -14,13 +14,12 @@ angular.module('myApp.map')
                         $location.path('/');
                     };
                     if ($localStorage.get(STORAGE_LOGIN)) {
-                        user.fb('/me?fields=id,name').then(function (res) {
-                            console.log('its me ');
+                        user.valid().then(function (res) {
                             d.resolve(true);
                         }, function (e) {
-                            // localStorage.clear();
-                            console.log('its should back ' + angular.toJson(e));
-                            // goHome(e);
+                            console.log('token invalid!');
+                            $localStorage.clear();
+                            goHome(e);
                         });
                     }
                     else { goHome(); }
