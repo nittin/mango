@@ -6,9 +6,14 @@ angular.module('myApp.back.local-storage-service', [])
         this.set = function (key, value) {
             sessionStorage.setItem(key, angular.toJson(value));
         };
+
         this.get = function (key) {
             var value = sessionStorage.getItem(key);
             return angular.fromJson(value);
+        };
+
+        this.clear = function () {
+            sessionStorage.clear();
         };
 
         return this;

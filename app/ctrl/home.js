@@ -1,3 +1,3 @@
 'use strict';
 
-angular.module('myApp.home', ['ngRoute', 'ngSanitize']);
+angular.module('myApp.home', ['ngRoute']);

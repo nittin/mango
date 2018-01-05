@@ -8,7 +8,7 @@ angular.module('myApp.home')
             controller: 'HomeCtrl',
             controllerAs: '$ctrl',
             resolve: {
-                factory: function ($q, $rootScope, $location, $localStorage, user, $mobile) {
+                factory: function ($q, $rootScope, $location, $localStorage, $sessionStorage, user, $mobile) {
                     var auth = function (code) {
                         user.auth(code).then(function (res) {
                             if (res.data && res.data.id) {
@@ -33,15 +33,17 @@ angular.module('myApp.home')
                     var code = reg ? reg[2] : null;
                     if (code) {
                         window.opener.postMessage(code, '*');
-                        reg = new RegExp("[?&]state(=([^&#]*)|&|#|$)").exec(window.location.href);
-                        var state = reg ? reg[2] : null;
-                        if (!state) {
-                            auth(code);
-                        }
+                        $sessionStorage.set(SESSION_LOGIN_CODE, code);
+                        window.location.href = FB_RE_URL;//refresh url
+                        // reg = new RegExp("[?&]state(=([^&#]*)|&|#|$)").exec(window.location.href);
+                        // var state = reg ? reg[2] : null;
+                        // if (!state) {
+                            // auth(code);
+                        // }
+
                     } else if ($localStorage.get(STORAGE_LOGIN)) {
                         goMap();
                     } else {
-                        $rootScope.connect = 'good';
                         d.resolve(true);
                     }
                     return d.promise;
