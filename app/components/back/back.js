@@ -14,6 +14,9 @@ angular.module('myApp.back', [
         key: ENVIRONMENT,
         oauth: BACK_HOST_NAME + 'back/auth',
         user: BACK_HOST_NAME + 'back/users',
+        signOut: BACK_HOST_NAME + 'back/users/me/out',
+        myProfile: BACK_HOST_NAME + 'back/users/me/profile',
+        myFriends: BACK_HOST_NAME + 'back/users/me/friends',
         notifications: BACK_HOST_NAME + 'back/notifications',
         userDetail: BACK_HOST_NAME + 'back/users/',
         cropPhoto: BACK_HOST_NAME + 'back/photo?url=',
@@ -25,5 +28,5 @@ angular.module('myApp.back', [
         wave: BACK_HOST_NAME + 'back/notify/wave',
         fb: BACK_HOST_NAME + 'back/fb',
         valid: BACK_HOST_NAME + 'back/fb/valid',
-        me: BACK_HOST_NAME + 'back/fb/me',
+        me: BACK_HOST_NAME + 'back/fb/me'
     });

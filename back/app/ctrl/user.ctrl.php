@@ -33,7 +33,7 @@ class UserController extends Controller
     {
         $me = User::find($this->container->me);
         $friends = User::whereIn('id', explode(',', $me['friends']))->get();
-        $response->write($friends->toJson());
+        $response->write($friends->makeHidden('friends')->toJson());
         return $response;
     }
 
@@ -70,6 +70,19 @@ class UserController extends Controller
         ]);
 
         $this->pushNotification($input['friends'], NOTIFY_INSTANT, 2, CHANNEL_USER, $this->container->me,MEAN_A_USER);
+
+        $response->write(json_encode($this->message['200']));
+        return $response;
+    }
+    public function signOut($request, $response)
+    {
+
+        unset ($_SESSION['token']);
+        unset ($_SESSION['user']);
+        unset ($_SESSION['environment']);
+
+        $me = User::find($this->container->me);
+        $this->pushNotification($me['friends'], NOTIFY_INSTANT, 3, CHANNEL_USER, $this->container->me,MEAN_A_USER);
 
         $response->write(json_encode($this->message['200']));
         return $response;

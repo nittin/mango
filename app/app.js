@@ -27,7 +27,7 @@ angular.module('myApp', [
         $translateProvider
             .translations('en', LANG_EN)
             .translations('vi', LANG_VI)
-            .preferredLanguage('en');
+            .preferredLanguage('vi');
         $mdThemingProvider.theme('lime-dark')
             .primaryPalette('lime')
             .accentPalette('orange')

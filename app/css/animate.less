@@ -23,6 +23,29 @@
     transform: @type;
 }
 
+.delay(@time) {
+    -webkit-transition-delay: @time;
+    -moz-transition-delay: @time;
+    -ms-transition-delay: @time;
+    -o-transition-delay: @time;
+    transition-delay: @time;
+}
+
+.transit-fade {
+    .transit(all, 500ms);
+    &.ng-enter {
+        opacity: 0;
+        &.ng-enter-active {
+            opacity: 1;
+        }
+    }
+    &.ng-leave {
+        .transit-fade.ng-enter.ng-enter-active;
+        &.ng-leave-active {
+            .transit-fade.ng-enter;
+        }
+    }
+}
 .transit-up-down {
     .transit(all, 500ms);
     &.ng-enter {
@@ -53,6 +76,23 @@
         }
     }
 }
+.transit-fade-down-up {
+    .transit(all, 500ms);
+    &.ng-enter {
+        opacity: 0;
+        .transform(translateY(-100%));
+        &.ng-enter-active {
+            opacity: 1;
+            .transform(translateY(0));
+        }
+    }
+    &.ng-leave {
+        .transit-fade-down-up.ng-enter.ng-enter-active;
+        &.ng-leave-active {
+            .transit-fade-down-up.ng-enter;
+        }
+    }
+}
 .transit-left-right {
     .transit(all, 500ms);
     &.ng-enter {
@@ -67,6 +107,12 @@
             .transit-left-right.ng-enter;
         }
     }
+}
+.delay-1000 {
+   .delay(1000ms);
+}
+.delay-2000 {
+   .delay(2000ms);
 }
 @keyframes up-down {
     0% { margin-top: 0; } 50% { margin-top: -30px; } 100% { margin-top: 0; }

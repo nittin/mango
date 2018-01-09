@@ -3,7 +3,10 @@
  */
 var LANG_EN = {
     welcome: {
-        start: 'Start with Facebook!'
+        hello: 'Hello',
+        start: 'Start with Facebook!',
+        make: 'Welcome to Mango!',
+        comeback: 'Welcome back!'
     },
     notification: {
         group2: '<b>{{user0}}</b> have invited you join group <b>{{group1}}</b>.'

@@ -9,26 +9,8 @@ angular.module('myApp.home')
             controllerAs: '$ctrl',
             resolve: {
                 factory: function ($q, $rootScope, $location, $localStorage, $sessionStorage, user, $mobile) {
-                    var auth = function (code) {
-                        user.auth(code).then(function (res) {
-                            if (res.data && res.data.id) {
-                                $localStorage.set(STORAGE_ID, res.data.id);
-                                $localStorage.set(STORAGE_TOKEN, res.data.token);
-                                $localStorage.set(STORAGE_LOGIN, true);
-                            }
-                        }).finally(function () {
-                            if (!$mobile.exist) {
-                                window.location.href = FB_RE_URL + 'map';
-                            }
-                        });
-                    };
-
                     var d = $q.defer();
-                    var goMap = function () {
-                        d.reject();
-                        $location.path('/map');
-                        // window.location.href = window.location.href.split("?")[0] + 'map';//clear all request params
-                    };
+
                     var reg = new RegExp("[?&]code(=([^&#]*)|&|#|$)").exec(window.location.href);
                     var code = reg ? reg[2] : null;
                     if (code) {
@@ -42,7 +24,8 @@ angular.module('myApp.home')
                         // }
 
                     } else if ($localStorage.get(STORAGE_LOGIN)) {
-                        goMap();
+                        d.reject();
+                        $location.path('/map');
                     } else {
                         d.resolve(true);
                     }
@@ -52,6 +35,49 @@ angular.module('myApp.home')
         });
     })
 
-    .controller('HomeCtrl', function ($rootScope, $scope, $window, $location, $localStorage, $http, $mobile, $cordovaInAppBrowser, user) {
-        this.loginMode = false;
+    .controller('HomeCtrl', function ($rootScope, $scope, $window, $location, $localStorage, $http, $mobile, $sessionStorage, user) {
+        this.me = null;
+        this.friends = null;
+        this.ok = false;
+        this.login = function () {
+            var clientId = FB_APP_ID; //your App ID or API Key
+            var redirect = FB_RE_URL;  //// YOUR CALLBACK URL
+            var display = 'touch';
+            var authorizeUrl = 'https://graph.facebook.com/v2.0/oauth/authorize?';
+            authorizeUrl += 'client_id=' + clientId;
+            authorizeUrl += '&redirect_uri=' + encodeURIComponent(redirect).replace(/'/g, "%27").replace(/"/g, "%22");
+            authorizeUrl += '&display=' + display;
+            authorizeUrl += '&scope=public_profile,email';
+            var target = $mobile.exist ? '_blank' : '_self';
+            var authWindow = window.open(authorizeUrl, target, 'location=yes,clearcache=no,toolbar=yes');
+            if (authWindow.addEventListener) {
+                authWindow.addEventListener('loadstart', function (event) {
+                    if (event.url.indexOf('?code=') >= 0) {
+                        authWindow.close();
+                    }
+                });
+            }
+        };
+        var code = $sessionStorage.get(SESSION_LOGIN_CODE);
+        if (code) {
+            this.auth = true;
+            var self = this;
+            $sessionStorage.clear();
+            user.auth(code).then(function (res) {
+                $localStorage.set(STORAGE_ID, res.data.id);
+                $localStorage.set(STORAGE_TOKEN, res.data.token);
+                $localStorage.set(STORAGE_LOGIN, true);
+                $rootScope.isAuth = true;
+                self.me = res.data;
+                user.friends().then(function (res) {
+                    self.ok = true;
+                    self.friends = res.data;
+                });
+            }, function () {
+                $location.path('/').replace();
+            });
+        }
+        else {
+            this.auth = false;
+        }
     });

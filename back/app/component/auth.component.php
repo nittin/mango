@@ -18,6 +18,7 @@ class AuthComponent extends Component
             $this->container->me = $_SESSION['user'];
             $this->container->environment = $_SESSION['environment'];
             $this->container->fb_app = $this->container->fb[$_SESSION['environment']];
+            $this->container->fb_app->setDefaultAccessToken($_SESSION['token']);
             return $next($request, $response);
         } else {
             $auth = Token::where('token', $token)->get()->first();
@@ -32,6 +33,7 @@ class AuthComponent extends Component
                 $this->container->me = $_SESSION['user'];
                 $this->container->environment = $_SESSION['environment'];
                 $this->container->fb_app = $this->container->fb[$_SESSION['environment']];
+                $this->container->fb_app->setDefaultAccessToken($_SESSION['token']);
                 return $next($request, $response);
             }
         }

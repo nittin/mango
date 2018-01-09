@@ -21,6 +21,8 @@ var src = {
         'app/constant/**/*.js',
         'app/app.js',
         'app/components/**/*.js',
+        'app/ctrl/home.js',
+        'app/ctrl/map.js',
         'app/ctrl/**/*.js'
     ],
     html: 'app/view/**/*.html',

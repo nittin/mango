@@ -22,8 +22,15 @@ class User extends Model
     ];
     protected $dateFormat = 'U';
     protected $hidden = ['pivot'];
+    protected $appends = ['photo'];
+    protected $casts = [
+        'photo' => 'string',
+    ];
     public $timestamps = true;
-
+    public function getPhotoAttribute()
+    {
+        return "http://".$_SERVER['HTTP_HOST']."/back/assets/users/origin/{$this->id}.jpg";
+    }
     public function notifications()
     {
         return $this->hasMany('App\Models\Notification', 'user', 'id');
