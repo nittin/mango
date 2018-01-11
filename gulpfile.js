@@ -42,6 +42,7 @@ var getBuild = function (environment) {
         mobile: 'mobile/www',
         all: 'app.js',
         html: 'build/' + env + '/view/',
+        vendor: 'build/' + env + '/lib/',
         asset: 'build/' + env + '/asset/',
         json: 'build/' + env + '/i18n/',
         oauth: 'build/' + env + '/oauth/',
@@ -74,20 +75,20 @@ var builder = function () {
     var version = prefix + now.toISOString().replace(/T/, ' ').replace(/\..+/, '')
             .replace(/-/g, '').replace(/:/g, '').replace(/ /g, '_');
     var suffix = '?v=app' + version;
-    var vendorStream = {
-        js: gulp.src(mainBowerFiles('**/*.js'))
+    /*var vendorStream = {
+        js: gulp.src(mainBowerFiles('**!/!*.js'))
             .pipe(concat(build.js.vendors))
 
             .pipe(angularFilesort())
             // .pipe(uglify({mangle: false}))
             .pipe(gulp.dest(build.branch))
             .pipe(gulp.dest(build.mobile)),
-        css: gulp.src(mainBowerFiles('**/*.css'))
+        css: gulp.src(mainBowerFiles('**!/!*.css'))
             .pipe(concat(build.css.vendors))
             .pipe(cssmin())
             .pipe(gulp.dest(build.branch))
             .pipe(gulp.dest(build.mobile))
-    };
+    };*/
     var appJs = ['app/env/env.' + this.environment + '.js', 'app/env/env.js'].concat(src.js);
     var appStream = {
         //find init file
@@ -111,26 +112,26 @@ var builder = function () {
     };
     
     var mobileStream = gulp.src(src.mobile);
-
     gulp.src([src.html]).pipe(gulp.dest(build.mobile_html));
     gulp.src([src.json]).pipe(gulp.dest(build.mobile_json));
     gulp.src([src.asset]).pipe(gulp.dest(build.mobile_asset));
     gulp.src(src.index)
-        .pipe(inject(series(vendorStream.js, vendorStream.css),
-            {name: 'inject-bower', ignorePath: build.mobile, addRootSlash: false, addSuffix: suffix}))
+        // .pipe(inject(series(vendorStream.js, vendorStream.css),
+        //     {name: 'inject-bower', ignorePath: build.mobile, addRootSlash: false, addSuffix: suffix}))
         .pipe(inject(series(appStream.js, appStream.css),
             {name: 'inject-app', ignorePath: build.mobile, addRootSlash: false, addSuffix: suffix}))
         .pipe(inject(mobileStream,
             { name: 'inject-mobile', ignorePath: build.mobile, addRootSlash: false, addSuffix: suffix}))
         .pipe(gulp.dest(build.mobile));
 
+    gulp.src(mainBowerFiles()).pipe(gulp.dest(build.vendor));
     gulp.src([src.html]).pipe(gulp.dest(build.html));
     gulp.src([src.json]).pipe(gulp.dest(build.json));
     gulp.src([src.asset]).pipe(gulp.dest(build.asset));
     gulp.src([src.oauth]).pipe(gulp.dest(build.oauth));
     return gulp.src(src.index)
-        .pipe(inject(series(vendorStream.js, vendorStream.css),
-            {name: 'inject-bower', ignorePath: build.mobile, addRootSlash: false, addSuffix: suffix}))
+        // .pipe(inject(series(vendorStream.js, vendorStream.css),
+        //     {name: 'inject-bower', ignorePath: build.mobile, addRootSlash: false, addSuffix: suffix}))
         .pipe(inject(series(appStream.js, appStream.css),
             {name: 'inject-app', ignorePath: build.mobile, addRootSlash: false, addSuffix: suffix}))
         .pipe(gulp.dest(build.branch));
