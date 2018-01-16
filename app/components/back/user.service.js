@@ -20,6 +20,12 @@ angular.module('myApp.back.user-service', [])
         this.getAll = function () {
             return $http.get(environment.user);
         };
+        this.myProfile = function () {
+            return $http.get(environment.myProfile);
+        };
+        this.myFriends = function () {
+            return $http.get(environment.myFriends);
+        };
         this.getNotifications = function () {
             return $http.get(environment.notifications);
         };

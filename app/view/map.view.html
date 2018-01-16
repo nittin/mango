@@ -147,11 +147,12 @@
         </md-tabs>
     </md-sidenav>
     <md-content flex layout="column" class="map-area">
-        <div class="map-mask" layout="column" layout-align="center center" ng-if="!$root.progress.all">
-            <md-progress-circular md-mode="determinate" value="{{$root.progress.current}}"></md-progress-circular>
-            <div layout-padding>{{$root.progress.message}}</div>
-        </div>
-        <ui-gmap-google-map flex center="map.center" zoom="map.zoom" bounds="map.bounds" pan="true" events="map.events">
+        <!--<div class="map-mask" layout="column" layout-align="center center" ng-if="!$root.progress.all">-->
+            <!--<md-progress-circular md-mode="determinate" value="{{$root.progress.current}}"></md-progress-circular>-->
+            <!--<div layout-padding>{{$root.progress.message}}</div>-->
+        <!--</div>-->
+        <map-term flex ng-if="!term.allowed" on-agree="term.agree(value)" on-disagree="term.disagree(value)"></map-term>
+        <ui-gmap-google-map ng-if="term.allowed" flex center="map.center" zoom="map.zoom" bounds="map.bounds" pan="true" events="map.events">
             <ui-gmap-markers models="marker.list" coords="'coords'" options="'options'" click="marker.click"
                              doCluster="true" clusterOptions="marker.cluster">
             </ui-gmap-markers>

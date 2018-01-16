@@ -31,6 +31,26 @@ angular.module('myApp.map')
     })
 
     .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $http, $interval, uiGmapIsReady, user, notify, environment, $group, $mdColorPalette) {
+        $scope.term = {
+            allowed: $localStorage.get(STORAGE_LOCATION_ALLOWED),
+            position: null,
+            agree: function () {
+                if (navigator.geolocation) {
+                    navigator.geolocation.watchPosition(function (position) {
+                        $localStorage.set(STORAGE_LOCATION_ALLOWED, true);
+                        $scope.term.position = position.coords;
+                        $scope.term.allowed = true;
+                    }, function (error) {
+                        if (error.code === error.PERMISSION_DENIED) {
+                            $localStorage.set(STORAGE_LOCATION_ALLOWED, false);
+                        }
+                    });
+                }
+            },
+            disagree: function (value) {
+
+            }
+        };
         $scope.user = {id: undefined, name: undefined, center: {latitude: 45, longitude: 45}};
         $scope.map = {
             center: {latitude: $scope.user.center.latitude, longitude: $scope.user.center.longitude},
@@ -292,7 +312,6 @@ angular.module('myApp.map')
             var d = $q.defer();
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function (position) {
-                    d.notify('Your location is detected');
                     d.resolve(position.coords);
                 }, function () {
                     d.reject();
@@ -304,53 +323,40 @@ angular.module('myApp.map')
         };
         var me = function () {
             var d = $q.defer();
-            user.fb('/me?fields=name,id,picture{url},cover,first_name').then(
+            user.myProfile().then(
+                function (res) {d.resolve(res.data);},
+                function (e) {d.reject(e);});
+            return d.promise;
+        };
+        var friends = function () {
+            var d = $q.defer();
+            user.myFriends().then(
                 function (res) {
-                    var meData = res.data;
-                    d.notify('Your info is ready');
-                    user.fb('/me/friends?fields=name,id,picture{url},cover,first_name').then(
-                        function (response) {
-                            $rootScope.progress.fb = true;
-                            d.notify('Your friends is ready');
-                            d.resolve({me: meData, friends: response.data.data});
-                        });
-
+                    $rootScope.friends = res.data.map(function (i) {
+                        // i.image = i.picture.data.url;
+                        return i;
+                    });
+                    d.resolve(res.data);
                 },
                 function (e) {
                     d.reject(e);
                 });
             return d.promise;
         };
-        var fb = function () {
-            var d = $q.defer();
-            if ($localStorage.get(STORAGE_LOGIN)) {
-                me().then(function (r) {
-                    d.resolve(r)
-                });
-            } else {
-                d.notify('Please log in...');
-                d.reject();
-                $location.path('/');
-            }
-
-            return d.promise;
-        };
         var done = function () {
 
         };
-        $q.all([map(), center(), fb()]).then(function (thread) {
+        $q.all([map(), center(), me(), friends()]).then(function (thread) {
             var position = thread[1];
-            var fbInfo = thread[2];
+            var me = thread[2];
+            var myFriends = thread[3];
 
             $scope.map.center.latitude = position.latitude;
             $scope.map.center.longitude = position.longitude;
-            $rootScope.friends = fbInfo.friends.map(function (i) {
-                i.image = i.picture.data.url;
-                return i;
-            });
+
             var bounds = new google.maps.LatLngBounds();
 
-            var friendChain = fbInfo.friends.map(function (i) { return i.id }).join(',');
+            var friendChain = myFriends.map(function (i) { return i.id }).join(',');
             user.check(friendChain).then(function (r) {
                 var all = r.data;
                 $rootScope.friends.forEach(function (i, index) {
@@ -393,24 +399,24 @@ angular.module('myApp.map')
                     southwest: {latitude: bounds.getSouthWest().lat(), longitude: bounds.getSouthWest().lng()}
                 };
             });
-            user.check(fbInfo.me.id).then(function (r) {
+            user.check(me.id).then(function (r) {
                 var nowUTC = new Date(new Date().toISOString()).getTime();
                 if (r.data[0]) {//Update
-                    user.update(fbInfo.me.id, fbInfo.me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC, friendChain);
+                    user.update(me.id, me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC, friendChain);
                 } else {//Insert
-                    user.create(fbInfo.me.id, fbInfo.me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC, friendChain);
+                    user.create(me.id, me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC, friendChain);
                 }
                 var photo = {
-                    marker: environment.markerPhoto + fbInfo.me.id + '.png',
-                    pin: environment.pinPhoto + fbInfo.me.id + '.png',
-                    origin: environment.originPhoto + fbInfo.me.id + '.jpg'
+                    marker: environment.markerPhoto + me.id + '.png',
+                    pin: environment.pinPhoto + me.id + '.png',
+                    origin: environment.originPhoto + me.id + '.jpg'
                 };
                 $scope.marker.list.push({
                     coords: {latitude: position.latitude, longitude: position.longitude},
                     show: false,
-                    name: fbInfo.me.name,
-                    id: fbInfo.me.id,
-                    fb: fbInfo.me,
+                    name: me.name,
+                    id: me.id,
+                    fb: me,
                     photo: photo,
                     options: {
                         icon: {
@@ -424,8 +430,8 @@ angular.module('myApp.map')
                     status: {},
                     popup: {options: {visible: true}}
                 });
-                $rootScope.me = fbInfo.me;
-                user.current = fbInfo.me;
+                $rootScope.me = me;
+                user.current = me;
                 $rootScope.me.coords = {latitude: position.latitude, longitude: position.longitude};
 
                 $timeout(function () {
