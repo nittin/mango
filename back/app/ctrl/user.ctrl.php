@@ -74,6 +74,20 @@ class UserController extends Controller
         $response->write(json_encode($this->message['200']));
         return $response;
     }
+    public function ping($request, $response)
+    {
+        $input = $request->getParsedBody();
+        User::find($this->container->me)->update([
+            'lat' => $input['lat'],
+            'lng' => $input['lng'],
+            'device' => $input['device']
+        ]);
+
+        $this->pushNotification($input['friends'], NOTIFY_INSTANT, 3, CHANNEL_USER, $this->container->me,MEAN_A_USER);
+
+        $response->write(json_encode($this->message['200']));
+        return $response;
+    }
     public function signOut($request, $response)
     {
 

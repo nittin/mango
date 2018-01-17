@@ -31,21 +31,13 @@ angular.module('myApp.map')
     })
 
     .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $http, $interval, uiGmapIsReady, user, notify, environment, $group, $mdColorPalette) {
+        var _geolocator = null;
+
         $scope.term = {
             allowed: $localStorage.get(STORAGE_LOCATION_ALLOWED),
             position: null,
             agree: function () {
-                if (navigator.geolocation) {
-                    navigator.geolocation.watchPosition(function (position) {
-                        $localStorage.set(STORAGE_LOCATION_ALLOWED, true);
-                        $scope.term.position = position.coords;
-                        $scope.term.allowed = true;
-                    }, function (error) {
-                        if (error.code === error.PERMISSION_DENIED) {
-                            $localStorage.set(STORAGE_LOCATION_ALLOWED, false);
-                        }
-                    });
-                }
+                $scope.term.allowed = true;
             },
             disagree: function (value) {
 
@@ -82,7 +74,7 @@ angular.module('myApp.map')
                     width: 35
                 }]
             },
-
+            bounds: new google.maps.LatLngBounds(),
             click: function (marker, eventName, model) {
                 $scope.marker.open(model);
             },
@@ -242,7 +234,7 @@ angular.module('myApp.map')
             current: 0,
             map: false,
             fb: false,
-            data: false,
+            friends: false,
             all: false
         };
         $scope.submenu = {
@@ -277,6 +269,26 @@ angular.module('myApp.map')
                 }
             }
         };
+        $scope.$watch('term.allowed', function (value) {
+            if (value === true && navigator.geolocation) {
+                _geolocator = navigator.geolocation.getCurrentPosition(function (position) {
+                    $scope.map.center.latitude = position.latitude;
+                    $scope.map.center.longitude = position.longitude;
+
+                    $localStorage.set(STORAGE_LOCATION_ALLOWED, true);
+                    $scope.term.position = position.coords;
+                    user.ping(position.coords.latitude, position.coords.longitude).then(function () {
+
+                    });
+                }, function (error) {
+                    if (error.code === error.PERMISSION_DENIED) {
+                        $localStorage.set(STORAGE_LOCATION_ALLOWED, false);
+                    }
+                });
+            } else {
+                navigator.geolocation.clearWatch(_geolocator);
+            }
+        });
         $scope.$watch('carousel.active', function (i) {
             if (i > -1) {
                 $scope.marker.open($scope.marker.list[i]);
@@ -308,7 +320,7 @@ angular.module('myApp.map')
             });
             return d.promise;
         };
-        var center = function () {
+        var geoLocation = function () {
             var d = $q.defer();
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function (position) {
@@ -324,7 +336,11 @@ angular.module('myApp.map')
         var me = function () {
             var d = $q.defer();
             user.myProfile().then(
-                function (res) {d.resolve(res.data);},
+                function (res) {
+                    res.data.me = true;
+                    $rootScope.me = res.data;
+                    d.resolve(res.data);
+                },
                 function (e) {d.reject(e);});
             return d.promise;
         };
@@ -332,77 +348,54 @@ angular.module('myApp.map')
             var d = $q.defer();
             user.myFriends().then(
                 function (res) {
-                    $rootScope.friends = res.data.map(function (i) {
-                        // i.image = i.picture.data.url;
-                        return i;
-                    });
+                    $rootScope.friends = res.data;
+                    $rootScope.progress.friends = true;
                     d.resolve(res.data);
                 },
-                function (e) {
-                    d.reject(e);
-                });
+                function (e) {d.reject(e);});
             return d.promise;
         };
-        var done = function () {
-
-        };
-        $q.all([map(), center(), me(), friends()]).then(function (thread) {
-            var position = thread[1];
-            var me = thread[2];
-            var myFriends = thread[3];
-
-            $scope.map.center.latitude = position.latitude;
-            $scope.map.center.longitude = position.longitude;
+        $q.all([map(), me(), friends()]).then(function (thread) {
+            var me = thread[1];
+            var myFriends = thread[2];
 
             var bounds = new google.maps.LatLngBounds();
 
-            var friendChain = myFriends.map(function (i) { return i.id }).join(',');
-            user.check(friendChain).then(function (r) {
-                var all = r.data;
-                $rootScope.friends.forEach(function (i, index) {
-                    var target = all.filter(function (j) { return i.id === j.id; })[0];
-                    if (target) {
-                        i.date = parseInt(target.date, 10);
-                        i.device = parseInt(target.device, 10);
-                        i.lat = parseFloat(target.lat);
-                        i.lng = parseFloat(target.lng);
-                        var photo = {
-                            marker: environment.markerPhoto + i.id + '.png',
-                            pin: environment.pinPhoto + i.id + '.png',
-                            origin: environment.originPhoto + i.id + '.jpg'
-                        };
-                        $scope.marker.list.push({
-                            coords: {latitude: i.lat, longitude: i.lng},
-                            show: false,
-                            date: i.date,
-                            name: i.name,
-                            id: i.id,
-                            fb: i,
-                            photo: photo,
-                            options: {
-                                icon: {
-                                    url: photo.marker,
-                                    scaledSize: {
-                                        width: $scope.marker.size.w, height: $scope.marker.size.h
-                                    }
-                                }
-                            },
-                            status: {},
-                            popup: {options: {visible: true}}
-                        });
-                        bounds.extend(new google.maps.LatLng(i.lat, i.lng));
-                    }
-                });
-                bounds.extend(new google.maps.LatLng(position.latitude, position.longitude));
-                $scope.map.bounds = {
-                    northeast: {latitude: bounds.getNorthEast().lat(), longitude: bounds.getNorthEast().lng()},
-                    southwest: {latitude: bounds.getSouthWest().lat(), longitude: bounds.getSouthWest().lng()}
+            $scope.marker.list = myFriends.concat([me]).map(function (i, index) {
+                var photo = {
+                    marker: environment.markerPhoto + i.id + '.png',
+                    pin: environment.pinPhoto + i.id + '.png',
+                    origin: environment.originPhoto + i.id + '.jpg'
                 };
+                bounds.extend(new google.maps.LatLng(parseFloat(i.lat), parseFloat(i.lng)));
+                return {
+                    coords: {latitude: parseFloat(i.lat), longitude: parseFloat(i.lng)},
+                    show: false,
+                    date: i.date,
+                    name: i.name,
+                    id: i.id,
+                    me: i.me,
+                    data: i,
+                    photo: photo,
+                    options: {
+                        icon: {
+                            url: photo.marker,
+                            scaledSize: {width: $scope.marker.size.w, height: $scope.marker.size.h}
+                        }
+                    },
+                    status: {},
+                    popup: {options: {visible: true}}
+                }
             });
-            user.check(me.id).then(function (r) {
+            // bounds.extend(new google.maps.LatLng(position.latitude, position.longitude));
+            $scope.map.bounds = {
+                northeast: {latitude: bounds.getNorthEast().lat(), longitude: bounds.getNorthEast().lng()},
+                southwest: {latitude: bounds.getSouthWest().lat(), longitude: bounds.getSouthWest().lng()}
+            };
+            /*user.check(me.id).then(function (r) {
                 var nowUTC = new Date(new Date().toISOString()).getTime();
                 if (r.data[0]) {//Update
-                    user.update(me.id, me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC, friendChain);
+                    // user.update(me.id, me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC, friendChain);
                 } else {//Insert
                     user.create(me.id, me.name, position.latitude.toString(), position.longitude.toString(), 1, nowUTC, friendChain);
                 }
@@ -412,7 +405,7 @@ angular.module('myApp.map')
                     origin: environment.originPhoto + me.id + '.jpg'
                 };
                 $scope.marker.list.push({
-                    coords: {latitude: position.latitude, longitude: position.longitude},
+                    // coords: {latitude: position.latitude, longitude: position.longitude},
                     show: false,
                     name: me.name,
                     id: me.id,
@@ -432,14 +425,15 @@ angular.module('myApp.map')
                 });
                 $rootScope.me = me;
                 user.current = me;
-                $rootScope.me.coords = {latitude: position.latitude, longitude: position.longitude};
+                // $rootScope.me.coords = {latitude: position.latitude, longitude: position.longitude};
 
-                $timeout(function () {
-                    startSubscribe();
-                }, 2000);
-                $scope.group.init();
-                $scope.notification.init();
-            });
+
+            });*/
+            $timeout(function () {
+                startSubscribe();
+            }, 2000);
+            $scope.group.init();
+            $scope.notification.init();
             $rootScope.progress.all = true;
         });
 
@@ -476,7 +470,6 @@ angular.module('myApp.map')
                 $scope.marker.open(marker);
             }
         };
-
         Pusher.logToConsole = DEBUG;
         var startSubscribe = function () {
             var pusher = new Pusher(PUSHER.key, {

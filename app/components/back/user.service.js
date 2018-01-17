@@ -38,6 +38,9 @@ angular.module('myApp.back.user-service', [])
         this.update = function (id, name, lat, lng, status, date, friends) {
             return $http.put(environment.user, {id: id, name: name, lat: lat, lng: lng, status: status, date: date, device:device.check(), friends: friends});
         };
+        this.ping = function (lat, lng) {
+            return $http.put(environment.myPing, {lat: lat, lng: lng, device:device.check()});
+        };
         this.signOut = function () {
             $localStorage.clear();
             return $http.post(environment.signOut, null);

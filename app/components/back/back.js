@@ -17,6 +17,7 @@ angular.module('myApp.back', [
         signOut: BACK_HOST_NAME + 'back/users/me/out',
         myProfile: BACK_HOST_NAME + 'back/users/me/profile',
         myFriends: BACK_HOST_NAME + 'back/users/me/friends',
+        myPing: BACK_HOST_NAME + 'back/users/me/ping',
         notifications: BACK_HOST_NAME + 'back/notifications',
         userDetail: BACK_HOST_NAME + 'back/users/',
         cropPhoto: BACK_HOST_NAME + 'back/photo?url=',

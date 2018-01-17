@@ -14,6 +14,7 @@ $app->group('', function () {
     $this->get('/users/{id}', 'UserController:contact');
     $this->get('/users/me/profile', 'UserController:me');
     $this->get('/users/me/friends', 'UserController:friends');
+    $this->put('/users/me/ping', 'UserController:ping');
     $this->post('/users/me/out', 'UserController:signOut');
     $this->post('/users', 'UserController:create');
     $this->put('/users', 'UserController:update');

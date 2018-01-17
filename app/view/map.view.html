@@ -42,13 +42,13 @@
                                         <span flex>Online friends </span><b ng-if="$root.progress.all">({{$root.friends.length}})</b>
                                     </div>
                                 </md-subheader>
-                                <md-list-item layout="row" ng-if="!$root.progress.all">
+                                <md-list-item layout="row" ng-if="!$root.progress.friends">
                                     <div flex layout="row" layout-align="center center">
                                         <md-progress-circular class="md-hue-2" md-diameter="20"></md-progress-circular>
                                     </div>
                                 </md-list-item>
                                 <md-list-item ng-repeat="i in $root.friends|orderBy:'-date'" ng-click="openId(i.id)">
-                                    <img alt="{{i.first_name}}" ng-src="{{i.picture.data.url}}" class="md-avatar"/>
+                                    <img alt="{{i.first_name}}" ng-src="{{i.photo}}" class="md-avatar"/>
                                     <p md-truncate>{{inSmallScreen?i.first_name:i.name}}</p>
                                     <md-button class="md-icon-button status-light" md-no-ink aria-label="Status">
                                         <md-icon aria-label="" class="material-icons md-24" ng-class="i.date|old:'old-'">
@@ -151,7 +151,7 @@
             <!--<md-progress-circular md-mode="determinate" value="{{$root.progress.current}}"></md-progress-circular>-->
             <!--<div layout-padding>{{$root.progress.message}}</div>-->
         <!--</div>-->
-        <map-term flex ng-if="!term.allowed" on-agree="term.agree(value)" on-disagree="term.disagree(value)"></map-term>
+        <map-term class="transit-up-down" flex ng-if="!term.allowed" on-agree="term.agree(value)" on-disagree="term.disagree(value)"></map-term>
         <ui-gmap-google-map ng-if="term.allowed" flex center="map.center" zoom="map.zoom" bounds="map.bounds" pan="true" events="map.events">
             <ui-gmap-markers models="marker.list" coords="'coords'" options="'options'" click="marker.click"
                              doCluster="true" clusterOptions="marker.cluster">
