@@ -7,7 +7,7 @@ angular.module('myApp.map')
             templateUrl: 'view/map.view.html',
             controller: 'MapCtrl',
             resolve: {
-                factory: function ($q, $rootScope, $location, $localStorage, user) {
+                factory: function ($q, $rootScope, $location, $localStorage, $mdToast, user) {
                     var d = $q.defer();
                     var goHome = function () {
                         d.reject();
@@ -17,7 +17,8 @@ angular.module('myApp.map')
                         user.valid().then(function (res) {
                             d.resolve(true);
                         }, function (e) {
-                            console.log('token invalid!');
+                            $mdToast.showSimple('Your token is invalid, Sign in again');
+                            $rootScope.signOut();
                             $localStorage.clear();
                             goHome(e);
                         });
@@ -286,7 +287,7 @@ angular.module('myApp.map')
                     }
                 });
             } else {
-                navigator.geolocation.clearWatch(_geolocator);
+                // navigator.geolocation.clearWatch(_geolocator);
             }
         });
         $scope.$watch('carousel.active', function (i) {

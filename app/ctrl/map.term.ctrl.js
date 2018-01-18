@@ -11,9 +11,23 @@ angular.module('myApp.map')
     })
     .controller('MapTermCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $http, $interval, uiGmapIsReady, user, notify, environment, $group, $mdColorPalette) {
         var ctrl = this;
-        this.$onInit = function () {
-        };
+        ctrl.accept = false;
+        this.$onInit = function () { };
+        
         this.broadcast = function () {
-            ctrl.onAgree({});
+            ctrl.accept = true;
+            if (navigator.geolocation) {
+                var a=navigator.geolocation.getCurrentPosition(function (position) {
+                    ctrl.onAgree({value: position.coords});
+                    $scope.$apply();
+                }, function (error) {
+                    if (error.code === error.PERMISSION_DENIED) {
+                        ctrl.accept = false;
+                        $scope.$apply();
+                    }
+                });
+                console.log(a);
+            }
+            //
         };
     });
