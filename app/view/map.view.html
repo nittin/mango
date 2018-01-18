@@ -146,7 +146,7 @@
             <!--<md-progress-circular md-mode="determinate" value="{{$root.progress.current}}"></md-progress-circular>-->
             <!--<div layout-padding>{{$root.progress.message}}</div>-->
         <!--</div>-->
-        <map-term class="transit-up-down" flex ng-if="!term.allowed" on-agree="term.agree(value)" on-disagree="term.disagree(value)"></map-term>
+        <map-term class="transit-down-up" flex ng-if="!term.allowed" on-agree="term.agree(value)" on-disagree="term.disagree(value)"></map-term>
         <ui-gmap-google-map ng-if="term.allowed" flex center="map.center" zoom="map.zoom" bounds="map.bounds" pan="true" events="map.events">
             <ui-gmap-markers models="marker.list" coords="'coords'" options="'options'" click="marker.click"
                              doCluster="true" clusterOptions="marker.cluster">

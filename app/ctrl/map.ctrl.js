@@ -31,18 +31,37 @@ angular.module('myApp.map')
         });
     })
 
-    .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $http, $interval, uiGmapIsReady, user, notify, environment, $group, $mdColorPalette) {
+    .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $sessionStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $http, $interval, uiGmapIsReady, user, notify, environment, $group, $mdColorPalette) {
         var _geolocator = null;
 
         $scope.term = {
-            allowed: $localStorage.get(STORAGE_LOCATION_ALLOWED),
+            d: $q.defer(),
+            allowed: $sessionStorage.get(STORAGE_LOCATION_ALLOWED),
             position: null,
-            agree: function () {
+            agree: function (coords) {
+                $sessionStorage.set(STORAGE_LOCATION_ALLOWED, true);
                 $scope.term.allowed = true;
+                this.d.resolve(coords);
             },
-            disagree: function (value) {
-
+            disagree: function () {
+                $sessionStorage.set(STORAGE_LOCATION_ALLOWED, false);
+                $scope.term.allowed = false;
+            },
+            check: function () {
+                var self = this;
+                if (navigator.geolocation && this.allowed) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        self.d.resolve(position.coords);
+                    }, function (error) {
+                        $sessionStorage.set(STORAGE_LOCATION_ALLOWED, false);
+                        self.d.reject(error);
+                    });
+                } else if(!navigator.geolocation) {
+                    self.d.reject();
+                }
+                return this.d.promise;
             }
+
         };
         $scope.user = {id: undefined, name: undefined, center: {latitude: 45, longitude: 45}};
         $scope.map = {
@@ -270,26 +289,6 @@ angular.module('myApp.map')
                 }
             }
         };
-        $scope.$watch('term.allowed', function (value) {
-            if (value === true && navigator.geolocation) {
-                _geolocator = navigator.geolocation.getCurrentPosition(function (position) {
-                    $scope.map.center.latitude = position.latitude;
-                    $scope.map.center.longitude = position.longitude;
-
-                    $localStorage.set(STORAGE_LOCATION_ALLOWED, true);
-                    $scope.term.position = position.coords;
-                    user.ping(position.coords.latitude, position.coords.longitude).then(function () {
-
-                    });
-                }, function (error) {
-                    if (error.code === error.PERMISSION_DENIED) {
-                        $localStorage.set(STORAGE_LOCATION_ALLOWED, false);
-                    }
-                });
-            } else {
-                // navigator.geolocation.clearWatch(_geolocator);
-            }
-        });
         $scope.$watch('carousel.active', function (i) {
             if (i > -1) {
                 $scope.marker.open($scope.marker.list[i]);
@@ -319,19 +318,6 @@ angular.module('myApp.map')
             }, function (e) {
                 d.reject(e)
             });
-            return d.promise;
-        };
-        var geoLocation = function () {
-            var d = $q.defer();
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    d.resolve(position.coords);
-                }, function () {
-                    d.reject();
-                });
-            } else {
-                d.reject();
-            }
             return d.promise;
         };
         var me = function () {
@@ -389,10 +375,7 @@ angular.module('myApp.map')
                 }
             });
             // bounds.extend(new google.maps.LatLng(position.latitude, position.longitude));
-            $scope.map.bounds = {
-                northeast: {latitude: bounds.getNorthEast().lat(), longitude: bounds.getNorthEast().lng()},
-                southwest: {latitude: bounds.getSouthWest().lat(), longitude: bounds.getSouthWest().lng()}
-            };
+
             /*user.check(me.id).then(function (r) {
                 var nowUTC = new Date(new Date().toISOString()).getTime();
                 if (r.data[0]) {//Update
@@ -436,6 +419,16 @@ angular.module('myApp.map')
             $scope.group.init();
             $scope.notification.init();
             $rootScope.progress.all = true;
+            $scope.term.check().then(function (coords) {
+                user.ping(coords.latitude, coords.longitude).then(function () {});
+                $scope.map.center.latitude = coords.latitude;
+                $scope.map.center.longitude = coords.longitude;
+                $scope.term.position = coords;
+            });
+            $scope.map.bounds = {
+                northeast: {latitude: bounds.getNorthEast().lat(), longitude: bounds.getNorthEast().lng()},
+                southwest: {latitude: bounds.getSouthWest().lat(), longitude: bounds.getSouthWest().lng()}
+            };
         });
 
         var debounce = function (func, wait, context) {
