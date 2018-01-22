@@ -32,8 +32,6 @@ angular.module('myApp.map')
     })
 
     .controller('MapCtrl', function ($rootScope, $scope, $localStorage, $sessionStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $http, $interval, uiGmapIsReady, user, notify, environment, $group, $mdColorPalette) {
-        var _geolocator = null;
-
         $scope.term = {
             d: $q.defer(),
             allowed: $sessionStorage.get(STORAGE_LOCATION_ALLOWED),
@@ -52,16 +50,18 @@ angular.module('myApp.map')
                 if (navigator.geolocation && this.allowed) {
                     navigator.geolocation.getCurrentPosition(function (position) {
                         self.d.resolve(position.coords);
-                    }, function (error) {
+                    }, function () {
                         $sessionStorage.set(STORAGE_LOCATION_ALLOWED, false);
-                        self.d.reject(error);
+                        self.d.reject();
                     });
                 } else if(!navigator.geolocation) {
                     self.d.reject();
                 }
                 return this.d.promise;
-            }
+            },
+            changed: function (value) {
 
+            }
         };
         $scope.user = {id: undefined, name: undefined, center: {latitude: 45, longitude: 45}};
         $scope.map = {
@@ -116,7 +116,7 @@ angular.module('myApp.map')
                 }
                 if (!marker.distance && !marker.me) {
                     direction.service.route({
-                        origin: new google.maps.LatLng($rootScope.me.coords.latitude, $rootScope.me.coords.longitude),
+                        origin: new google.maps.LatLng($rootScope.me.lat, $rootScope.me.lng),
                         destination: new google.maps.LatLng(marker.coords.latitude, marker.coords.longitude),
                         travelMode: 'DRIVING'
                     }, function (response, status) {
@@ -235,8 +235,12 @@ angular.module('myApp.map')
 
                     });
                     $scope.notification.list = res.data;
+                    $scope.notification.count = res.data.filter(function (i) {
+                        return i.status === 0;
+                    }).length;
                 });
             },
+            count: 0,
             list: [],
             select: function (group) {
                 this.open(group);
@@ -470,7 +474,7 @@ angular.module('myApp.map')
                 cluster: PUSHER.cluster,
                 encrypted: true
             });
-            var myChannel = $rootScope.me.id;
+            var myChannel = $rootScope.me.id.toString();
             var userChannel = pusher.subscribe(myChannel);
             var worldChannel = pusher.subscribe('world-channel');
             userChannel.bind('user-online', function (data) {

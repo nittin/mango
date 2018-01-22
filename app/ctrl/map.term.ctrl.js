@@ -12,12 +12,15 @@ angular.module('myApp.map')
     .controller('MapTermCtrl', function ($rootScope, $scope, $localStorage, $mdSidenav, $mdMedia, $mdToast, $q, $timeout, $http, $interval, uiGmapIsReady, user, notify, environment, $group, $mdColorPalette) {
         var ctrl = this;
         ctrl.accept = false;
-        this.$onInit = function () { };
+        ctrl.init = false;
+        this.$onInit = function () {
+            ctrl.init = true;
+        };
         
         this.broadcast = function () {
             ctrl.accept = true;
             if (navigator.geolocation) {
-                var a=navigator.geolocation.getCurrentPosition(function (position) {
+                navigator.geolocation.getCurrentPosition(function (position) {
                     ctrl.onAgree({value: position.coords});
                     $scope.$apply();
                 }, function (error) {
@@ -26,8 +29,6 @@ angular.module('myApp.map')
                         $scope.$apply();
                     }
                 });
-                console.log(a);
             }
-            //
         };
     });

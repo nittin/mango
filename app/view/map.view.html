@@ -14,8 +14,10 @@
                 <md-icon aria-label="Group" class="material-icons md-24">people</md-icon>
             </md-button>
 
-            <md-button class="md-icon-button" ng-class="{active:submenu.active===2}" ng-click="submenu.active=2">
+            <md-button class="md-icon-button" aria-label="Notification" ng-class="{active:submenu.active===2}"
+                       ng-click="submenu.active=2">
                 <md-icon aria-label="Friend" class="material-icons md-24">person_pin</md-icon>
+                <div class="notification-top transit-fade" ng-if="notification.count>0">{{notification.count}}</div>
             </md-button>
         </div>
     </div>
@@ -27,12 +29,9 @@
                         <md-toolbar class="md-tall">
                             <div flex></div>
                             <div class="md-toolbar-tools">
-                                <h2 flex md-truncate>{{inSmallScreen?me.first_name:me.name}}'s friends</h2>
-                                <md-button class="md-icon-button" ng-click="openId($root.me.id)" ng-disabled="!$root.progress.all"
-                                           aria-label="Find me">
-                                    <md-icon aria-label="Friend" class="material-icons md-24">face</md-icon>
-                                    <md-tooltip md-delay="400" md-direction="right">Find me</md-tooltip>
-                                </md-button>
+                                <h2 flex md-truncate>{{inSmallScreen?me.first_name:me.name}}</h2>
+                                <md-switch md-invert ng-model="term.allowed" ng-change="term.changed(term.allowed)">
+                                </md-switch>
                             </div>
                         </md-toolbar>
                         <md-content flex>
@@ -146,12 +145,12 @@
             <!--<md-progress-circular md-mode="determinate" value="{{$root.progress.current}}"></md-progress-circular>-->
             <!--<div layout-padding>{{$root.progress.message}}</div>-->
         <!--</div>-->
-        <map-term class="transit-down-up" flex ng-if="!term.allowed" on-agree="term.agree(value)" on-disagree="term.disagree(value)"></map-term>
-        <ui-gmap-google-map ng-if="term.allowed" flex center="map.center" zoom="map.zoom" bounds="map.bounds" pan="true" events="map.events">
+        <ui-gmap-google-map flex center="map.center" zoom="map.zoom" bounds="map.bounds" pan="true" events="map.events">
             <ui-gmap-markers models="marker.list" coords="'coords'" options="'options'" click="marker.click"
                              doCluster="true" clusterOptions="marker.cluster">
             </ui-gmap-markers>
         </ui-gmap-google-map>
+        <map-term class="form transit-left-right" ng-if="!term.allowed" on-agree="term.agree(value)" on-disagree="term.disagree(value)"></map-term>
         <div class="cards-swipe cards-swipe-bottom transit-up-down" ng-if="carousel.active!==-1"
              ng-class="{detail:carousel.detail}" ng-init="carousel.detail=null;carousel.lock=false">
             <ul class="cards-wrap" rn-carousel rn-carousel-index="carousel.active"
@@ -177,13 +176,13 @@
                             </div>
                             <div class="user-photo">
                                 <div class="user-round-photo">
-                                    <img ng-src="{{m.fb.picture.data.url}}" alt="::{{m.fb.name}}"/>
+                                    <img ng-src="{{m.data.photo}}" alt="::{{m.data.name}}"/>
                                 </div>
                             </div>
                         </div>
                         <md-card-content class="card-item">
                             <div class="card-txt">
-                                <div class="md-title" md-truncate>{{m.fb.name}}</div>
+                                <div class="md-title" md-truncate>{{m.data.name}}</div>
                                 <div class="md-caption">
                                     <span ng-if="!m.me">{{m.distance/1000|number}}km</span>
                                     <span ng-if="!m.me">{{m.date|ago}}</span>
