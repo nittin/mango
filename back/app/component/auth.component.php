@@ -17,8 +17,10 @@ class AuthComponent extends Component
             $this->container->token = $_SESSION['token'];
             $this->container->me = $_SESSION['user'];
             $this->container->environment = $_SESSION['environment'];
-            $this->container->fb_app = $this->container->fb[$_SESSION['environment']];
-            $this->container->fb_app->setDefaultAccessToken($_SESSION['token']);
+            if ($_SESSION['environment'] != 'gg') {
+                $this->container->fb_app = $this->container->fb[$_SESSION['environment']];
+                $this->container->fb_app->setDefaultAccessToken($_SESSION['token']);
+            }
             return $next($request, $response);
         } else {
             $auth = Token::where('token', $token)->get()->first();
@@ -27,13 +29,15 @@ class AuthComponent extends Component
                 return $response->withStatus(401);
             } else {
                 $_SESSION['token'] = $token;
-                $_SESSION['user'] = $auth['id'];
+                $_SESSION['user'] = $auth['id']."";
                 $_SESSION['environment'] = $auth['environment'];
                 $this->container->token = $_SESSION['token'];
                 $this->container->me = $_SESSION['user'];
                 $this->container->environment = $_SESSION['environment'];
-                $this->container->fb_app = $this->container->fb[$_SESSION['environment']];
-                $this->container->fb_app->setDefaultAccessToken($_SESSION['token']);
+                if ($_SESSION['environment'] != 'gg') {
+                    $this->container->fb_app = $this->container->fb[$_SESSION['environment']];
+                    $this->container->fb_app->setDefaultAccessToken($_SESSION['token']);
+                }
                 return $next($request, $response);
             }
         }

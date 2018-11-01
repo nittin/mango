@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controllers;
+
 use App\Models\User;
 use DateTime;
 
@@ -39,7 +40,8 @@ class Controller
         curl_close($ch);
         return $ch_send;
     }
-    protected function pushNotification($friends, $method, $template, $channel, $mention, $meaning)
+
+    protected function pushNotification($friends, $method, $event, $content)
     {
         if (!$friends) {
             return;
@@ -50,17 +52,16 @@ class Controller
         $friend_array = is_array($friends) ? $friends : explode(',', (string)$friends);
 
         switch ($method) {
-            case NOTIFY_PULL:
+            case NOTIFY_BY_PULL:
                 foreach ($friend_array as $f) {
-                    User::find($f)->notifications()->create([
-                        'template' => $template,
-                        'channel' => $channel,
-                        'mention' => is_array($mention) ? join(',', $mention) : $mention,
-                        'meaning' => is_array($meaning) ? join(',', $meaning) : $meaning,
-                        'status' => 0,
-                    ]);
+//                    User::find($f)->notifications()->create([
+//                        'template' => $template,
+//                        'channel' => $channel,
+//                        'mention' => is_array($mention) ? join(',', $mention) : $mention,
+//                        'status' => 0,
+//                    ]);
                     $message = ['date' => $now];
-                    $pusher->trigger($f, CMD_PULL_NOW, $message);
+                    $pusher->trigger($f, $event, $message);
                 }
                 break;
 
@@ -68,20 +69,22 @@ class Controller
 
                 foreach ($friend_array as $f) {
                     $message = [
-                            'template' => $template,
-                            'date' => $now
-                        ] + $this->readNotification($mention, $meaning);
-                    $pusher->trigger($f, CMD_SHOW_NOW, $message);
+                        'friend' => $this->container->me,
+                        'date' => $now,
+                        'message' => $content
+                    ];
+                    $pusher->trigger($f, $event, $message);
                 }
                 break;
         }
     }
+
     protected function readNotification($mention, $meaning)
     {
-        $mention_arr =is_array($mention) ? $mention : explode(',', (string)$mention);
+        $mention_arr = is_array($mention) ? $mention : explode(',', (string)$mention);
         $meaning_arr = is_array($meaning) ? $meaning : explode(',', (string)$meaning);
         $result = (object)[];
-        array_map(function ($a, $b, $i) use ($result){
+        array_map(function ($a, $b, $i) use ($result) {
             $result->{"$b$i"} = $a;
             return ['id' => $a, 'type' => $b];
         }, $mention_arr, $meaning_arr, array_keys($meaning_arr));

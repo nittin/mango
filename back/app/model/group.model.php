@@ -6,28 +6,26 @@ use Illuminate\Database\Eloquent\Model;
 
 class Group extends Model
 {
-    const CREATED_AT = 'date';
-    const UPDATED_AT = 'date';
     protected $table = 'group';
 
     protected $fillable = [
         'name',
-        'description',
-        'admin',
-        'theme'
+        'owner',
+        'type'
     ];
-    protected $dateFormat = 'U000';
 
     public $timestamps = true;
-
+    protected $casts = [
+        'id' => 'string'
+    ];
     public function members()
     {
         return $this->belongsToMany('App\Models\User', 'user_group', 'group', 'user')
-            ->withPivot('role', 'status', 'date');
+            ->withPivot('role', 'status');
     }
     public function posts()
     {
-        return $this->hasMany('App\Models\Post', 'group', 'id');
+        return $this->hasMany('App\Models\Event', 'group', 'id');
     }
 
 }

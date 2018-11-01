@@ -4,18 +4,21 @@
  ** to gen autoload*/
 
 use App\Components\AuthComponent;
-use App\Components\FBComponent;
 
 require 'constant/notification.constant.php';
 
+$app->get('/', 'GGController:hello');
 
 $app->group('', function () {
     $this->get('/users', 'UserController:listed');
     $this->get('/users/{id}', 'UserController:contact');
     $this->get('/users/me/profile', 'UserController:me');
     $this->get('/users/me/friends', 'UserController:friends');
-    $this->put('/users/me/ping', 'UserController:ping');
+    $this->post('/users/me/pin', 'UserController:pin');
+    $this->post('/users/me/move', 'UserController:move');
     $this->post('/users/me/out', 'UserController:signOut');
+    $this->post('/users/friend/make', 'UserController:makeFriend');
+    $this->get('/users/friend/pins', 'UserController:friendPins');
     $this->post('/users', 'UserController:create');
     $this->put('/users', 'UserController:update');
     $this->get('/notifications', 'UserController:pullNotifications');
@@ -32,4 +35,11 @@ $app->group('', function () {
 
 })->add(new AuthComponent($container));
 
-$app->post('/auth', 'FBController:auth');
+$app->post('/auth/fb', 'FBController:authProduct');
+$app->post('/auth/fbCI', 'FBController:authCI');
+$app->post('/auth/gg', 'GGController:auth');
+$app->group('/admin', function () {
+    $this->get('/users', 'UserController:listed');
+    $this->post('/ping', 'UserController:adminDummyPing');
+    $this->post('/gen', 'FBController:adminGenUserProduct');
+});

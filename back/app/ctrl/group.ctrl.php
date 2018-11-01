@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Group;
-use App\Models\Post;
+use App\Models\Event;
 use DateTime;
 use function React\Promise\map;
 
@@ -15,53 +15,49 @@ class GroupController extends Controller
             $query->orderBy('role', 'desc');
         }])
             ->whereHas('members', function ($q) {
-                $q->where('user', $this->container->me);
+                $q->where('owner', $this->container->me);
             })
-            ->get()->each(function ($group) {
-                $group->members->each(function ($user) use ($group) {
-                    $user->admin = $group->admin == $user->id;
-                });
-                $group->owner = $group->admin == $this->container->me;
-            });
+            ->get();
+//            ->each(function ($group) {
+//                $group->members->each(function ($user) use ($group) {
+//                    $user->admin = $group->admin == $user->id;
+//                });
+//            });
         return $groups->toJson();
     }
 
     public function create($request, $response)
     {
         $input = $request->getParsedBody();
-        $now = (new DateTime())->getTimestamp() * 1000;
 
         $group = Group::create([
             'name' => $input['name'],
-            'description' => $input['description'],
-            'admin' => $this->container->me,
-            'theme' => $input['theme']
+            'type' => $input['type'],
+            'owner' => $this->container->me
         ]);
-        $message = [
-            'content' => 'GROUP',
-            'id' => $this->container->me,
-            'name' => $group['name'],
-            'date' => $now,
-            'type' => 1
-        ];
+//        $message = [
+//            'content' => 'GROUP',
+//            'id' => $this->container->me,
+//            'name' => $group['name'],
+//            'date' => $now,
+//            'type' => 1
+//        ];
         $group->members()->attach($this->container->me, [
             'role' => 1,
-            'status' => 1,
-            'date' => $now
+            'status' => 1
         ]);
-        array_map(function ($id) use ($group, $now, $message) {
+        array_map(function ($id) use ($group) {
             $group->members()->attach($id, [
                 'role' => 0,
-                'status' => 1,
-                'date' => $now
+                'status' => 1
             ]);
         }, explode(',', $input['members']));
-        $this->pushNotification($input['members'],
-            NOTIFY_PULL,
-            1,
-            CHANNEL_GROUP,
-            [$this->container->me, $group['id']],
-            [MEAN_A_USER, MEAN_A_GROUP]);
+//        $this->pushNotification($input['members'],
+//            NOTIFY_PULL,
+//            1,
+//            CHANNEL_GROUP,
+//            [$this->container->me, $group['id']],
+//            [MEAN_A_USER, MEAN_A_GROUP]);
         $response->write(json_encode(array('success' => true, 'id' => $group['id'])));
         return $response;
     }
@@ -127,7 +123,7 @@ class GroupController extends Controller
     public function editPost($request, $response)
     {
         $input = $request->getParsedBody();
-        $post = Post::find($input['id']);
+        $post = Event::find($input['id']);
         if (!$post) {
             $response->write(json_encode($this->message['404']));
             return $response->withStatus(404);
